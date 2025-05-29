@@ -1,0 +1,20 @@
+import { createBrowserRouter } from "react-router-dom";
+import { lazy } from "react";
+import UserLayout from "../layout/UserLayout.jsx";
+
+const HomepageLazy = lazy(() => import("../page/Home/Homepage.jsx"));
+const ProductListLazy = lazy(() => import("../page/Product/ProductList.jsx"));
+const NotFoundLazy = lazy(() => import("../page/error/NotFound.jsx"));
+
+const router = createBrowserRouter([
+    {
+        element: <UserLayout />,
+        children: [
+            { path: "/", element: <HomepageLazy /> },
+            { path: "/products", element: <ProductListLazy /> },
+            { path: "*", element: <NotFoundLazy /> },
+        ],
+    },
+]);
+
+export default router;
