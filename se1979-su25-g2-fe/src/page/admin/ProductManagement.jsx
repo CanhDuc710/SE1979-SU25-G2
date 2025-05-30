@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import AdminLayout from "../../layout/AdminLayout";
 
+//Sample data
 const productsData = [
     {
         id: 1,
@@ -46,15 +47,17 @@ const productsData = [
         stock: 50,
         status: "Active",
     },
-    // Giả sử có thêm nhiều sản phẩm hơn
     // ...
 ];
 
+//Số product 1 trang
 const PRODUCTS_PER_PAGE = 5;
 
 export default function ProductManagement() {
+    // Trang hiện tại
     const [currentPage, setCurrentPage] = useState(1);
 
+    // Tống số trang
     const totalPages = Math.ceil(productsData.length / PRODUCTS_PER_PAGE);
 
     // Lấy dữ liệu sản phẩm cho trang hiện tại
@@ -63,6 +66,7 @@ export default function ProductManagement() {
         currentPage * PRODUCTS_PER_PAGE
     );
 
+    // Hàm tạo style cho Status
     const getStatusStyle = (status) => {
         switch (status) {
             case "Active":
@@ -75,7 +79,6 @@ export default function ProductManagement() {
     };
 
     // Hàm render các nút trang
-    // Hàm render nút trang với style giống ảnh bạn gửi
     const renderPageButtons = () => {
         const buttons = [];
 
