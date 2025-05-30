@@ -8,6 +8,7 @@ import org.example.se1979su25g2be.repository.ProductImageRepository;
 import org.example.se1979su25g2be.repository.ProductRepository;
 import org.example.se1979su25g2be.service.LocalImageService;
 import org.example.se1979su25g2be.service.ProductService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -57,9 +58,22 @@ public class ProductController {
     }
 
     @GetMapping("/dto")
-    public ResponseEntity<List<ProductDTO>> getAllProductDTOs() {
-        return ResponseEntity.ok(productService.getAllProductsDTO());
+    public ResponseEntity<Page<ProductDTO>> getFilteredProducts(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) String material,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+
+        Page<ProductDTO> result = productService.getFilteredProducts(name, brand, gender, material, page, size);
+        return ResponseEntity.ok(result);
     }
+
+
+
+
+
 
     @GetMapping("/new-arrivals")
     public ResponseEntity<List<ProductDTO>> getNewArrivals() {

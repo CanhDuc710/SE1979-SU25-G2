@@ -7,6 +7,7 @@ import java.util.List;
 
 @Data
 public class ProductDTO {
+    private Integer productId;
     private String productCode;
     private String name;
     private String description;
@@ -19,6 +20,13 @@ public class ProductDTO {
     private BigDecimal price;
     private List<String> imageUrls;
 
+    public Integer getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Integer productId) {
+        this.productId = productId;
+    }
 
     public String getProductCode() {
         return productCode;

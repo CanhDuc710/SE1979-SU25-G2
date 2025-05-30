@@ -8,8 +8,10 @@ import org.example.se1979su25g2be.entity.Product;
 import org.example.se1979su25g2be.entity.ProductImage;
 import org.example.se1979su25g2be.repository.CategoryRepository;
 import org.example.se1979su25g2be.repository.ProductRepository;
-import org.example.se1979su25g2be.service.ProductService;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -71,36 +73,69 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteById(id);
     }
 
-
-
     @Override
-    public List<ProductDTO> getAllProductsDTO() {
-        return productRepository.findAll().stream()
-                .map(p -> {
-                    ProductDTO dto = new ProductDTO();
-                    dto.setProductCode(p.getProductCode());
-                    dto.setName(p.getName());
-                    dto.setDescription(p.getDescription());
-                    dto.setBrand(p.getBrand());
-                    dto.setMaterial(p.getMaterial());
-                    dto.setGender(p.getGender() != null ? p.getGender().name() : null);
-                    dto.setPrice(p.getPrice());
-                    dto.setIsActive(p.getIsActive());
-                    dto.setCategoryId(p.getCategory() != null ? p.getCategory().getCategoryId() : null);
-                    if (p.getImages() != null) {
-                        List<String> urls = p.getImages().stream()
-                                .map(ProductImage::getImageUrl)
-                                .collect(Collectors.toList());
-                        dto.setImageUrls(urls);
-                    }
+    public Page<ProductDTO> getActiveProductsDTO(String name, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
 
-                    return dto;
-                })
-                .collect(Collectors.toList());
+        Specification<Product> spec = Specification.where(isActive())
+                .and(nameContains(name));
+
+        Page<Product> productsPage = productRepository.findAll(spec, pageable);
+
+        return productsPage.map(this::toDTO);
+    }
+
+    public Page<ProductDTO> getFilteredProducts(String name, String brand, String gender, String material, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+
+        Specification<Product> spec = Specification.where(isActive())
+                .and(nameContains(name))
+                .and(brandEquals(brand))
+                .and(genderEquals(gender))
+                .and(materialEquals(material));
+
+        Page<Product> productsPage = productRepository.findAll(spec, pageable);
+
+        return productsPage.map(this::toDTO);
+    }
+
+    private Specification<Product> isActive() {
+        return (root, query, cb) -> cb.isTrue(root.get("isActive"));
+    }
+
+    private Specification<Product> nameContains(String name) {
+        return (root, query, cb) -> !StringUtils.hasText(name)
+                ? cb.conjunction()
+                : cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%");
+    }
+
+    private Specification<Product> brandEquals(String brand) {
+        return (root, query, cb) -> !StringUtils.hasText(brand)
+                ? cb.conjunction()
+                : cb.equal(root.get("brand"), brand);
+    }
+
+    private Specification<Product> genderEquals(String gender) {
+        return (root, query, cb) -> {
+            if (!StringUtils.hasText(gender)) return cb.conjunction();
+            try {
+                Product.Gender genderEnum = Product.Gender.valueOf(gender.toUpperCase());
+                return cb.equal(root.get("gender"), genderEnum);
+            } catch (IllegalArgumentException e) {
+                return cb.disjunction(); // Invalid enum → no match
+            }
+        };
+    }
+
+    private Specification<Product> materialEquals(String material) {
+        return (root, query, cb) -> !StringUtils.hasText(material)
+                ? cb.conjunction()
+                : cb.equal(root.get("material"), material);
     }
 
     private ProductDTO toDTO(Product p) {
         ProductDTO dto = new ProductDTO();
+        dto.setProductId(p.getProductId());
         dto.setProductCode(p.getProductCode());
         dto.setName(p.getName());
         dto.setDescription(p.getDescription());
@@ -111,7 +146,7 @@ public class ProductServiceImpl implements ProductService {
         dto.setIsActive(p.getIsActive());
         if (p.getCategory() != null) {
             dto.setCategoryId(p.getCategory().getCategoryId());
-            dto.setCategoryName(p.getCategory().getName()); // ✅ Gán category name
+            dto.setCategoryName(p.getCategory().getName());
         }
         if (p.getImages() != null) {
             List<String> urls = p.getImages().stream()
@@ -142,9 +177,4 @@ public class ProductServiceImpl implements ProductService {
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
-
-
-
-
-
 }
