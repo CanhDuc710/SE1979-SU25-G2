@@ -47,7 +47,83 @@ const productsData = [
         stock: 50,
         status: "Active",
     },
-    // ...
+    {
+        id: 5,
+        image: "https://via.placeholder.com/60x60?text=T2",
+        name: "T-Shirt Love Kills",
+        brand: "Polaf",
+        category: "T-Shirt",
+        price: "300.000 VND",
+        discount: "15%",
+        stock: 120,
+        status: "Inactive",
+    },
+    {
+        id: 6,
+        image: "https://via.placeholder.com/60x60?text=T1",
+        name: "T-Shirt Groot Black",
+        brand: "Diorr",
+        category: "T-Shirt",
+        price: "300.000 VND",
+        discount: "15%",
+        stock: 200,
+        status: "Active",
+    },
+    {
+        id: 7,
+        image: "https://via.placeholder.com/60x60?text=Sepatu",
+        name: "Sepatu Nike",
+        brand: "Nokie",
+        category: "Shoe",
+        price: "300.000 VND",
+        discount: "15%",
+        stock: 0,
+        status: "Out of Stock",
+    },
+    {
+        id: 8,
+        image: "https://via.placeholder.com/60x60?text=T2",
+        name: "T-Shirt Love Kills",
+        brand: "Polaf",
+        category: "T-Shirt",
+        price: "300.000 VND",
+        discount: "15%",
+        stock: 120,
+        status: "Inactive",
+    },
+    {
+        id: 9,
+        image: "https://via.placeholder.com/60x60?text=Tas",
+        name: "Tas Selempang Pria",
+        brand: "Polaf",
+        category: "Bag",
+        price: "300.000 VND",
+        discount: "15%",
+        stock: 50,
+        status: "Active",
+    },
+    {
+        id: 10,
+        image: "https://via.placeholder.com/60x60?text=T2",
+        name: "T-Shirt Love Kills",
+        brand: "Polaf",
+        category: "T-Shirt",
+        price: "300.000 VND",
+        discount: "15%",
+        stock: 120,
+        status: "Inactive",
+    },
+    {
+        id: 11,
+        image: "https://via.placeholder.com/60x60?text=Sepatu",
+        name: "Sepatu Nike",
+        brand: "Nokie",
+        category: "Shoe",
+        price: "300.000 VND",
+        discount: "15%",
+        stock: 0,
+        status: "Out of Stock",
+    },
 ];
 
 //Số product 1 trang
@@ -82,10 +158,12 @@ export default function ProductManagement() {
     const renderPageButtons = () => {
         const buttons = [];
 
+        //Nút trước
         buttons.push(
             <button
                 key="prev"
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                //Nếu trang hien tai la 1 thi nút truoc bi disable
                 disabled={currentPage === 1}
                 style={{
                     backgroundColor: "#000",
