@@ -1,4 +1,49 @@
 package org.example.se1979su25g2be.service.account;
 
-public class AccountServiceImpl {
+import lombok.RequiredArgsConstructor;
+import org.example.se1979su25g2be.dto.Account.AccountDTO;
+import org.example.se1979su25g2be.dto.Account.AccountDetailDTO;
+import org.example.se1979su25g2be.entity.User;
+import org.example.se1979su25g2be.repository.AccountRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+@Service
+@RequiredArgsConstructor
+public class AccountServiceImpl implements AccountService {
+
+    private final AccountRepository accountRepository;
+
+    @Override
+    public Page<AccountDTO> getAllAccounts(String keyword, String status, String role, int page, int size) {
+        User.Status statusEnum = (status != null) ? User.Status.valueOf(status.toUpperCase()) : null;
+        Pageable pageable = PageRequest.of(page, size);
+
+        return accountRepository.searchUsers(keyword, statusEnum, role, pageable)
+                .map(this::mapToDTO);
+    }
+
+    @Override
+    public AccountDTO banAccount(Integer id) {
+        return null;
+    }
+
+    @Override
+    public AccountDTO unbanAccount(Integer id) {
+        return null;
+    }
+
+
+    private AccountDTO mapToDTO(User u) {
+        return AccountDTO.builder()
+                .userId(u.getUserId())
+                .username(u.getUsername())
+                .email(u.getEmail())
+                .roleName(u.getRole().getRoleName())
+                .status(u.getStatus())
+                .build();
+    }
 }
+
+
