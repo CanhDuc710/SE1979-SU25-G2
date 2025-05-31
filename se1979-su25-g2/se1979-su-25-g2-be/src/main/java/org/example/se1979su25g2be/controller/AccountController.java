@@ -1,12 +1,28 @@
 package org.example.se1979su25g2be.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.example.se1979su25g2be.dto.Account.AccountDTO;
+import org.example.se1979su25g2be.service.account.AccountService;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/admin/accounts")
 @RequiredArgsConstructor
 public class AccountController {
 
+    private final AccountService accountService;
+
+    @GetMapping
+    public ResponseEntity<Page<AccountDTO>> getAllAccounts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String role,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<AccountDTO> accounts = accountService.getAllAccounts(keyword, status, role, page, size);
+        return ResponseEntity.ok(accounts);
+    }
 }

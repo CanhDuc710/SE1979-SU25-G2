@@ -1,5 +1,6 @@
 package org.example.se1979su25g2be.repository;
 
+import org.example.se1979su25g2be.entity.Role;
 import org.example.se1979su25g2be.entity.User;
 import org.example.se1979su25g2be.entity.User.Status;
 import org.springframework.data.domain.Page;
@@ -19,8 +20,9 @@ public interface AccountRepository extends JpaRepository<User, Integer> {
 """)
     Page<User> searchUsers(
             @Param("keyword") String keyword,
-            @Param("status") Status status,
-            @Param("role") String role,
+            @Param("status") User.Status status,
+            @Param("role") Role role,
             Pageable pageable
     );
+
 }
