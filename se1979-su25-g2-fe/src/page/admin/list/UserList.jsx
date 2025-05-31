@@ -95,11 +95,11 @@ export default function UserList() {
                         {users.map((user) => (
                             <tr key={user.userId} className="border-t hover:bg-gray-50 transition">
                                 <td className="px-4 py-2 flex items-center gap-2">
-                                    <img
-                                        src="https://via.placeholder.com/30"
-                                        className="rounded-full w-8 h-8"
-                                        alt="avatar"
-                                    />
+                                    {/*<img*/}
+                                    {/*    src="https://via.placeholder.com/30"*/}
+                                    {/*    className="rounded-full w-8 h-8"*/}
+                                    {/*    alt="avatar"*/}
+                                    {/*/>*/}
                                     <span className="font-medium text-blue-600 hover:underline cursor-pointer">
                                             {user.username}
                                         </span>
