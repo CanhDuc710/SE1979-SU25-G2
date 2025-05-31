@@ -1,30 +1,43 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../../../components/Sidebar";
 import { FaEye, FaBan, FaCheckCircle } from "react-icons/fa";
+import { fetchAccounts } from "/src/service/accountService.js";
 
 export default function UserList() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
     const [filterRole, setFilterRole] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
+    const [search, setSearch] = useState("");
+    const [users, setUsers] = useState([]);
+    const [total, setTotal] = useState(0);
 
-    const users = [
-        { id: 1, username: "user1", email: "user1@example.com", role: "Admin", status: "ACTIVE" },
-        { id: 2, username: "user2", email: "user2@example.com", role: "User", status: "ACTIVE" },
-        { id: 3, username: "user3", email: "user3@example.com", role: "User", status: "BANNED" },
-    ];
+    const fetchUsers = async () => {
+        try {
+            const data = await fetchAccounts({
+                keyword: search,
+                status: filterStatus,
+                role: filterRole,
+                page: 0,
+                size: 20,
+            });
+            setUsers(data.content || []);
+            setTotal(data.totalElements || 0);
+        } catch (err) {
+            console.error("Lỗi khi gọi API:", err.message);
+        }
+    };
 
-    const filteredUsers = users.filter((user) => {
-        const matchRole = filterRole ? user.role === filterRole : true;
-        const matchStatus = filterStatus ? user.status === filterStatus : true;
-        return matchRole && matchStatus;
-    });
+    useEffect(() => {
+        fetchUsers();
+    }, [filterRole, filterStatus, search]);
 
     return (
         <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white">
             {/* Sidebar */}
             <div
-                className={`transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"} flex-shrink-0`}
+                className={`transition-all duration-300 ${
+                    sidebarCollapsed ? "w-16" : "w-64"
+                } flex-shrink-0`}
             >
                 <Sidebar
                     sidebarCollapsed={sidebarCollapsed}
@@ -32,13 +45,15 @@ export default function UserList() {
                 />
             </div>
 
-            {/* Main Content */}
+            {/* Main */}
             <div className="flex-1 p-6">
                 {/* Filters */}
                 <div className="flex flex-col md:flex-row gap-4 mb-4">
                     <input
                         type="text"
-                        placeholder="Search"
+                        placeholder="Tìm kiếm tên hoặc email..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
                         className="flex-1 px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
                     />
 
@@ -47,9 +62,9 @@ export default function UserList() {
                         onChange={(e) => setFilterRole(e.target.value)}
                         className="px-4 py-2 border rounded"
                     >
-                        <option value="">All Roles</option>
-                        <option value="Admin">Admin</option>
-                        <option value="User">User</option>
+                        <option value="">Tất cả vai trò</option>
+                        <option value="ADMIN">Admin</option>
+                        <option value="USER">User</option>
                     </select>
 
                     <select
@@ -57,8 +72,9 @@ export default function UserList() {
                         onChange={(e) => setFilterStatus(e.target.value)}
                         className="px-4 py-2 border rounded"
                     >
-                        <option value="">All Status</option>
+                        <option value="">Tất cả trạng thái</option>
                         <option value="ACTIVE">Active</option>
+                        <option value="INACTIVE">Inactive</option>
                         <option value="BANNED">Banned</option>
                     </select>
                 </div>
@@ -76,8 +92,8 @@ export default function UserList() {
                         </tr>
                         </thead>
                         <tbody>
-                        {filteredUsers.map((user) => (
-                            <tr key={user.id} className="border-t hover:bg-gray-50 transition">
+                        {users.map((user) => (
+                            <tr key={user.userId} className="border-t hover:bg-gray-50 transition">
                                 <td className="px-4 py-2 flex items-center gap-2">
                                     <img
                                         src="https://via.placeholder.com/30"
@@ -85,25 +101,23 @@ export default function UserList() {
                                         alt="avatar"
                                     />
                                     <span className="font-medium text-blue-600 hover:underline cursor-pointer">
-                      {user.username}
-                    </span>
+                                            {user.username}
+                                        </span>
                                 </td>
                                 <td className="px-4 py-2">{user.email}</td>
+                                <td className="px-4 py-2">{user.roleName}</td>
                                 <td className="px-4 py-2">
-                    <span className="text-gray-700 font-medium">
-                      {user.role || "User"}
-                    </span>
-                                </td>
-                                <td className="px-4 py-2">
-                    <span
-                        className={`font-semibold flex items-center gap-1 ${
-                            user.status === "ACTIVE"
-                                ? "text-green-600"
-                                : "text-red-600"
-                        }`}
-                    >
-                      <FaCheckCircle /> {user.status}
-                    </span>
+                                        <span
+                                            className={`font-semibold flex items-center gap-1 ${
+                                                user.status === "ACTIVE"
+                                                    ? "text-green-600"
+                                                    : user.status === "INACTIVE"
+                                                        ? "text-yellow-600"
+                                                        : "text-red-600"
+                                            }`}
+                                        >
+                                            <FaCheckCircle /> {user.status}
+                                        </span>
                                 </td>
                                 <td className="px-4 py-2 space-x-2">
                                     <button className="bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200">
@@ -120,7 +134,7 @@ export default function UserList() {
                 </div>
 
                 <div className="mt-4 text-sm text-gray-500">
-                    Display 1 to {filteredUsers.length} of total {users.length} users
+                    Đang hiển thị {users.length} / {total} tài khoản
                 </div>
             </div>
         </div>
