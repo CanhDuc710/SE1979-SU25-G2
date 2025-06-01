@@ -25,4 +25,16 @@ public class AccountController {
         Page<AccountDTO> accounts = accountService.getAllAccounts(keyword, status, role, page, size);
         return ResponseEntity.ok(accounts);
     }
+
+    @PutMapping("/ban/{id}")
+    public ResponseEntity<AccountDTO> banAccount(@PathVariable Integer id) {
+        AccountDTO accountDTO = accountService.banAccount(id);
+        return ResponseEntity.ok(accountDTO);
+    }
+
+    @PutMapping("/unban/{id}")
+    public ResponseEntity<AccountDTO> unbanAccount(@PathVariable Integer id) {
+        AccountDTO accountDTO = accountService.unbanAccount(id);
+        return ResponseEntity.ok(accountDTO);
+    }
 }

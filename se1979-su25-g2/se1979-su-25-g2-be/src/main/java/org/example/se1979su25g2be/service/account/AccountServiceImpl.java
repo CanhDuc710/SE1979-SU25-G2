@@ -33,13 +33,20 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public AccountDTO banAccount(Integer id) {
-        return null;
+        User user = accountRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setStatus(User.Status.BANNED);
+        accountRepository.save(user);
+        return mapToDTO(user);
     }
 
     @Override
     public AccountDTO unbanAccount(Integer id) {
-        return null;
+        User user = accountRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setStatus(User.Status.ACTIVE);
+        accountRepository.save(user);
+        return mapToDTO(user);
     }
+
 
     @Override
     public AccountDetailDTO getAccountDetail(Integer id) {
