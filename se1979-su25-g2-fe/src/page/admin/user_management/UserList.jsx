@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../../../components/Sidebar";
-import { FaEye, FaBan, FaCheckCircle } from "react-icons/fa";
-import { fetchAccounts } from "/src/service/accountService.js";
+import {FaEye, FaBan, FaCheckCircle, FaCheck} from "react-icons/fa";
+import {getAccounts, banAccount, unbanAccount} from "../../../service/accountService";
 
 export default function UserList() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -13,12 +13,12 @@ export default function UserList() {
 
     const fetchUsers = async () => {
         try {
-            const data = await fetchAccounts({
+            const data = await getAccounts({
                 keyword: search,
                 status: filterStatus,
                 role: filterRole,
                 page: 0,
-                size: 20,
+                size: 20
             });
             setUsers(data.content || []);
             setTotal(data.totalElements || 0);
@@ -30,6 +30,20 @@ export default function UserList() {
     useEffect(() => {
         fetchUsers();
     }, [filterRole, filterStatus, search]);
+
+    const handleBan = async (id) => {
+        if (window.confirm("Bạn có chắc muốn ban tài khoản này?")) {
+            await banAccount(id);
+            fetchUsers();
+        }
+    };
+
+    const handleUnban = async (id) => {
+        if (window.confirm("Bạn có chắc muốn unban tài khoản này?")) {
+            await unbanAccount(id);
+            fetchUsers();
+        }
+    };
 
     return (
         <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white">
@@ -64,7 +78,8 @@ export default function UserList() {
                     >
                         <option value="">Tất cả vai trò</option>
                         <option value="ADMIN">Admin</option>
-                        <option value="USER">User</option>
+                        <option value="CUSTOMER">CUSTOMER</option>
+                        <option value="STAFF">STAFF</option>
                     </select>
 
                     <select
@@ -84,48 +99,56 @@ export default function UserList() {
                     <table className="min-w-full text-sm bg-white rounded">
                         <thead className="bg-gradient-to-r from-blue-100 to-yellow-100 text-gray-700 text-left">
                         <tr>
-                            <th className="px-4 py-3">Username</th>
+                            <th className="px-4 py-3">Tên người dùng</th>
                             <th className="px-4 py-3">Email</th>
-                            <th className="px-4 py-3">Role</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3">Action</th>
+                            <th className="px-4 py-3">Vai trò</th>
+                            <th className="px-4 py-3">Trạng thái</th>
+                            <th className="px-4 py-3">Hành Động</th>
                         </tr>
                         </thead>
                         <tbody>
                         {users.map((user) => (
                             <tr key={user.userId} className="border-t hover:bg-gray-50 transition">
-                                <td className="px-4 py-2 flex items-center gap-2">
-                                    {/*<img*/}
-                                    {/*    src="https://via.placeholder.com/30"*/}
-                                    {/*    className="rounded-full w-8 h-8"*/}
-                                    {/*    alt="avatar"*/}
-                                    {/*/>*/}
-                                    <span className="font-medium text-blue-600 hover:underline cursor-pointer">
-                                            {user.username}
-                                        </span>
-                                </td>
+                                <td className="px-4 py-2">{user.username}</td>
+
                                 <td className="px-4 py-2">{user.email}</td>
                                 <td className="px-4 py-2">{user.roleName}</td>
                                 <td className="px-4 py-2">
-                                        <span
-                                            className={`font-semibold flex items-center gap-1 ${
-                                                user.status === "ACTIVE"
-                                                    ? "text-green-600"
-                                                    : user.status === "INACTIVE"
-                                                        ? "text-yellow-600"
-                                                        : "text-red-600"
-                                            }`}
-                                        >
-                                            <FaCheckCircle /> {user.status}
-                                        </span>
+                                    <span
+                                        className={`font-semibold flex items-center gap-1 ${
+                                            user.status === "ACTIVE"
+                                                ? "text-green-600"
+                                                : user.status === "INACTIVE"
+                                                    ? "text-yellow-600"
+                                                    : "text-red-600"
+                                        }`}
+                                    >
+                                        <FaCheckCircle /> {user.status}
+                                    </span>
                                 </td>
                                 <td className="px-4 py-2 space-x-2">
-                                    <button className="bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200">
+                                    <button
+                                        className="bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200"
+                                        title="View Details"
+                                    >
                                         <FaEye />
                                     </button>
-                                    <button className="bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200">
-                                        <FaBan />
-                                    </button>
+                                    {user.status === "BANNED" ? (
+                                        <button
+                                            className="bg-green-100 text-green-600 px-2 py-1 rounded hover:bg-green-200"
+                                            onClick={() => handleUnban(user.userId)}
+                                        >
+                                            <FaCheck />
+
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200"
+                                            onClick={() => handleBan(user.userId)}
+                                        >
+                                            <FaBan />
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ))}
