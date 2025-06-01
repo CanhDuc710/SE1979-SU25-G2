@@ -11,6 +11,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.time.format.DateTimeFormatter;
+
 @Service
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
@@ -50,9 +53,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public AccountDetailDTO getAccountDetail(Integer id) {
-        return null;
+        User user = accountRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return mapToDetailDTO(user);
     }
-
 
     private AccountDTO mapToDTO(User u) {
         return AccountDTO.builder()
@@ -63,6 +67,24 @@ public class AccountServiceImpl implements AccountService {
                 .status(u.getStatus())
                 .build();
     }
+
+    private AccountDetailDTO mapToDetailDTO(User u) {
+        return AccountDetailDTO.builder()
+                .userId(u.getUserId())
+                .firstName(u.getFirstName())
+                .lastName(u.getLastName())
+                .username(u.getUsername())
+                .email(u.getEmail())
+                .phoneNumber(u.getPhoneNumber())
+//                .address(u.getAddress())
+//                .gender(u.getGender())
+                .dob(u.getDob().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))
+                .role(u.getRole().getRoleName())
+                .status(u.getStatus().name())
+                .fullName(u.getFirstName() + " " + u.getLastName())
+                .build();
+    }
+
 }
 
 
