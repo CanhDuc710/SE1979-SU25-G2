@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "../../../components/Sidebar";
 import {FaEye, FaBan, FaCheckCircle, FaCheck} from "react-icons/fa";
 import {getAccounts, banAccount, unbanAccount} from "../../../service/accountService";
+import { useNavigate } from "react-router-dom";
 
 export default function UserList() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -10,6 +11,7 @@ export default function UserList() {
     const [search, setSearch] = useState("");
     const [users, setUsers] = useState([]);
     const [total, setTotal] = useState(0);
+    const navigate = useNavigate();
 
     const fetchUsers = async () => {
         try {
@@ -129,7 +131,9 @@ export default function UserList() {
                                 <td className="px-4 py-2 space-x-2">
                                     <button
                                         className="bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200"
-                                        title="View Details"
+                                        onClick={() =>
+                                            navigate(`/admin/accounts/${user.userId}`)
+                                        }
                                     >
                                         <FaEye />
                                     </button>
