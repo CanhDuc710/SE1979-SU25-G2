@@ -39,7 +39,9 @@ export default function Header({ onSearch }) {
                         onChange={(e) => setQuery(e.target.value)}
                         onKeyDown={handleSearch}
                     />
-                    <button>🛒</button>
+                    <Link to="/cart" className="relative">
+                        <span className="text-2xl">🛒</span>
+                    </Link>
                     <button>👤</button>
                 </div>
             </div>
