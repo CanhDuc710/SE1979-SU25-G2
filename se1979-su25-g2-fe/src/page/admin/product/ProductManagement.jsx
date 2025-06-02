@@ -128,13 +128,13 @@ export default function ProductManagement() {
                     <input
                         type="text"
                         placeholder="Search by name (not functional)"
-                        className="flex-1 px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-                        // Chưa xử lý search
+                        className="flex-1 px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300 bg-white text-black"
                     />
+
                     <select
                         value={filterCategory}
                         onChange={(e) => setFilterCategory(e.target.value)}
-                        className="px-4 py-2 border rounded"
+                        className="px-4 py-2 border rounded bg-white text-black"
                     >
                         <option value="">All Categories</option>
                         {[...new Set(productsData.map((p) => p.category))].map((cat) => (
@@ -147,7 +147,7 @@ export default function ProductManagement() {
                     <select
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value)}
-                        className="px-4 py-2 border rounded"
+                        className="px-4 py-2 border rounded bg-white text-black"
                     >
                         <option value="">All Status</option>
                         <option value="Active">Active</option>
