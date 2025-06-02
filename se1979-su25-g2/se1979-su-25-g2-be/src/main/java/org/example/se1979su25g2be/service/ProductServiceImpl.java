@@ -2,10 +2,13 @@ package org.example.se1979su25g2be.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.example.se1979su25g2be.dto.OptionDTO;
 import org.example.se1979su25g2be.dto.ProductDTO;
+import org.example.se1979su25g2be.dto.ProductVariantDTO;
 import org.example.se1979su25g2be.entity.Category;
 import org.example.se1979su25g2be.entity.Product;
 import org.example.se1979su25g2be.entity.ProductImage;
+import org.example.se1979su25g2be.entity.ProductVariant;
 import org.example.se1979su25g2be.repository.CategoryRepository;
 import org.example.se1979su25g2be.repository.ProductRepository;
 import org.springframework.data.domain.*;
@@ -144,16 +147,34 @@ public class ProductServiceImpl implements ProductService {
         dto.setGender(p.getGender() != null ? p.getGender().name() : null);
         dto.setPrice(p.getPrice());
         dto.setIsActive(p.getIsActive());
+
         if (p.getCategory() != null) {
             dto.setCategoryId(p.getCategory().getCategoryId());
             dto.setCategoryName(p.getCategory().getName());
         }
+
         if (p.getImages() != null) {
             List<String> urls = p.getImages().stream()
                     .map(ProductImage::getImageUrl)
                     .collect(Collectors.toList());
             dto.setImageUrls(urls);
         }
+
+        // 💥 Thêm phần này
+        if (p.getVariants() != null) {
+            List<ProductVariantDTO> variantDTOs = p.getVariants().stream()
+                    .filter(ProductVariant::getIsActive)
+                    .map(v -> new ProductVariantDTO(
+                            v.getVariantId(),
+                            v.getColor(),
+                            v.getSize(),
+                            v.getStockQuantity(),
+                            v.getIsActive()
+                    ))
+                    .collect(Collectors.toList());
+            dto.setVariants(variantDTOs);
+        }
+
         return dto;
     }
 
@@ -166,7 +187,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO> getNewArrivals() {
-        return productRepository.findTop5ByIsActiveTrueOrderByCreatedAtDesc().stream()
+        return productRepository.findTop8ByIsActiveTrueOrderByCreatedAtDesc().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
@@ -177,4 +198,21 @@ public class ProductServiceImpl implements ProductService {
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<OptionDTO> getAllBrandOptions() {
+        return productRepository.findAllDistinctBrands().stream()
+                .map(brand -> new OptionDTO(brand, brand))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<OptionDTO> getAllMaterialOptions() {
+        return productRepository.findAllDistinctMaterials().stream()
+                .map(material -> new OptionDTO(material, material))
+                .collect(Collectors.toList());
+    }
+
+
+
 }

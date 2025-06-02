@@ -1,6 +1,7 @@
 package org.example.se1979su25g2be.controller;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.example.se1979su25g2be.dto.OptionDTO;
 import org.example.se1979su25g2be.dto.ProductDTO;
 import org.example.se1979su25g2be.entity.Product;
 import org.example.se1979su25g2be.entity.ProductImage;
@@ -70,9 +71,15 @@ public class ProductController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/brands")
+    public ResponseEntity<List<OptionDTO>> getAllBrandOptions() {
+        return ResponseEntity.ok(productService.getAllBrandOptions());
+    }
 
-
-
+    @GetMapping("/materials")
+    public ResponseEntity<List<OptionDTO>> getAllMaterialOptions() {
+        return ResponseEntity.ok(productService.getAllMaterialOptions());
+    }
 
 
     @GetMapping("/new-arrivals")

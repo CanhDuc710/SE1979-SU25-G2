@@ -1,41 +1,28 @@
-package org.example.se1979su25g2be.entity;
+package org.example.se1979su25g2be.dto;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
-@Entity
-@Table(name = "product_variants")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class ProductVariant {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class ProductVariantDTO {
     private Integer variantId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
-
-    @Column(length = 50)
     private String color;
-
-    @Column(length = 20)
     private String size;
+    private Integer stockQuantity;
+    private Boolean isActive;
 
-    private Integer stockQuantity = 0;
+    public ProductVariantDTO(){
 
-    private Boolean isActive = true;
+    }
 
-    // Constructors, Getters, Setters
-
+    public ProductVariantDTO(Integer variantId, String color, String size, Integer stockQuantity, Boolean isActive) {
+        this.variantId = variantId;
+        this.color = color;
+        this.size = size;
+        this.stockQuantity = stockQuantity;
+        this.isActive = isActive;
+    }
 
     public Integer getVariantId() {
         return variantId;
@@ -43,14 +30,6 @@ public class ProductVariant {
 
     public void setVariantId(Integer variantId) {
         this.variantId = variantId;
-    }
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
     }
 
     public String getColor() {
