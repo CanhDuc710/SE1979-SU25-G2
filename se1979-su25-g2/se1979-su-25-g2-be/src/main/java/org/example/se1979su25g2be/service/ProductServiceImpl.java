@@ -28,6 +28,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Page<ProductDTO> getAllProducts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+        Page<Product> productPage = productRepository.findAll(pageable);
+        return productPage.map(this::toDTO);
+    }
+
+
+    @Override
     public Product createProduct(ProductDTO dto) {
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException("Category not found"));

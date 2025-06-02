@@ -36,6 +36,15 @@ public class ProductController {
         this.localImageService = localImageService;
     }
 
+    @GetMapping
+    public ResponseEntity<Page<ProductDTO>> getAllProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(productService.getAllProducts(page, size));
+    }
+
+
     @PostMapping
     public ResponseEntity<Product> createProduct(@RequestBody ProductDTO dto) {
         return ResponseEntity.ok(productService.createProduct(dto));
@@ -69,11 +78,6 @@ public class ProductController {
         Page<ProductDTO> result = productService.getFilteredProducts(name, brand, gender, material, page, size);
         return ResponseEntity.ok(result);
     }
-
-
-
-
-
 
     @GetMapping("/new-arrivals")
     public ResponseEntity<List<ProductDTO>> getNewArrivals() {
