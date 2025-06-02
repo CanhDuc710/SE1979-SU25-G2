@@ -1,44 +1,32 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../../../components/Sidebar";
 import { FaEdit, FaTrash } from "react-icons/fa";
-
-// Sample data
-const productsData = [
-    // giữ nguyên data bạn đã có
-    {
-        id: 1,
-        image: "https://via.placeholder.com/60x60?text=T1",
-        name: "T-Shirt Groot Black",
-        brand: "Diorr",
-        category: "T-Shirt",
-        price: "300.000 VND",
-        discount: "15%",
-        stock: 200,
-        status: "Active",
-    },
-    // ... các sản phẩm còn lại
-];
+import { fetchAllProductsPaged } from "../../../service/productService";
+import Pagination from "../../../components/Pagination";
 
 const PRODUCTS_PER_PAGE = 5;
 
 export default function ProductManagement() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(0); // Backend dùng index = 0
+    const [totalPages, setTotalPages] = useState(0);
+    const [products, setProducts] = useState([]);
     const [filterCategory, setFilterCategory] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
 
-    const filteredProducts = productsData.filter((p) => {
-        const matchCategory = filterCategory ? p.category === filterCategory : true;
-        const matchStatus = filterStatus ? p.status === filterStatus : true;
-        return matchCategory && matchStatus;
-    });
-
-    const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
-
-    const pagedProducts = filteredProducts.slice(
-        (currentPage - 1) * PRODUCTS_PER_PAGE,
-        currentPage * PRODUCTS_PER_PAGE
-    );
+    // Lấy dữ liệu từ API
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await fetchAllProductsPaged(currentPage, PRODUCTS_PER_PAGE);
+                setProducts(data.content);
+                setTotalPages(data.totalPages);
+            } catch (error) {
+                console.error("Lỗi khi tải sản phẩm:", error);
+            }
+        };
+        fetchData();
+    }, [currentPage]);
 
     const getStatusStyle = (status) => {
         switch (status) {
@@ -53,57 +41,16 @@ export default function ProductManagement() {
         }
     };
 
-    const renderPageButtons = () => {
-        const buttons = [];
+    const filteredProducts = products.filter((p) => {
+        const matchCategory = filterCategory ? p.categoryName === filterCategory : true;
+        const matchStatus = filterStatus
+            ? (p.isActive ? "Active" : "Inactive") === filterStatus
+            : true;
+        return matchCategory && matchStatus;
+    });
 
-        buttons.push(
-            <button
-                key="prev"
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                disabled={currentPage === 1}
-                className={`px-3 py-2 rounded font-bold ${
-                    currentPage === 1
-                        ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                        : "bg-black text-gray-300 hover:bg-gray-700 cursor-pointer"
-                }`}
-            >
-                Trước
-            </button>
-        );
 
-        for (let i = 1; i <= totalPages; i++) {
-            buttons.push(
-                <button
-                    key={i}
-                    onClick={() => setCurrentPage(i)}
-                    className={`w-10 h-10 rounded font-bold mx-1 ${
-                        i === currentPage
-                            ? "bg-blue-600 text-white"
-                            : "bg-black text-gray-300 hover:bg-gray-700"
-                    }`}
-                >
-                    {i}
-                </button>
-            );
-        }
-
-        buttons.push(
-            <button
-                key="next"
-                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className={`px-3 py-2 rounded font-bold ${
-                    currentPage === totalPages
-                        ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                        : "bg-black text-gray-300 hover:bg-gray-700 cursor-pointer"
-                }`}
-            >
-                Sau
-            </button>
-        );
-
-        return buttons;
-    };
+    const categories = [...new Set(products.map((p) => p.categoryName))];
 
     return (
         <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white">
@@ -129,21 +76,20 @@ export default function ProductManagement() {
                         type="text"
                         placeholder="Search by name (not functional)"
                         className="flex-1 px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300 bg-white text-black"
+                        // (Optional) future implementation
                     />
-
                     <select
                         value={filterCategory}
                         onChange={(e) => setFilterCategory(e.target.value)}
                         className="px-4 py-2 border rounded bg-white text-black"
                     >
                         <option value="">All Categories</option>
-                        {[...new Set(productsData.map((p) => p.category))].map((cat) => (
+                        {categories.map((cat) => (
                             <option key={cat} value={cat}>
                                 {cat}
                             </option>
                         ))}
                     </select>
-
                     <select
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value)}
@@ -152,7 +98,6 @@ export default function ProductManagement() {
                         <option value="">All Status</option>
                         <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
-                        <option value="Out of Stock">Out of Stock</option>
                     </select>
                 </div>
 
@@ -165,33 +110,28 @@ export default function ProductManagement() {
                             <th className="px-4 py-3">Brand</th>
                             <th className="px-4 py-3">Category</th>
                             <th className="px-4 py-3">Price</th>
-                            <th className="px-4 py-3">Discount</th>
-                            <th className="px-4 py-3">Stock</th>
                             <th className="px-4 py-3">Status</th>
                             <th className="px-4 py-3">Action</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {pagedProducts.map(
+                        {filteredProducts.map(
                             ({
-                                 id,
-                                 image,
+                                 productId,
                                  name,
                                  brand,
-                                 category,
+                                 categoryName,
                                  price,
-                                 discount,
-                                 stock,
-                                 status,
+                                 imageUrls,
+                                 isActive,
                              }) => (
                                 <tr
-                                    key={id}
+                                    key={productId}
                                     className="border-t hover:bg-gray-50 transition"
-                                    style={{ verticalAlign: "middle" }}
                                 >
                                     <td className="px-4 py-2 flex items-center gap-2">
                                         <img
-                                            src={image}
+                                            src={imageUrls?.[0]}
                                             alt={name}
                                             className="rounded-full w-8 h-8 object-cover"
                                         />
@@ -200,12 +140,16 @@ export default function ProductManagement() {
                       </span>
                                     </td>
                                     <td className="px-4 py-2">{brand}</td>
-                                    <td className="px-4 py-2">{category}</td>
-                                    <td className="px-4 py-2">{price}</td>
-                                    <td className="px-4 py-2">{discount}</td>
-                                    <td className="px-4 py-2">{stock}</td>
-                                    <td className={`px-4 py-2 ${getStatusStyle(status)}`}>
-                                        {status}
+                                    <td className="px-4 py-2">{categoryName}</td>
+                                    <td className="px-4 py-2">
+                                        {price.toLocaleString("vi-VN")} VND
+                                    </td>
+                                    <td
+                                        className={`px-4 py-2 ${
+                                            getStatusStyle(isActive ? "Active" : "Inactive")
+                                        }`}
+                                    >
+                                        {isActive ? "Active" : "Inactive"}
                                     </td>
                                     <td className="px-4 py-2 space-x-2">
                                         <button className="bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200">
@@ -223,17 +167,16 @@ export default function ProductManagement() {
                 </div>
 
                 <div className="mt-6 flex justify-between items-center text-gray-600 text-sm">
-                    <div className="flex gap-2">{renderPageButtons()}</div>
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
                     <div>
-                        Hiển thị{" "}
-                        {pagedProducts.length === 0
-                            ? 0
-                            : (currentPage - 1) * PRODUCTS_PER_PAGE + 1}{" "}
-                        -{" "}
-                        {(currentPage - 1) * PRODUCTS_PER_PAGE + pagedProducts.length} trên{" "}
-                        {filteredProducts.length} mục
+                        Trang {currentPage + 1} / {totalPages}
                     </div>
                 </div>
+
             </div>
         </div>
     );

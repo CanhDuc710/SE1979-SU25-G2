@@ -21,6 +21,13 @@ export const fetchProductsPaged = async (page = 0, size = 8, filters = {}) => {
 
     return response.data;
 };
+
+export const fetchAllProductsPaged = async (page = 0, size = 8) => {
+    const response = await axios.get(`${API_BASE_URL}/products?page=${page}&size=${size}`);
+    console.log("🚀 Calling ALL products API:", response); // ✅ Debug log
+    return response.data;
+};
+
 export const getProductDetail = async (productId) => {
     const response = await axios.get(`${API_BASE_URL}/products/${productId}`);
     return response.data;
