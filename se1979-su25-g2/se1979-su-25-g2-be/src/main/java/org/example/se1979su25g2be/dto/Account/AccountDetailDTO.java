@@ -13,7 +13,7 @@ public class AccountDetailDTO {
     private String email;
     private String phoneNumber;
     private String address;
-    private String gender;
+    private String sex;
     private String dob;
     private String role;
     private String status;
