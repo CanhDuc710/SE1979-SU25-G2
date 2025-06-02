@@ -7,7 +7,8 @@ const ProductListLazy = lazy(() => import("../page/Product/ProductList.jsx"));
 const ProductManagementLazy = lazy(() => import("../page/admin/ProductManagement.jsx"));
 const NotFoundLazy = lazy(() => import("../page/error/NotFound.jsx"));
 const ProductDetailLazy = lazy(() => import("../page/Product/ProductDetail.jsx"));
-const UserListLazy = lazy(() => import("../page/admin/list/UserList.jsx"));
+const UserListLazy = lazy(() => import("../page/admin/user_management/UserList.jsx"));
+const UserDetailsLazy = lazy(() => import("../page/admin/user_management/UserDetails.jsx"));
 const CartLazy = lazy(() => import("../page/Cart/CartPage.jsx"));
 const router = createBrowserRouter([
     {
@@ -18,10 +19,14 @@ const router = createBrowserRouter([
             { path: "/products/:productId", element: <ProductDetailLazy /> },
             { path: "/cart", element: <CartLazy /> },
             { path: "/admin/product-management", element: <ProductManagementLazy /> },
-            { path: "/admin/users", element: <UserListLazy /> },
+            { path: "/admin/accounts", element: <UserListLazy /> },
+            { path:"/admin/accounts/:id", element:<UserDetailsLazy />},
             { path: "*", element: <NotFoundLazy /> },
         ],
     },
+    {
+
+    }
 ]);
 
 export default router;
