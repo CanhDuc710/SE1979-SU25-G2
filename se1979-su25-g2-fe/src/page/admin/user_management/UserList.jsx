@@ -3,6 +3,7 @@ import Sidebar from "../../../components/Sidebar";
 import {FaEye, FaBan, FaCheckCircle, FaCheck} from "react-icons/fa";
 import {getAccounts, banAccount, unbanAccount} from "../../../service/accountService";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../../../components/Pagination.jsx";
 
 export default function UserList() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -12,6 +13,18 @@ export default function UserList() {
     const [users, setUsers] = useState([]);
     const [total, setTotal] = useState(0);
     const navigate = useNavigate();
+    const [currentPage, setCurrentPage] = useState(0); // Backend dùng index = 0
+    const [totalPages, setTotalPages] = useState(0);
+    const roleLabels = {
+        ADMIN: "Quản trị viên",
+        STAFF: "Nhân viên",
+        CUSTOMER: "Người dùng",
+    };
+    const statusLabels = {
+        ACTIVE: "Hoạt động",
+        INACTIVE: "Không hoạt động",
+        BANNED: "Bị đình chỉ",
+    };
 
     const fetchUsers = async () => {
         try {
@@ -19,11 +32,13 @@ export default function UserList() {
                 keyword: search,
                 status: filterStatus,
                 role: filterRole,
-                page: 0,
-                size: 20
+                page: currentPage,
+                size: 5
             });
             setUsers(data.content || []);
             setTotal(data.totalElements || 0);
+            setTotalPages(data.totalPages);
+
         } catch (err) {
             console.error("Lỗi khi gọi API:", err.message);
         }
@@ -31,7 +46,7 @@ export default function UserList() {
 
     useEffect(() => {
         fetchUsers();
-    }, [filterRole, filterStatus, search]);
+    }, [filterRole, filterStatus, search, currentPage]);
 
     const handleBan = async (id) => {
         if (window.confirm("Bạn có chắc muốn ban tài khoản này?")) {
@@ -79,9 +94,9 @@ export default function UserList() {
                         className="px-4 py-2 border rounded"
                     >
                         <option value="">Tất cả vai trò</option>
-                        <option value="ADMIN">Admin</option>
-                        <option value="CUSTOMER">CUSTOMER</option>
-                        <option value="STAFF">STAFF</option>
+                        <option value="ADMIN">Quản trị viên</option>
+                        <option value="CUSTOMER">Người dùng</option>
+                        <option value="STAFF">Nhân viên</option>
                     </select>
 
                     <select
@@ -90,9 +105,9 @@ export default function UserList() {
                         className="px-4 py-2 border rounded"
                     >
                         <option value="">Tất cả trạng thái</option>
-                        <option value="ACTIVE">Active</option>
-                        <option value="INACTIVE">Inactive</option>
-                        <option value="BANNED">Banned</option>
+                        <option value="ACTIVE">Hoạt động</option>
+                        <option value="INACTIVE">Không hoạt động</option>
+                        <option value="BANNED">Bị đình chỉ</option>
                     </select>
                 </div>
 
@@ -112,9 +127,8 @@ export default function UserList() {
                         {users.map((user) => (
                             <tr key={user.userId} className="border-t hover:bg-gray-50 transition">
                                 <td className="px-4 py-2">{user.username}</td>
-
                                 <td className="px-4 py-2">{user.email}</td>
-                                <td className="px-4 py-2">{user.roleName}</td>
+                                <td className="px-4 py-2">{roleLabels[user.roleName]}</td>
                                 <td className="px-4 py-2">
                                     <span
                                         className={`font-semibold flex items-center gap-1 ${
@@ -125,7 +139,7 @@ export default function UserList() {
                                                     : "text-red-600"
                                         }`}
                                     >
-                                        <FaCheckCircle /> {user.status}
+                                        <FaCheckCircle /> {statusLabels[user.status]}
                                     </span>
                                 </td>
                                 <td className="px-4 py-2 space-x-2">
@@ -158,8 +172,18 @@ export default function UserList() {
                         ))}
                         </tbody>
                     </table>
-                </div>
 
+                </div>
+                <div className="mt-6 flex justify-between items-center text-gray-600 text-sm">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
+                    <div>
+                        Trang {currentPage + 1} / {totalPages}
+                    </div>
+                </div>
                 <div className="mt-4 text-sm text-gray-500">
                     Đang hiển thị {users.length} / {total} tài khoản
                 </div>
