@@ -52,111 +52,18 @@ public class User {
     @CreationTimestamp
     private Timestamp createdAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status = Status.INACTIVE;
+
     public enum Sex {
         MALE, FEMALE, OTHER
     }
+
     public enum Status {
         ACTIVE,
         INACTIVE,
         BANNED
-    }
-
-    private Status status;
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public LocalDate getDob() {
-        return dob;
-    }
-
-    public void setDob(LocalDate dob) {
-        this.dob = dob;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public Sex getSex() {
-        return sex;
-    }
-
-    public void setSex(Sex sex) {
-        this.sex = sex;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
     }
 
 }
