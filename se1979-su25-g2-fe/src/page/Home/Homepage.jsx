@@ -4,7 +4,6 @@ import ProductCard from '../Product/ProductCard';
 import { getNewArrivals, getSuggestedProducts, getProductById } from '../../service/productService';
 import { API_BASE_URL, IMAGE_BASE_URL } from '../../utils/constants';
 import axios from 'axios';
-
 export default function Homepage() {
     const [newArrivals, setNewArrivals] = useState([]);
     const [suggestedProducts, setSuggestedProducts] = useState([]);
@@ -50,7 +49,7 @@ export default function Homepage() {
                     </div>
                     <div className="flex-1 flex justify-center">
                         <img
-                            src="/images/hero-main.jpg"
+                            src="https://cdn.hpdecor.vn/wp-content/uploads/2022/05/thiet-ke-cua-hang-quan-ao-nam-5.jpg"
                             alt="Hero"
                             className="rounded-2xl shadow-2xl w-[320px] h-[240px] md:w-[500px] md:h-[360px] object-cover animate-fadeInUp"
                         />
