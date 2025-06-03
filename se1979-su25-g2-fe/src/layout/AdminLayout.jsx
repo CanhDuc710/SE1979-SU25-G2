@@ -1,6 +1,6 @@
 // AdminLayout.jsx
 import React from "react";
-import Sidebar from "../ui/admin/sidebar";
+import Sidebar from "../components/Sidebar";
 
 export default function AdminLayout({ children, activeMenu }) {
     return (
