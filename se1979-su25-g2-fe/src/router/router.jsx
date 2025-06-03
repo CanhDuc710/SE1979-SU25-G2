@@ -21,6 +21,7 @@ const router = createBrowserRouter([
             { path: "/admin/product-management", element: <ProductManagementLazy /> },
             { path: "/admin/accounts", element: <UserListLazy /> },
             { path:"/admin/accounts/:id", element:<UserDetailsLazy />},
+            { path: "/faqs", element: <FaqPageLazy /> },
             { path: "*", element: <NotFoundLazy /> },
         ],
     },
