@@ -56,6 +56,5 @@ public class User {
         MALE, FEMALE, OTHER
     }
 
-    // Constructors, Getters, Setters
 }
 

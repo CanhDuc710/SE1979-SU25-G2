@@ -10,6 +10,9 @@ const ProductDetailLazy = lazy(() => import("../page/Product/ProductDetail.jsx")
 const UserListLazy = lazy(() => import("../page/admin/user_management/UserList.jsx"));
 const UserDetailsLazy = lazy(() => import("../page/admin/user_management/UserDetails.jsx"));
 const CartLazy = lazy(() => import("../page/Cart/CartPage.jsx"));
+const LoginLazy = lazy(() => import("../page/User/Login.jsx"));
+const RegisterLazy = lazy(() => import("../page/User/Register.jsx"));
+const UserProfileLazy = lazy(() => import("../page/User/UserProfile.jsx"));
 const router = createBrowserRouter([
     {
         element: <UserLayout />,
@@ -18,6 +21,9 @@ const router = createBrowserRouter([
             { path: "/products", element: <ProductListLazy /> },
             { path: "/products/:productId", element: <ProductDetailLazy /> },
             { path: "/cart", element: <CartLazy /> },
+            { path: "/login", element: <LoginLazy /> },
+            { path: "/register", element: <RegisterLazy /> },
+            { path: "/userprofile", element: <UserProfileLazy /> },
             { path: "/admin/product-management", element: <ProductManagementLazy /> },
             { path: "/admin/accounts", element: <UserListLazy /> },
             { path:"/admin/accounts/:id", element:<UserDetailsLazy />},
