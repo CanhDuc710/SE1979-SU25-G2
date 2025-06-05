@@ -47,7 +47,7 @@ public class Product {
 
     private Boolean isActive;
 
-    @Column(precision = 10, scale = 2, nullable = false)
+    @Column(precision = 14, scale = 2, nullable = false)
     private BigDecimal price;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)

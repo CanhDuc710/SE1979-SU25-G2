@@ -52,10 +52,19 @@ public class User {
     @CreationTimestamp
     private Timestamp createdAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status = Status.INACTIVE;
+
     public enum Sex {
         MALE, FEMALE, OTHER
     }
 
-    // Constructors, Getters, Setters
+    public enum Status {
+        ACTIVE,
+        INACTIVE,
+        BANNED
+    }
+
 }
 

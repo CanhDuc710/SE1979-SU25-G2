@@ -8,8 +8,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class CartDTO {
     private String sessionId;
     private List<CartItemDTO> items;

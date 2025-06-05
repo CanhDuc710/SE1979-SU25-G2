@@ -77,7 +77,7 @@ public class AccountServiceImpl implements AccountService {
                 .email(u.getEmail())
                 .phoneNumber(u.getPhoneNumber())
 //                .address(u.getAddress())
-//                .gender(u.getGender())
+                .sex(String.valueOf(u.getSex()))
                 .dob(u.getDob().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))
                 .role(u.getRole().getRoleName())
                 .status(u.getStatus().name())
