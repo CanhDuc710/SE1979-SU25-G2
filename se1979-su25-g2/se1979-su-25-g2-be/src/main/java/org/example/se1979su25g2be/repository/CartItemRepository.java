@@ -19,7 +19,6 @@ public interface CartItemRepository extends JpaRepository<CartItem, Integer> {
 
     int countByUser(User user);
 
-    // 👉 Cho người dùng chưa đăng nhập (sử dụng sessionId)
     List<CartItem> findBySessionId(String sessionId);
 
     Optional<CartItem> findBySessionIdAndVariant(String sessionId, ProductVariant variant);
