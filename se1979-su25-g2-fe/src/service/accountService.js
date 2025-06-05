@@ -27,4 +27,3 @@ export const getAccountDetail = async (id) => {
     const response = await axios.get(`${API_BASE_URL}/admin/accounts/getDetail/${id}`);
     return response.data;
 };
-

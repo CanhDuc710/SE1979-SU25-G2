@@ -120,7 +120,7 @@ export default function Homepage() {
                             <ProductCard
                                 name={item.name}
                                 price={item.price === 0 ? 'Contact' : `${item.price.toLocaleString()} VND`}
-                                image={item.imageUrls?.[0] ? `${IMAGE_BASE_URL}${item.imageUrls[0]}` : null}
+                                image={item.    imageUrls?.[0] ? `${IMAGE_BASE_URL}${item.imageUrls[0]}` : null}
                             />
                         </Link>
                     ))}
