@@ -1,96 +1,74 @@
 import React, { useEffect, useState } from "react";
-import { getAllFaqs, createFaq, deleteFaq } from "../../service/faqService";
+import axios from "axios";
 
-export default function FaqPage() {
+const FAQPage = () => {
     const [faqs, setFaqs] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [question, setQuestion] = useState("");
-    const [answer, setAnswer] = useState("");
-    const [error, setError] = useState("");
-
-    const loadFaqs = async () => {
-        setLoading(true);
-        try {
-            setFaqs(await getAllFaqs());
-        } catch {
-            setError("Không thể tải FAQ.");
-        }
-        setLoading(false);
-    };
+    const [openIndex, setOpenIndex] = useState(null);
 
     useEffect(() => {
-        loadFaqs();
+        axios.get("/api/faqs")
+            .then(res => setFaqs(res.data))
+            .catch(err => console.error(err));
     }, []);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!question.trim() || !answer.trim()) {
-            setError("Vui lòng nhập đủ thông tin.");
-            return;
-        }
-        try {
-            await createFaq({ question, answer });
-            setQuestion("");
-            setAnswer("");
-            setError("");
-            loadFaqs();
-        } catch {
-            setError("Không thể thêm FAQ.");
-        }
-    };
-
-    const handleDelete = async (id) => {
-        if (window.confirm("Xóa FAQ này?")) {
-            try {
-                await deleteFaq(id);
-                loadFaqs();
-            } catch {
-                setError("Không thể xóa FAQ.");
-            }
-        }
+    const handleToggle = (idx) => {
+        setOpenIndex(openIndex === idx ? null : idx);
     };
 
     return (
-        <div className="max-w-2xl mx-auto py-10 px-4">
-            <h2 className="text-2xl font-bold mb-6">Câu hỏi thường gặp</h2>
-            <form onSubmit={handleSubmit} className="mb-8 bg-white p-4 rounded shadow">
-                <input
-                    className="border rounded w-full p-2 mb-2"
-                    placeholder="Câu hỏi"
-                    value={question}
-                    onChange={e => setQuestion(e.target.value)}
-                    required
-                />
-                <textarea
-                    className="border rounded w-full p-2 mb-2"
-                    placeholder="Trả lời"
-                    value={answer}
-                    onChange={e => setAnswer(e.target.value)}
-                    required
-                />
-                <button className="bg-black text-white px-4 py-2 rounded" type="submit">
-                    Thêm
-                </button>
-                {error && <div className="text-red-500 mt-2">{error}</div>}
-            </form>
-            {loading ? (
-                <div>Đang tải...</div>
-            ) : (
-                <ul className="space-y-4">
-                    {faqs.map(faq => (
-                        <li key={faq.id} className="border rounded p-4 bg-white shadow">
-                            <div className="font-semibold">{faq.question}</div>
-                            <div className="text-gray-700 mt-2">{faq.answer}</div>
-                            <button
-                                className="mt-2 text-red-500 text-sm"
-                                onClick={() => handleDelete(faq.id)}
-                            >
-                                Xóa
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            )}
+        <div className="bg-white min-h-screen">
+            {/* Header */}
+            <div className="text-center mt-16 mb-8">
+                <h1 className="text-5xl font-extrabold tracking-wide">FAQS</h1>
+            </div>
+
+            {/* Main content */}
+            <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8">
+                {/* Left: FAQs */}
+                <div className="flex-1">
+                    <h2 className="text-2xl font-bold mb-6">Frequently<br />asked questions</h2>
+                    <div className="space-y-4">
+                        {faqs.map((faq, idx) => (
+                            <div key={faq.id} className="border rounded-lg">
+                                <button
+                                    className="w-full flex justify-between items-center px-4 py-3 text-left font-medium focus:outline-none"
+                                    onClick={() => handleToggle(idx)}
+                                >
+                                    <span>{faq.question}</span>
+                                    <span className="text-xl">{openIndex === idx ? "-" : "+"}</span>
+                                </button>
+                                {openIndex === idx && (
+                                    <div className="px-4 pb-4 text-gray-700">{faq.answer}</div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Right: More questions box */}
+                <div className="w-full md:w-80 flex-shrink-0">
+                    <div className="bg-gray-100 rounded-lg p-6 text-center shadow">
+                        <div className="mb-4">
+                            <div className="w-10 h-10 mx-auto bg-black rounded-full flex items-center justify-center text-white text-2xl">?</div>
+                        </div>
+                        <div className="font-semibold mb-2">Do you have more questions?</div>
+                        <div className="text-gray-600 mb-4 text-sm">
+                            Please contact our customer support for further help and information.
+                        </div>
+                        <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded transition">
+                            Email us now
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Decorative elements (optional, SVG or absolute divs) */}
+            {/* Bạn có thể thêm SVG hoặc hình vẽ tay ở đây nếu muốn */}
+
+            {/* Footer placeholder */}
+            <div className="mt-24"></div>
         </div>
     );
-}
+};
+
+export default FAQPage;
