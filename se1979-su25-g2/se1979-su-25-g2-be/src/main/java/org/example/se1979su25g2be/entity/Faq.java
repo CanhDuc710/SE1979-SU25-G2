@@ -4,20 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Table(name = "faqs")
-public class Faq {
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+public class FAQ {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "faq_id")
-    private Integer id;
+    private Long id;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
     private String question;
-
-    @Column(nullable = false, columnDefinition = "TEXT")
     private String answer;
 }
