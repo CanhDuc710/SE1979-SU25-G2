@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface ProductService {
+    Page<ProductDTO> getAllProducts(int page, int size);
+
     Product createProduct(ProductDTO dto);
     Product updateProduct(Integer id, ProductDTO dto);
     void deleteProduct(Integer id);
@@ -23,5 +25,6 @@ public interface ProductService {
     List<ProductDTO> getRandomSuggestions(int limit);
     List<OptionDTO> getAllBrandOptions();
     List<OptionDTO> getAllMaterialOptions();
+
 
 }
