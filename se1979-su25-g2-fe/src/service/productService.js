@@ -33,5 +33,15 @@ export const getProductDetail = async (productId) => {
     return response.data;
 };
 
+export const deleteProductById = async (productId) => {
+    const res = await fetch(`${API_BASE_URL}/products/${productId}`, {
+        method: "DELETE",
+    });
+    if (!res.ok) {
+        throw new Error("Delete failed");
+    }
+};
+
+
 
 

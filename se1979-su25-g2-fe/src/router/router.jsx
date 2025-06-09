@@ -4,7 +4,7 @@ import UserLayout from "../layout/UserLayout.jsx";
 
 const HomepageLazy = lazy(() => import("../page/Home/Homepage.jsx"));
 const ProductListLazy = lazy(() => import("../page/Product/ProductList.jsx"));
-const ProductManagementLazy = lazy(() => import("../page/admin/product/ProductManagement.jsx"));
+const ProductManagementLazy = lazy(() => import("../page/admin/product/productList.jsx"));
 const NotFoundLazy = lazy(() => import("../page/error/NotFound.jsx"));
 const ProductDetailLazy = lazy(() => import("../page/Product/ProductDetail.jsx"));
 const UserListLazy = lazy(() => import("../page/admin/user/UserList.jsx"));
@@ -15,7 +15,7 @@ const router = createBrowserRouter([
             { path: "/", element: <HomepageLazy /> },
             { path: "/products", element: <ProductListLazy /> },
             { path: "/products/:productId", element: <ProductDetailLazy /> },
-            { path: "/admin/product", element: <ProductManagementLazy /> },
+            { path: "/admin/product-list", element: <ProductManagementLazy /> },
             { path: "/admin/user-management", element: <UserListLazy /> },
             { path: "*", element: <NotFoundLazy /> },
         ],

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../../components/Sidebar";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import { fetchAllProductsPaged } from "../../../service/productService";
+import {deleteProductById, fetchAllProductsPaged} from "../../../service/productService";
 import Pagination from "../../../components/Pagination";
 
-const PRODUCTS_PER_PAGE = 5;
+const PRODUCTS_PER_PAGE = 8;
 
-export default function ProductManagement() {
+export default function ProductList() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [currentPage, setCurrentPage] = useState(0); // Backend dùng index = 0
     const [totalPages, setTotalPages] = useState(0);
@@ -51,6 +51,24 @@ export default function ProductManagement() {
 
 
     const categories = [...new Set(products.map((p) => p.categoryName))];
+
+    const handleDelete = async (productId) => {
+        const confirm = window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?");
+        if (!confirm) return;
+
+        try {
+            await deleteProductById(productId);
+            alert("Xóa thành công!");
+            // Sau khi xóa thành công, gọi lại API trang hiện tại
+            const data = await fetchAllProductsPaged(currentPage, PRODUCTS_PER_PAGE);
+            setProducts(data.content);
+            setTotalPages(data.totalPages);
+        } catch (error) {
+            console.error("Lỗi khi xóa sản phẩm:", error);
+            alert("Xóa thất bại!");
+        }
+    };
+
 
     return (
         <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white">
@@ -155,9 +173,13 @@ export default function ProductManagement() {
                                         <button className="bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200">
                                             <FaEdit />
                                         </button>
-                                        <button className="bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200">
-                                            <FaTrash />
+                                        <button
+                                            onClick={() => handleDelete(productId)}
+                                            className="bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200"
+                                        >
+                                            <FaTrash/>
                                         </button>
+
                                     </td>
                                 </tr>
                             )
