@@ -95,7 +95,7 @@ export default function UserDetail() {
                                 <Field label="Giới tính" value={sexLabel[user.sex] || ""} />
                                 <Field label="Email" value={user.email || ""} />
                                 <Field label="Số điện thoại" value={user.phoneNumber || ""} />
-                                <Field label="Địa chỉ" value={user.address || ""} />
+                                {/*<Field label="Địa chỉ" value={user.address || ""} />*/}
 
                                 {/* STATUS with Toggle Button */}
                                 <div className="bg-blue-50 p-3 rounded-lg">

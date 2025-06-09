@@ -180,9 +180,9 @@ export default function UserList() {
                         totalPages={totalPages}
                         onPageChange={setCurrentPage}
                     />
-                    <div>
-                        Trang {currentPage + 1} / {totalPages}
-                    </div>
+                    {/*<div>*/}
+                    {/*    Trang {currentPage + 1} / {totalPages}*/}
+                    {/*</div>*/}
                 </div>
                 <div className="mt-4 text-sm text-gray-500">
                     Đang hiển thị {users.length} / {total} tài khoản
