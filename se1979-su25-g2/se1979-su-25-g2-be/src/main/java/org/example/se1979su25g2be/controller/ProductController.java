@@ -37,6 +37,15 @@ public class ProductController {
         this.localImageService = localImageService;
     }
 
+    @GetMapping
+    public ResponseEntity<Page<ProductDTO>> getAllProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(productService.getAllProducts(page, size));
+    }
+
+
     @PostMapping
     public ResponseEntity<Product> createProduct(@RequestBody ProductDTO dto) {
         return ResponseEntity.ok(productService.createProduct(dto));
