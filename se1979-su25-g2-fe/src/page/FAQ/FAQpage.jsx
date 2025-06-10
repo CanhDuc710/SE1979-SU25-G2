@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { fetchAllFaqs } from "../../service/faqService";
 
 const FAQPage = () => {
     const [faqs, setFaqs] = useState([]);
     const [openIndex, setOpenIndex] = useState(null);
 
     useEffect(() => {
-        axios.get("/api/faqs")
-            .then(res => setFaqs(res.data))
+        fetchAllFaqs()
+            .then(data => setFaqs(data))
             .catch(err => console.error(err));
     }, []);
 
@@ -62,8 +62,7 @@ const FAQPage = () => {
                 </div>
             </div>
 
-            {/* Decorative elements (optional, SVG or absolute divs) */}
-            {/* Bạn có thể thêm SVG hoặc hình vẽ tay ở đây nếu muốn */}
+
 
             {/* Footer placeholder */}
             <div className="mt-24"></div>

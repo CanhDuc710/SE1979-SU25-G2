@@ -14,10 +14,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 
-    List<User> findByAuthorities_Authority(String role);
+    //List<User> findByAuthorities_Authority(String role);
 
     List<User> findByEmailContaining(String email);
 
-    List<User> findByAuthorities_AuthorityAndEmailContaining(String role, String email);
+    //List<User> findByAuthorities_AuthorityAndEmailContaining(String role, String email);
 }
 //Quang Anh
