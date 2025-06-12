@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Province {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer provinceId;
 
     @Column(length = 100, nullable = false)
