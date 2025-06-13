@@ -63,25 +63,30 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public AccountDTO createStaffAccount(StaffAccountDTO dto) {
-        Role role = roleRepository.findByRoleNameIgnoreCase(dto.getRole())
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+        try {
+            Role role = roleRepository.findByRoleNameIgnoreCase(dto.getRole())
+                    .orElseThrow(() -> new RuntimeException("Role not found: " + dto.getRole()));
 
-        User user = User.builder()
-                .firstName(dto.getFirstName())
-                .lastName(dto.getLastName())
-                .username(dto.getUsername())
-                .email(dto.getEmail())
-                .passwordHash(passwordEncoder.encode(dto.getPassword()))
-                .phoneNumber(dto.getPhone())
-                .sex(User.Sex.valueOf(dto.getGender()))
-                .dob(dto.getDob())
-                .role(role)
-                .status(User.Status.ACTIVE)
-                .build();
+            User user = User.builder()
+                    .firstName(dto.getFirstName())
+                    .lastName(dto.getLastName())
+                    .username(dto.getUsername())
+                    .email(dto.getEmail())
+                    .passwordHash(passwordEncoder.encode(dto.getPassword()))
+                    .phoneNumber(dto.getPhone())
+                    .sex(User.Sex.valueOf(dto.getGender()))
+                    .dob(dto.getDob())
+                    .role(role)
+                    .status(User.Status.ACTIVE)
+                    .build();
 
-        user = accountRepository.save(user);
-        return mapToDTO(user);
+            return mapToDTO(accountRepository.save(user));
+        } catch (Exception e) {
+            e.printStackTrace(); // in log BE
+            throw new RuntimeException("Lỗi khi tạo tài khoản: " + e.getMessage());
+        }
     }
+
 
 
     private AccountDTO mapToDTO(User u) {

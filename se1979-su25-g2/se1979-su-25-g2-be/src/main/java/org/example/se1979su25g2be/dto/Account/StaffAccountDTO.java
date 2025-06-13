@@ -12,7 +12,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 public class StaffAccountDTO {
-    private int id;
     private String firstName;
     private String lastName;
     private String username;
