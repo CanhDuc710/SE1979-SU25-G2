@@ -11,6 +11,7 @@ import org.example.se1979su25g2be.repository.RoleRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
@@ -20,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 public class AccountServiceImpl implements AccountService {
     private final RoleRepository roleRepository;
     private final AccountRepository accountRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Page<AccountDTO> getAllAccounts(String keyword, String status, String role, int page, int size) {
@@ -61,8 +63,26 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public AccountDTO createStaffAccount(StaffAccountDTO dto) {
-        return null;
+        Role role = roleRepository.findByRoleNameIgnoreCase(dto.getRole())
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+
+        User user = User.builder()
+                .firstName(dto.getFirstName())
+                .lastName(dto.getLastName())
+                .username(dto.getUsername())
+                .email(dto.getEmail())
+                .passwordHash(passwordEncoder.encode(dto.getPassword()))
+                .phoneNumber(dto.getPhone())
+                .sex(User.Sex.valueOf(dto.getGender()))
+                .dob(dto.getDob())
+                .role(role)
+                .status(User.Status.ACTIVE)
+                .build();
+
+        user = accountRepository.save(user);
+        return mapToDTO(user);
     }
+
 
     private AccountDTO mapToDTO(User u) {
         return AccountDTO.builder()

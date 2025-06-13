@@ -46,10 +46,12 @@ public class AccountController {
         return ResponseEntity.ok(accountDetailDTO);
     }
 
-    @PostMapping
-    public ResponseEntity<AccountDTO> createStaffAccount(@RequestBody StaffAccountDTO dto) {
-        return ResponseEntity.ok(accountService.createStaffAccount(dto));
+    @PostMapping("/add")
+    public ResponseEntity<Void> createInternalAccount(@RequestBody StaffAccountDTO staffAccountDTO) {
+        accountService.createStaffAccount(staffAccountDTO);
+        return ResponseEntity.ok().build();
     }
+
 
 
 }
