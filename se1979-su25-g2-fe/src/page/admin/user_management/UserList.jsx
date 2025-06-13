@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../../../components/Sidebar";
-import {FaEye, FaBan, FaCheckCircle, FaCheck} from "react-icons/fa";
-import {getAccounts, banAccount, unbanAccount} from "../../../service/accountService";
+import { FaEye, FaBan, FaCheckCircle, FaCheck } from "react-icons/fa";
+import { getAccounts, banAccount, unbanAccount } from "../../../service/accountService";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../../components/Pagination.jsx";
 
@@ -13,13 +13,15 @@ export default function UserList() {
     const [users, setUsers] = useState([]);
     const [total, setTotal] = useState(0);
     const navigate = useNavigate();
-    const [currentPage, setCurrentPage] = useState(0); // Backend dùng index = 0
+    const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+
     const roleLabels = {
         ADMIN: "Quản trị viên",
         STAFF: "Nhân viên",
         CUSTOMER: "Người dùng",
     };
+
     const statusLabels = {
         ACTIVE: "Hoạt động",
         INACTIVE: "Không hoạt động",
@@ -38,7 +40,6 @@ export default function UserList() {
             setUsers(data.content || []);
             setTotal(data.totalElements || 0);
             setTotalPages(data.totalPages);
-
         } catch (err) {
             console.error("Lỗi khi gọi API:", err.message);
         }
@@ -65,20 +66,26 @@ export default function UserList() {
     return (
         <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white">
             {/* Sidebar */}
-            <div
-                className={`transition-all duration-300 ${
-                    sidebarCollapsed ? "w-16" : "w-64"
-                } flex-shrink-0`}
-            >
-                <Sidebar
-                    sidebarCollapsed={sidebarCollapsed}
-                    setSidebarCollapsed={setSidebarCollapsed}
-                />
+            <div className={`transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"} flex-shrink-0`}>
+                <Sidebar sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />
             </div>
 
             {/* Main */}
             <div className="flex-1 p-6">
-                {/* Filters */}
+                {/* Header */}
+                <h1 className="text-2xl font-bold mb-2">Tài khoản người dùng</h1>
+
+                {/* Add staff button */}
+                <div className="flex justify-end mb-4">
+                    <button
+                        onClick={() => navigate("/admin/accounts/add")}
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    >
+                        Thêm nhân viên +
+                    </button>
+                </div>
+
+                {/* Bộ lọc */}
                 <div className="flex flex-col md:flex-row gap-4 mb-4">
                     <input
                         type="text"
@@ -111,7 +118,7 @@ export default function UserList() {
                     </select>
                 </div>
 
-                {/* Table */}
+                {/* Bảng */}
                 <div className="overflow-x-auto rounded shadow-md">
                     <table className="min-w-full text-sm bg-white rounded">
                         <thead className="bg-gradient-to-r from-blue-100 to-yellow-100 text-gray-700 text-left">
@@ -120,7 +127,7 @@ export default function UserList() {
                             <th className="px-4 py-3">Email</th>
                             <th className="px-4 py-3">Vai trò</th>
                             <th className="px-4 py-3">Trạng thái</th>
-                            <th className="px-4 py-3">Hành Động</th>
+                            <th className="px-4 py-3 text-right">Hành động</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -130,59 +137,69 @@ export default function UserList() {
                                 <td className="px-4 py-2">{user.email}</td>
                                 <td className="px-4 py-2">{roleLabels[user.roleName]}</td>
                                 <td className="px-4 py-2">
-                                    <span
-                                        className={`font-semibold flex items-center gap-1 ${
-                                            user.status === "ACTIVE"
-                                                ? "text-green-600"
-                                                : user.status === "INACTIVE"
-                                                    ? "text-yellow-600"
-                                                    : "text-red-600"
-                                        }`}
-                                    >
-                                        <FaCheckCircle /> {statusLabels[user.status]}
-                                    </span>
+                                        <span
+                                            className={`font-semibold flex items-center gap-1 ${
+                                                user.status === "ACTIVE"
+                                                    ? "text-green-600"
+                                                    : user.status === "INACTIVE"
+                                                        ? "text-yellow-600"
+                                                        : "text-red-600"
+                                            }`}
+                                        >
+                                            <FaCheckCircle /> {statusLabels[user.status]}
+                                        </span>
                                 </td>
-                                <td className="px-4 py-2 space-x-2">
+                                <td className="px-4 py-2 flex justify-end gap-2">
+                                    {/* Nút xem */}
                                     <button
                                         className="bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200"
-                                        onClick={() =>
-                                            navigate(`/admin/accounts/${user.userId}`)
-                                        }
-                                    >
+                                        onClick={() => navigate(`/admin/accounts/${user.userId}`)}>
                                         <FaEye />
                                     </button>
+
+                                    {/* Ban/Unban button */}
                                     {user.status === "BANNED" ? (
                                         <button
                                             className="bg-green-100 text-green-600 px-2 py-1 rounded hover:bg-green-200"
-                                            onClick={() => handleUnban(user.userId)}
-                                        >
+                                            onClick={() => handleUnban(user.userId)}>
                                             <FaCheck />
-
                                         </button>
                                     ) : (
                                         <button
                                             className="bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200"
-                                            onClick={() => handleBan(user.userId)}
-                                        >
+                                            onClick={() => handleBan(user.userId)}>
                                             <FaBan />
                                         </button>
                                     )}
+
+                                    {/* edit button */}
+                                    <button
+                                        className={`px-2 py-1 rounded ${
+                                            ["ADMIN", "STAFF"].includes(user.roleName)
+                                                ? "bg-yellow-100 text-yellow-600 hover:bg-yellow-200"
+                                                : "opacity-0 cursor-default"
+                                        }`}
+                                        onClick={() =>
+                                            ["ADMIN", "STAFF"].includes(user.roleName) &&
+                                            navigate(`/admin/accounts/edit/${user.userId}`)
+                                        }
+                                    >
+                                        ✏️
+                                    </button>
                                 </td>
                             </tr>
                         ))}
                         </tbody>
                     </table>
-
                 </div>
+
+                {/* Phân trang */}
                 <div className="mt-6 flex justify-between items-center text-gray-600 text-sm">
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
                         onPageChange={setCurrentPage}
                     />
-                    {/*<div>*/}
-                    {/*    Trang {currentPage + 1} / {totalPages}*/}
-                    {/*</div>*/}
                 </div>
                 <div className="mt-4 text-sm text-gray-500">
                     Đang hiển thị {users.length} / {total} tài khoản

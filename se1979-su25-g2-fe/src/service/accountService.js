@@ -28,3 +28,8 @@ export const getAccountDetail = async (id) => {
     return response.data;
 };
 
+export const createAccount = async (accountData) => {
+    const response = await axios.post("/api/admin/accounts/add", accountData);
+    return response.data;
+};
+

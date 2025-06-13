@@ -6,7 +6,11 @@ import Pagination from "../../../components/Pagination.jsx";
 export default function OrderList() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [expandedOrders, setExpandedOrders] = useState({});
-
+    const [filterRole, setFilterRole] = useState("");
+    const [filterStatus, setFilterStatus] = useState("");
+    const [search, setSearch] = useState("");
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
     const [orders] = useState([
         {
             orderId: "123421",
@@ -167,7 +171,16 @@ export default function OrderList() {
                         </tbody>
                     </table>
                 </div>
-                <div className="mt-4 text-sm text-gray-500">Hiển thị {orders.length} đơn hàng</div>
+                <div className="mt-6 flex justify-between items-center text-gray-600 text-sm">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
+                    {/*<div>*/}
+                    {/*    Trang {currentPage + 1} / {totalPages}*/}
+                    {/*</div>*/}
+                </div>
             </div>
         </div>
     );
