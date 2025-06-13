@@ -3,6 +3,7 @@ package org.example.se1979su25g2be.service.account;
 import lombok.RequiredArgsConstructor;
 import org.example.se1979su25g2be.dto.Account.AccountDTO;
 import org.example.se1979su25g2be.dto.Account.AccountDetailDTO;
+import org.example.se1979su25g2be.dto.Account.StaffAccountDTO;
 import org.example.se1979su25g2be.entity.Role;
 import org.example.se1979su25g2be.entity.User;
 import org.example.se1979su25g2be.repository.AccountRepository;
@@ -56,6 +57,11 @@ public class AccountServiceImpl implements AccountService {
         User user = accountRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return mapToDetailDTO(user);
+    }
+
+    @Override
+    public AccountDTO createStaffAccount(StaffAccountDTO dto) {
+        return null;
     }
 
     private AccountDTO mapToDTO(User u) {
