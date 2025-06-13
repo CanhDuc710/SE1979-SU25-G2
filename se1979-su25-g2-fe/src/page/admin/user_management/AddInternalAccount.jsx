@@ -14,9 +14,9 @@ export default function AddInternalAccount() {
         email: "",
         password: "",
         phone: "",
-        gender: "",
+        gender: "MALE",
         dob: "",
-        role: "",
+        role: "STAFF",
     });
 
     const handleChange = (e) => {
