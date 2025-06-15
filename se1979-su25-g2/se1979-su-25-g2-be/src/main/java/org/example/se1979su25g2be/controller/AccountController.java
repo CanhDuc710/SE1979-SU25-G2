@@ -3,6 +3,7 @@ package org.example.se1979su25g2be.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.se1979su25g2be.dto.Account.AccountDTO;
 import org.example.se1979su25g2be.dto.Account.AccountDetailDTO;
+import org.example.se1979su25g2be.dto.Account.StaffAccountDTO;
 import org.example.se1979su25g2be.service.account.AccountService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -44,5 +45,15 @@ public class AccountController {
         AccountDetailDTO accountDetailDTO = accountService.getAccountDetail(id);
         return ResponseEntity.ok(accountDetailDTO);
     }
+
+    @PostMapping("/add")
+    public ResponseEntity<Void> createInternalAccount(@RequestBody StaffAccountDTO dto) {
+        System.out.println("RECEIVED: " + dto); // in log
+        accountService.createStaffAccount(dto);
+        return ResponseEntity.ok().build();
+    }
+
+
+
 
 }
