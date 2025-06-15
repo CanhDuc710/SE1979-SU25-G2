@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import {
     getCart,
     updateCartItem,
     removeFromCart,
 } from "../../service/cartService";
 import { IMAGE_BASE_URL } from "../../utils/constants";
-import Header from "../../ui/Header.jsx";
-import Footer from "../../ui/Footer.jsx";
 
 
 export default function CartPage() {
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         loadCart();
@@ -54,7 +55,8 @@ export default function CartPage() {
                             className="flex items-center justify-between border-b pb-4"
                         >
                             <div className="flex gap-4 items-center">
-                                <div className="w-20 h-20 bg-gray-100 flex justify-center items-center overflow-hidden rounded">
+                                <div
+                                    className="w-20 h-20 bg-gray-100 flex justify-center items-center overflow-hidden rounded">
                                     {item.imageUrl ? (
                                         <img
                                             src={`${IMAGE_BASE_URL}${item.imageUrl}`}
@@ -134,7 +136,10 @@ export default function CartPage() {
                 </div>
 
                 <div className="mt-6 text-right">
-                    <button className="bg-black text-white px-6 py-3 rounded hover:bg-gray-800 transition">
+                    <button
+                        className="bg-black text-white px-6 py-3 rounded hover:bg-gray-800 transition"
+                        onClick={() => navigate("/order")}
+                    >
                         Thanh toán →
                     </button>
                 </div>

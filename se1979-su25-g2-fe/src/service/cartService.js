@@ -9,7 +9,7 @@ const getSessionId = () => {
     }
     return sessionId;
 };
-
+export { getSessionId };
 export const getCart = async () => {
     const sessionId = getSessionId();
     const res = await axios.get(`${API_BASE_URL}/cart`, {

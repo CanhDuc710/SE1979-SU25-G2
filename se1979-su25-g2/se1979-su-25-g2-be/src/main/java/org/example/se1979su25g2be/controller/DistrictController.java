@@ -5,7 +5,7 @@ import org.example.se1979su25g2be.service.DistrictService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/districts")
 public class DistrictController {
