@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class District {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer districtId;
 
     @ManyToOne

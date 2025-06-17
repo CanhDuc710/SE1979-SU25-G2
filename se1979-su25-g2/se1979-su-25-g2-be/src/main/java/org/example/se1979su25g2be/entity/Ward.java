@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Ward {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer wardId;
 
     @ManyToOne

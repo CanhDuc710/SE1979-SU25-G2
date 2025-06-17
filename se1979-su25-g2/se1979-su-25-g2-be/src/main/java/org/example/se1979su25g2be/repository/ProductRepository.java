@@ -13,9 +13,15 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Integer>, JpaSpecificationExecutor {
     Optional<Product> findByProductCode(String productCode);
-    List<Product> findTop5ByIsActiveTrueOrderByCreatedAtDesc();
+    List<Product> findTop8ByIsActiveTrueOrderByCreatedAtDesc();
     @Query(value = "SELECT * FROM products WHERE is_active = true ORDER BY RAND() LIMIT :limit", nativeQuery = true)
     List<Product> findRandomProducts(@Param("limit") int limit);
     Page<Product> findByIsActiveTrueAndNameContainingIgnoreCase(String name, Pageable pageable);
+    @Query("SELECT DISTINCT p.brand FROM Product p WHERE p.brand IS NOT NULL")
+    List<String> findAllDistinctBrands();
+    @Query("SELECT DISTINCT p.material FROM Product p WHERE p.material IS NOT NULL")
+    List<String> findAllDistinctMaterials();
+
+
 
 }

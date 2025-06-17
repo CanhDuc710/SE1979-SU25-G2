@@ -7,9 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.security.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -51,11 +51,14 @@ public class User {
     private Role role;
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    private java.sql.Timestamp createdAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status = Status.INACTIVE;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> addresses = new ArrayList<>();
 
     public enum Sex {
         MALE, FEMALE, OTHER
@@ -66,6 +69,4 @@ public class User {
         INACTIVE,
         BANNED
     }
-
 }
-
