@@ -8,16 +8,22 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+// Correct ID type is Integer, matching the User entity's `userId`
+public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findByUsername(String username);
 
     Optional<User> findByEmail(String email);
 
-    List<User> findByAuthorities_Authority(String role);
+    /**
+     * CORRECTED: Finds users by the `roleName` of their associated Role entity.
+     */
+    List<User> findByRole_RoleName(String roleName);
 
     List<User> findByEmailContaining(String email);
 
-    List<User> findByAuthorities_AuthorityAndEmailContaining(String role, String email);
+    /**
+     * CORRECTED: Finds users by role name AND a partial email match.
+     */
+    List<User> findByRole_RoleNameAndEmailContaining(String roleName, String email);
 }
-//Quang Anh
