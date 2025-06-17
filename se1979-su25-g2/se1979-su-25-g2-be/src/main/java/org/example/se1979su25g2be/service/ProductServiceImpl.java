@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.se1979su25g2be.dto.OptionDTO;
 import org.example.se1979su25g2be.dto.ProductDTO;
+import org.example.se1979su25g2be.dto.ProductCreateDTO;
 import org.example.se1979su25g2be.dto.ProductVariantDTO;
 import org.example.se1979su25g2be.entity.Category;
 import org.example.se1979su25g2be.entity.Product;
@@ -14,8 +15,11 @@ import org.example.se1979su25g2be.repository.ProductRepository;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,10 +28,17 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductVariantService productVariantService;
+    private final ProductImageService productImageService;
 
-    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public ProductServiceImpl(ProductRepository productRepository,
+                           CategoryRepository categoryRepository,
+                           ProductVariantService productVariantService,
+                           ProductImageService productImageService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.productVariantService = productVariantService;
+        this.productImageService = productImageService;
     }
 
     @Override
@@ -37,6 +48,46 @@ public class ProductServiceImpl implements ProductService {
         return productPage.map(this::toDTO);
     }
 
+    @Override
+    @Transactional
+    public Product createProduct(ProductCreateDTO dto) {
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new EntityNotFoundException("Category not found"));
+
+        Product product = Product.builder()
+                .productCode(dto.getProductCode())
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .category(category)
+                .brand(dto.getBrand())
+                .material(dto.getMaterial())
+                .gender(Product.Gender.valueOf(dto.getGender().toUpperCase()))
+                .isActive(dto.getIsActive())
+                .price(dto.getPrice())
+                .build();
+
+        Product savedProduct = productRepository.save(product);
+
+        // Create variants if any
+        if (dto.getVariants() != null && !dto.getVariants().isEmpty()) {
+            productVariantService.createVariantsForProduct(savedProduct, dto.getVariants());
+        }
+
+        return savedProduct;
+    }
+
+    @Override
+    @Transactional
+    public Product createProductWithImages(ProductCreateDTO dto, List<MultipartFile> images) throws IOException {
+        Product product = createProduct(dto);
+
+        // Add images if any
+        if (images != null && !images.isEmpty()) {
+            productImageService.addImagesToProduct(product, images);
+        }
+
+        return product;
+    }
 
     @Override
     public Product createProduct(ProductDTO dto) {
@@ -56,6 +107,35 @@ public class ProductServiceImpl implements ProductService {
                 .build();
 
         return productRepository.save(product);
+    }
+
+    @Override
+    @Transactional
+    public Product updateProduct(Integer id, ProductCreateDTO dto) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new EntityNotFoundException("Category not found"));
+
+        product.setProductCode(dto.getProductCode());
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setCategory(category);
+        product.setBrand(dto.getBrand());
+        product.setMaterial(dto.getMaterial());
+        product.setGender(Product.Gender.valueOf(dto.getGender().toUpperCase()));
+        product.setIsActive(dto.getIsActive());
+        product.setPrice(dto.getPrice());
+
+        Product savedProduct = productRepository.save(product);
+
+        // Update variants
+        if (dto.getVariants() != null) {
+            productVariantService.updateVariantsForProduct(savedProduct, dto.getVariants());
+        }
+
+        return savedProduct;
     }
 
     @Override
@@ -80,6 +160,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
+    public Product updateProductWithImages(Integer id, ProductCreateDTO dto, List<MultipartFile> images) throws IOException {
+        Product product = updateProduct(id, dto);
+
+        // Add new images if any
+        if (images != null && !images.isEmpty()) {
+            productImageService.addImagesToProduct(product, images);
+        }
+
+        return product;
+    }
+
+    @Override
+    @Transactional
     public void deleteProduct(Integer id) {
         productRepository.deleteById(id);
     }
@@ -96,6 +190,7 @@ public class ProductServiceImpl implements ProductService {
         return productsPage.map(this::toDTO);
     }
 
+    @Override
     public Page<ProductDTO> getFilteredProducts(String name, String brand, String gender, String material, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
 
@@ -166,6 +261,12 @@ public class ProductServiceImpl implements ProductService {
                     .map(ProductImage::getImageUrl)
                     .collect(Collectors.toList());
             dto.setImageUrls(urls);
+
+            // Set main image if available
+            p.getImages().stream()
+                .filter(ProductImage::isMain)
+                .findFirst()
+                .ifPresent(mainImage -> dto.setMainImageUrl(mainImage.getImageUrl()));
         }
 
         // 💥 Thêm phần này
@@ -181,6 +282,29 @@ public class ProductServiceImpl implements ProductService {
                     ))
                     .collect(Collectors.toList());
             dto.setVariants(variantDTOs);
+
+            // Extract available colors and sizes for filtering
+            List<String> availableColors = p.getVariants().stream()
+                    .filter(ProductVariant::getIsActive)
+                    .map(ProductVariant::getColor)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            List<String> availableSizes = p.getVariants().stream()
+                    .filter(ProductVariant::getIsActive)
+                    .map(ProductVariant::getSize)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            dto.setAvailableColors(availableColors);
+            dto.setAvailableSizes(availableSizes);
+
+            // Calculate total stock
+            int totalStock = p.getVariants().stream()
+                    .filter(ProductVariant::getIsActive)
+                    .mapToInt(ProductVariant::getStockQuantity)
+                    .sum();
+            dto.setTotalStock(totalStock);
         }
 
         return dto;
@@ -220,7 +344,9 @@ public class ProductServiceImpl implements ProductService {
                 .map(material -> new OptionDTO(material, material))
                 .collect(Collectors.toList());
     }
-
-
-
+    @Override
+    public Product findById(Integer id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with ID: " + id));
+    }
 }

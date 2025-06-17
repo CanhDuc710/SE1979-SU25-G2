@@ -29,8 +29,7 @@ public class ProductController {
     private final ProductImageRepository productImageRepository;
     private final LocalImageService localImageService;
 
-
-    public ProductController(ProductService productService,ProductRepository productRepository, ProductImageRepository productImageRepository, LocalImageService localImageService) {
+    public ProductController(ProductService productService, ProductRepository productRepository, ProductImageRepository productImageRepository, LocalImageService localImageService) {
         this.productService = productService;
         this.productRepository = productRepository;
         this.productImageRepository = productImageRepository;
@@ -44,7 +43,6 @@ public class ProductController {
     ) {
         return ResponseEntity.ok(productService.getAllProducts(page, size));
     }
-
 
     @PostMapping
     public ResponseEntity<Product> createProduct(@RequestBody ProductDTO dto) {
@@ -90,11 +88,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllMaterialOptions());
     }
 
-
     @GetMapping("/new-arrivals")
     public ResponseEntity<List<ProductDTO>> getNewArrivals() {
         return ResponseEntity.ok(productService.getNewArrivals());
     }
+
     @GetMapping("/suggestions")
     public ResponseEntity<List<ProductDTO>> getSuggestions(@RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(productService.getRandomSuggestions(limit));
