@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Sidebar from "../../../components/Sidebar";
 import { useNavigate } from "react-router-dom";
-import { createAccount } from "../../../service/accountService"; // bạn cần tạo hàm này
+import { createAccount } from "../../../service/accountService";
 
 export default function AddInternalAccount() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
