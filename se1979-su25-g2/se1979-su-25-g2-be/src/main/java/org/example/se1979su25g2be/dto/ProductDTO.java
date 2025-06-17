@@ -19,6 +19,8 @@ public class ProductDTO {
     private Boolean isActive;
     private BigDecimal price;
     private List<String> imageUrls;
+    private List<ProductVariantDTO> variants;
+
 
     public Integer getProductId() {
         return productId;
@@ -114,5 +116,21 @@ public class ProductDTO {
 
     public void setImageUrls(List<String> imageUrls) {
         this.imageUrls = imageUrls;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
+    }
+
+    public List<ProductVariantDTO> getVariants() {
+        return variants;
+    }
+
+    public void setVariants(List<ProductVariantDTO> variants) {
+        this.variants = variants;
     }
 }

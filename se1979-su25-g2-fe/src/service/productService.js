@@ -33,6 +33,20 @@ export const getProductDetail = async (productId) => {
     return response.data;
 };
 
+export const fetchAllBrands = async () => {
+    const response = await axios.get(`${API_BASE_URL}/products/brands`);
+    return response.data;
+};
+export const fetchAllMaterials = async () => {
+    const response = await axios.get(`${API_BASE_URL}/products/materials`);
+    return response.data;
+};
+export const getProductById = async (productId) => {
+    const response = await axios.get(`${API_BASE_URL}/products/${productId}`);
+    return response.data;
+};
+
+
 export const deleteProductById = async (productId) => {
     const res = await fetch(`${API_BASE_URL}/products/${productId}`, {
         method: "DELETE",
