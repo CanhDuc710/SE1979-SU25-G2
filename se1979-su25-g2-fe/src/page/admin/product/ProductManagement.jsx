@@ -3,6 +3,7 @@ import Sidebar from "../../../components/Sidebar";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { fetchAllProductsPaged } from "../../../service/productService";
 import Pagination from "../../../components/Pagination";
+import { IMAGE_BASE_URL } from "../../../utils/constants";
 
 const PRODUCTS_PER_PAGE = 5;
 
@@ -53,21 +54,11 @@ export default function ProductManagement() {
     const categories = [...new Set(products.map((p) => p.categoryName))];
 
     return (
-        <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white">
-            {/* Sidebar */}
-            <div
-                className={`transition-all duration-300 ${
-                    sidebarCollapsed ? "w-16" : "w-64"
-                } flex-shrink-0`}
-            >
-                <Sidebar
-                    sidebarCollapsed={sidebarCollapsed}
-                    setSidebarCollapsed={setSidebarCollapsed}
-                />
-            </div>
+        <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white" style={{ minHeight: '100vh' }}>
+
 
             {/* Main content */}
-            <div className="flex-1 p-6">
+            <div className="flex-1 flex flex-col p-6" style={{ minHeight: '100vh' }}>
                 <h2 className="text-2xl font-semibold mb-6">Product Management</h2>
 
                 {/* Filters */}
@@ -102,81 +93,92 @@ export default function ProductManagement() {
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto rounded shadow-md">
-                    <table className="min-w-full text-sm bg-white rounded">
+                <div className="overflow-x-auto rounded shadow-md flex-1">
+                    <table className="min-w-full w-full text-sm bg-white rounded table-auto">
                         <thead className="bg-gradient-to-r from-blue-100 to-yellow-100 text-gray-700 text-left">
                         <tr>
-                            <th className="px-4 py-3">Product</th>
+                            <th className="px-4 py-3">ID</th>
+                            <th className="px-4 py-3">Image</th>
+                            <th className="px-4 py-3">Product Name</th>
+                            <th className="px-4 py-3">Product Code</th>
                             <th className="px-4 py-3">Brand</th>
                             <th className="px-4 py-3">Category</th>
+                            <th className="px-4 py-3">Material</th>
+                            <th className="px-4 py-3">Gender</th>
                             <th className="px-4 py-3">Price</th>
+                            <th className="px-4 py-3">Available Colors</th>
+                            <th className="px-4 py-3">Available Sizes</th>
+                            <th className="px-4 py-3">Total Stock</th>
                             <th className="px-4 py-3">Status</th>
                             <th className="px-4 py-3">Action</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {filteredProducts.map(
-                            ({
-                                 productId,
-                                 name,
-                                 brand,
-                                 categoryName,
-                                 price,
-                                 imageUrls,
-                                 isActive,
-                             }) => (
-                                <tr
-                                    key={productId}
-                                    className="border-t hover:bg-gray-50 transition"
-                                >
-                                    <td className="px-4 py-2 flex items-center gap-2">
+                        {filteredProducts.map((product, idx) => {
+                            const {
+                                productId,
+                                productCode,
+                                name,
+                                brand,
+                                categoryName,
+                                material,
+                                gender,
+                                price,
+                                imageUrls,
+                                isActive,
+                                availableColors,
+                                availableSizes,
+                                totalStock
+                            } = product;
+                            // Calculate the correct index based on pagination
+                            const displayId = currentPage * PRODUCTS_PER_PAGE + idx + 1;
+                            return (
+                                <tr key={productId} className="border-t hover:bg-gray-50 transition">
+                                    <td className="px-4 py-2 font-bold">{displayId}</td>
+                                    <td className="px-4 py-2">
                                         <img
-                                            src={imageUrls?.[0]}
+                                            src={imageUrls?.[0] ? IMAGE_BASE_URL + imageUrls[0] : undefined}
                                             alt={name}
-                                            className="rounded-full w-8 h-8 object-cover"
+                                            className="rounded w-12 h-12 object-cover border"
                                         />
-                                        <span className="font-semibold text-blue-600 hover:underline cursor-pointer">
-                        {name}
-                      </span>
                                     </td>
+                                    <td className="px-4 py-2 font-semibold text-blue-600">{name}</td>
+                                    <td className="px-4 py-2">{productCode}</td>
                                     <td className="px-4 py-2">{brand}</td>
                                     <td className="px-4 py-2">{categoryName}</td>
+                                    <td className="px-4 py-2">{material}</td>
+                                    <td className="px-4 py-2">{gender}</td>
+                                    <td className="px-4 py-2">{price.toLocaleString()}₫</td>
+                                    <td className="px-4 py-2">{availableColors && availableColors.length > 0 ? availableColors.join(", ") : '-'}</td>
+                                    <td className="px-4 py-2">{availableSizes && availableSizes.length > 0 ? availableSizes.join(", ") : '-'}</td>
+                                    <td className="px-4 py-2">{totalStock}</td>
                                     <td className="px-4 py-2">
-                                        {price.toLocaleString("vi-VN")} VND
+                                        <span className={getStatusStyle(isActive ? "Active" : "Inactive")}>{isActive ? "Active" : "Inactive"}</span>
                                     </td>
-                                    <td
-                                        className={`px-4 py-2 ${
-                                            getStatusStyle(isActive ? "Active" : "Inactive")
-                                        }`}
-                                    >
-                                        {isActive ? "Active" : "Inactive"}
-                                    </td>
-                                    <td className="px-4 py-2 space-x-2">
-                                        <button className="bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200">
+                                    <td className="px-4 py-2 flex gap-2">
+                                        <button
+                                            className="text-blue-500 hover:text-blue-700 p-1 rounded border border-blue-200 hover:bg-blue-50"
+                                            title="Edit product"
+                                            onClick={() => alert(`Edit product ${productId}`)}
+                                        >
                                             <FaEdit />
-                                        </button>
-                                        <button className="bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200">
-                                            <FaTrash />
                                         </button>
                                     </td>
                                 </tr>
-                            )
-                        )}
+                            );
+                        })}
                         </tbody>
                     </table>
                 </div>
 
-                <div className="mt-6 flex justify-between items-center text-gray-600 text-sm">
+                {/* Pagination */}
+                <div className="mt-6 flex justify-center">
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
                         onPageChange={setCurrentPage}
                     />
-                    <div>
-                        Trang {currentPage + 1} / {totalPages}
-                    </div>
                 </div>
-
             </div>
         </div>
     );

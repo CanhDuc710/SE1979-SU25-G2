@@ -1,35 +1,47 @@
 import { createBrowserRouter } from "react-router-dom";
 import { lazy } from "react";
 import UserLayout from "../layout/UserLayout.jsx";
+import AdminLayout from "../layout/AdminLayout.jsx";
 
 const HomepageLazy = lazy(() => import("../page/Home/Homepage.jsx"));
 const ProductListLazy = lazy(() => import("../page/Product/ProductList.jsx"));
-const ProductManagementLazy = lazy(() => import("../page/admin/product/ProductManagement.jsx"));
-const NotFoundLazy = lazy(() => import("../page/error/NotFound.jsx"));
 const ProductDetailLazy = lazy(() => import("../page/Product/ProductDetail.jsx"));
+const CartPageLazy = lazy(() => import("../page/Cart/CartPage.jsx"));
+const FAQLazy = lazy(() => import("../page/FAQ/FAQpage.jsx"));
+const OrderPageLazy = lazy(() => import("../page/Order/OrderPage.jsx"));
+const NotFoundLazy = lazy(() => import("../page/error/NotFound.jsx"));
+
+// Admin pages
+const ProductManagementLazy = lazy(() => import("../page/admin/product/ProductManagement.jsx"));
 const UserListLazy = lazy(() => import("../page/admin/user_management/UserList.jsx"));
 const UserDetailsLazy = lazy(() => import("../page/admin/user_management/UserDetail.jsx"));
-const OrderPageLazy = lazy(() => import("../page/Order/OrderPage.jsx"));
-const CartPageLazy = lazy(() => import("../page/Cart/CartPage.jsx"));
+const AddInternalAccountLazy = lazy(() => import("../page/admin/user_management/AddInternalAccount.jsx"));
+
 const router = createBrowserRouter([
     {
+        path: "/",
         element: <UserLayout />,
         children: [
-            { path: "/", element: <HomepageLazy /> },
-            { path: "/products", element: <ProductListLazy /> },
-            { path: "/products/:productId", element: <ProductDetailLazy /> }, // Thêm dòng này
-            { path: "/admin/accounts", element: <UserListLazy /> },
-            { path:"/admin/accounts/:id", element:<UserDetailsLazy />},
-            { path: "*", element: <NotFoundLazy /> },
-            { path: "/admin/products", element: <ProductManagementLazy /> },
-            { path: "/cart", element: <CartPageLazy /> },
-            { path: "/order", element: <OrderPageLazy /> }, // Add this line
-
+            { index: true, element: <HomepageLazy /> },
+            { path: "products", element: <ProductListLazy /> },
+            { path: "products/:productId", element: <ProductDetailLazy /> },
+            { path: "cart", element: <CartPageLazy /> },
+            { path: "faq", element: <FAQLazy /> },
+            { path: "order", element: <OrderPageLazy /> },
+            { path: "*", element: <NotFoundLazy /> }
         ],
     },
     {
-
-    }
+        path: "/admin",
+        element: <AdminLayout />,
+        children: [
+            { path: "products", element: <ProductManagementLazy /> },
+            { path: "accounts", element: <UserListLazy /> },
+            { path: "accounts/add", element: <AddInternalAccountLazy /> },
+            { path: "accounts/:id", element: <UserDetailsLazy /> },
+            { path: "*", element: <NotFoundLazy /> },
+        ],
+    },
 ]);
 
 export default router;
