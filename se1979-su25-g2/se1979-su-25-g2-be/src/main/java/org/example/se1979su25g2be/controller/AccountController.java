@@ -53,6 +53,11 @@ public class AccountController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/edit/{id}")
+    public ResponseEntity<StaffAccountDTO> getInternalAccountById(@PathVariable Integer id) {
+        StaffAccountDTO dto = accountService.getStaffAccountById(id);
+        return ResponseEntity.ok(dto);
+    }
 
 
 

@@ -87,6 +87,22 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
+    @Override
+    public StaffAccountDTO getStaffAccountById(Integer id) {
+        User user = accountRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với ID: " + id));
+
+        return StaffAccountDTO.builder()
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .phone(user.getPhoneNumber())
+                .dob(user.getDob())
+                .gender(user.getSex().name())
+                .role(user.getRole().getRoleName())
+                .build();
+    }
 
 
     private AccountDTO mapToDTO(User u) {
@@ -115,6 +131,7 @@ public class AccountServiceImpl implements AccountService {
                 .fullName(u.getFirstName() + " " + u.getLastName())
                 .build();
     }
+
 
 }
 
