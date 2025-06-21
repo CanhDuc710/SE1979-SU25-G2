@@ -13,5 +13,6 @@ public interface AccountService {
     AccountDetailDTO getAccountDetail(Integer id);
     AccountDTO createStaffAccount(StaffAccountDTO dto);
     StaffAccountDTO getStaffAccountById(Integer id);
+    AccountDTO updateStaffAccount(Integer id, StaffAccountDTO dto);
 
 }

@@ -104,6 +104,29 @@ public class AccountServiceImpl implements AccountService {
                 .build();
     }
 
+    @Override
+    public AccountDTO updateStaffAccount(Integer id, StaffAccountDTO dto) {
+        User user = accountRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Role role = roleRepository.findByRoleNameIgnoreCase(dto.getRole())
+                .orElseThrow(() -> new RuntimeException("Role not found: " + dto.getRole()));
+
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getEmail());
+        user.setPhoneNumber(dto.getPhone());
+        user.setSex(User.Sex.valueOf(dto.getGender()));
+        user.setDob(dto.getDob());
+        user.setRole(role);
+
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        return mapToDTO(accountRepository.save(user));
+    }
 
     private AccountDTO mapToDTO(User u) {
         return AccountDTO.builder()

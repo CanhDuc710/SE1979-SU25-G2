@@ -59,6 +59,9 @@ public class AccountController {
         return ResponseEntity.ok(dto);
     }
 
-
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<AccountDTO> updateInternalAccount(@PathVariable Integer id, @RequestBody StaffAccountDTO dto) {
+        return ResponseEntity.ok(accountService.updateStaffAccount(id, dto));
+    }
 
 }
