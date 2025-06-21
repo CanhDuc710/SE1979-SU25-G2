@@ -51,7 +51,7 @@ export default function EditInternalAccount() {
                     phone: data.phone || "",
                     gender: data.gender || "",
                     dob: data.dob || "",
-                    role: data.roleName || "",
+                    role: data.role || "",
                 });
             } catch (err) {
                 console.error("Lỗi khi lấy dữ liệu tài khoản:", err);
