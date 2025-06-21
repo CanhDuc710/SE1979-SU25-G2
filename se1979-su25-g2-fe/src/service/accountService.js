@@ -33,3 +33,14 @@ export const createAccount = async (accountData) => {
     return response.data;
 };
 
+export const getAccountById = async (id) => {
+    const response = await axios.get(`/api/admin/accounts/edit/${id}`);
+    return response.data;
+};
+
+export const updateAccount = async (id, data) => {
+    const response = await axios.put(`/api/admin/accounts/edit/${id}`, data);
+    return response.data;
+};
+
+

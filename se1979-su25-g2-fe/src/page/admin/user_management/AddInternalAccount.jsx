@@ -2,6 +2,7 @@ import { useState } from "react";
 import Sidebar from "../../../components/Sidebar";
 import { useNavigate } from "react-router-dom";
 import { createAccount } from "../../../service/accountService";
+import {FaArrowCircleLeft} from "react-icons/fa";
 
 export default function AddInternalAccount() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -45,9 +46,13 @@ export default function AddInternalAccount() {
 
             {/* Main content */}
             <div className="flex-1 p-6">
-                {/* Quay lại */}
-                <button onClick={() => navigate(-1)} className="mb-4 text-blue-600 hover:underline">
-                    ← Quay lại
+                <button
+                    className="bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200"
+                    onClick={() =>
+                        navigate(`/admin/accounts`)
+                    }
+                >
+                    <FaArrowCircleLeft	 />
                 </button>
 
                 {/* Tiêu đề */}
