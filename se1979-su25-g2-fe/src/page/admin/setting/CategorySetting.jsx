@@ -13,12 +13,13 @@ export default function CategorySettings() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [categories, setCategories] = useState([]);
     const [newCategory, setNewCategory] = useState("");
+    const [newDescription, setNewDescription] = useState("");
     const [editingId, setEditingId] = useState(null);
-    const [searchTerm, setSearchTerm] = useState("");
     const [editedName, setEditedName] = useState("");
+    const [editedDescription, setEditedDescription] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
-    const [total, setTotal] = useState(0);
 
     useEffect(() => {
         fetchCategories();
@@ -26,10 +27,9 @@ export default function CategorySettings() {
 
     const fetchCategories = async () => {
         try {
-            const data = await getAllCategories(currentPage, 10, searchTerm);
-            setCategories(data.content || []);
-            setTotal(data.totalElements || 0);
-            setTotalPages(data.totalPages || 0);
+            const res = await getAllCategories({ page: currentPage, size: 5, keyword: searchTerm });
+            setCategories(res.content);
+            setTotalPages(res.totalPages);
         } catch (error) {
             console.error("Lỗi khi lấy danh mục:", error);
         }
@@ -38,10 +38,10 @@ export default function CategorySettings() {
     const handleAdd = async () => {
         if (!newCategory.trim()) return;
         try {
-            await createCategory({ name: newCategory });
+            const res = await createCategory({ name: newCategory, description: newDescription });
             setNewCategory("");
-            setCurrentPage(0);
-            fetchCategories();
+            setNewDescription("");
+            setCategories(prev => [res, ...prev]);
         } catch (error) {
             alert("Lỗi khi thêm danh mục");
         }
@@ -49,7 +49,7 @@ export default function CategorySettings() {
 
     const handleUpdate = async (id) => {
         try {
-            await updateCategory(id, { name: editedName });
+            await updateCategory(id, { name: editedName, description: editedDescription });
             setEditingId(null);
             fetchCategories();
         } catch (error) {
@@ -73,7 +73,6 @@ export default function CategorySettings() {
             <div className={`transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"} flex-shrink-0`}>
                 <Sidebar sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />
             </div>
-
             <div className="flex-1 p-6">
                 <h1 className="text-xl font-bold mb-4">Cài đặt {'>'} Cài đặt danh mục</h1>
 
@@ -98,11 +97,11 @@ export default function CategorySettings() {
                         <thead className="bg-gray-100 text-left">
                         <tr>
                             <th className="p-2">Tên Danh mục</th>
+                            <th className="p-2">Mô tả</th>
                             <th className="p-2 w-32">Hành động</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {/* Row thêm mới */}
                         <tr>
                             <td className="p-2">
                                 <input
@@ -113,16 +112,20 @@ export default function CategorySettings() {
                                 />
                             </td>
                             <td className="p-2">
-                                <button
-                                    onClick={handleAdd}
-                                    className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
-                                >
-                                    Lưu
+                                <input
+                                    className="w-full border px-2 py-1 rounded"
+                                    placeholder="Nhập mô tả danh mục sản phẩm"
+                                    value={newDescription}
+                                    onChange={(e) => setNewDescription(e.target.value)}
+                                />
+                            </td>
+                            <td className="p-2">
+                                <button onClick={handleAdd} className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">
+                                    Tạo
                                 </button>
                             </td>
                         </tr>
 
-                        {/* Danh sách */}
                         {categories.map((cat) => (
                             <tr key={cat.categoryId}>
                                 <td className="p-2">
@@ -136,12 +139,20 @@ export default function CategorySettings() {
                                         <span>{cat.name}</span>
                                     )}
                                 </td>
+                                <td className="p-2">
+                                    {editingId === cat.categoryId ? (
+                                        <input
+                                            className="w-full border px-2 py-1 rounded"
+                                            value={editedDescription}
+                                            onChange={(e) => setEditedDescription(e.target.value)}
+                                        />
+                                    ) : (
+                                        <span>{cat.description}</span>
+                                    )}
+                                </td>
                                 <td className="p-2 space-x-2">
                                     {editingId === cat.categoryId ? (
-                                        <button
-                                            onClick={() => handleUpdate(cat.categoryId)}
-                                            className="text-green-600 hover:text-green-800"
-                                        >
+                                        <button onClick={() => handleUpdate(cat.categoryId)} className="text-green-600 hover:text-green-800">
                                             Lưu
                                         </button>
                                     ) : (
@@ -149,6 +160,7 @@ export default function CategorySettings() {
                                             onClick={() => {
                                                 setEditingId(cat.categoryId);
                                                 setEditedName(cat.name);
+                                                setEditedDescription(cat.description);
                                             }}
                                             className="text-yellow-600 hover:text-yellow-800"
                                         >
@@ -167,8 +179,8 @@ export default function CategorySettings() {
                         </tbody>
                     </table>
 
+                    {/* Pagination */}
                     <div className="mt-6 flex justify-between items-center text-gray-600 text-sm">
-                        <span>Hiển thị {categories.length} / {total} danh mục</span>
                         <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}
