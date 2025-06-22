@@ -4,7 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.example.se1979su25g2be.dto.DiscountDTO;
 import org.example.se1979su25g2be.entity.Discount;
 import org.example.se1979su25g2be.repository.DiscountRepository;
+import org.example.se1979su25g2be.specification.DiscountSpecification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -47,13 +52,13 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public List<DiscountDTO> getAll(String sortBy, String direction) {
+    public Page<DiscountDTO> getAllWithPagination(String sortBy, String direction, int page, int size) {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy != null ? sortBy : "code");
-        return discountRepository.findAll(sort)
-                .stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Discount> resultPage = discountRepository.findAll(pageable);
+        return resultPage.map(this::mapToDTO);
     }
+
 
     @Override
     public DiscountDTO getByCode(String code) {
@@ -99,5 +104,24 @@ public class DiscountServiceImpl implements DiscountService {
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<DiscountDTO> search(
+            String code,
+            BigDecimal minValue,
+            BigDecimal maxValue,
+            int page,
+            int size,
+            String sortBy,
+            String direction
+    ) {
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy != null ? sortBy : "discountId");
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Specification<Discount> spec = DiscountSpecification.filter(code, minValue, maxValue);
+        Page<Discount> resultPage = discountRepository.findAll(spec, pageable);
+
+        return resultPage.map(this::mapToDTO);
     }
 }
