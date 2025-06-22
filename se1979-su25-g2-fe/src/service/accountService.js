@@ -29,18 +29,16 @@ export const getAccountDetail = async (id) => {
 };
 
 export const createAccount = async (accountData) => {
-    const response = await axios.post("/api/admin/accounts/add", accountData);
+    const response = await axios.post(`${API_BASE_URL}/admin/accounts/add`, accountData);
     return response.data;
 };
 
 export const getAccountById = async (id) => {
-    const response = await axios.get(`/api/admin/accounts/edit/${id}`);
+    const response = await axios.get(`${API_BASE_URL}/admin/accounts/edit/${id}`);
     return response.data;
 };
 
 export const updateAccount = async (id, data) => {
-    const response = await axios.put(`/api/admin/accounts/edit/${id}`, data);
+    const response = await axios.put(`${API_BASE_URL}/admin/accounts/edit/${id}`, data);
     return response.data;
 };
-
-
