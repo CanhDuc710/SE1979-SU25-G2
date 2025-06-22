@@ -12,6 +12,7 @@ const AddAccountLazy = lazy(() => import("../page/admin/user_management/AddInter
 const UserDetailsLazy = lazy(() => import("../page/admin/user_management/UserDetail.jsx"));
 const EditInternalAccount = lazy(() => import("../page/admin/user_management/EditInternalAccount.jsx"));
 const OrderPageLazy = lazy(() => import("../page/Order/OrderPage.jsx"));
+const CategorySettingLazy = lazy(() => import("../page/admin/setting/CategorySetting.jsx"));
 const CartPageLazy = lazy(() => import("../page/Cart/CartPage.jsx"));
 const router = createBrowserRouter([
     {
@@ -23,6 +24,7 @@ const router = createBrowserRouter([
             { path: "/admin/accounts", element: <UserListLazy /> },
             { path:"/admin/accounts/:id", element:<UserDetailsLazy />},
             { path:"/admin/accounts/edit/:id", element:<EditInternalAccount />},
+            { path:"/admin/settings/categories", element:<CategorySettingLazy />},
             { path:"/admin/accounts/add", element:<AddAccountLazy />},
             { path: "*", element: <NotFoundLazy /> },
             { path: "/admin/products", element: <ProductManagementLazy /> },
