@@ -3,6 +3,7 @@ import Sidebar from "../../../components/Sidebar";
 import { useNavigate, useParams } from "react-router-dom";
 import { getAccountById, updateAccount } from "../../../service/accountService";
 import { FaArrowCircleLeft } from "react-icons/fa";
+import { validateAccountForm } from "/src/ValidateForm.js";
 
 export default function EditInternalAccount() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -28,6 +29,12 @@ export default function EditInternalAccount() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const errors = validateAccountForm(formData);
+        if (Object.keys(errors).length > 0) {
+            alert(Object.values(errors)[0]);
+            return;
+        }
+
         try {
             await updateAccount(id, formData);
             alert("Cập nhật tài khoản thành công!");
@@ -37,6 +44,7 @@ export default function EditInternalAccount() {
             alert("Cập nhật tài khoản thất bại!");
         }
     };
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -82,13 +90,14 @@ export default function EditInternalAccount() {
                     <div>
                         <label className="block text-sm font-medium">Họ</label>
                         <input name="lastName" value={formData.lastName} onChange={handleChange}
-                               className="w-full border px-3 py-2 rounded" required />
+                               className="w-full border px-3 py-2 rounded"  />
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium">Tên</label>
                         <input name="firstName" value={formData.firstName} onChange={handleChange}
-                               className="w-full border px-3 py-2 rounded" required />
+                               className="w-full border px-3 py-2 rounded" />
+
                     </div>
 
                     <div>
@@ -107,7 +116,8 @@ export default function EditInternalAccount() {
                     <div>
                         <label className="block text-sm font-medium">Email</label>
                         <input type="email" name="email" value={formData.email} onChange={handleChange}
-                               className="w-full border px-3 py-2 rounded" required />
+                               className="w-full border px-3 py-2 rounded" />
+
                     </div>
 
                     <div>
@@ -137,7 +147,7 @@ export default function EditInternalAccount() {
 
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium">Số điện thoại</label>
-                        <input name="phone" value={formData.phone} onChange={handleChange}
+                        <input type="number" name="phone" value={formData.phone} onChange={handleChange}
                                className="w-full border px-3 py-2 rounded" />
                     </div>
 
