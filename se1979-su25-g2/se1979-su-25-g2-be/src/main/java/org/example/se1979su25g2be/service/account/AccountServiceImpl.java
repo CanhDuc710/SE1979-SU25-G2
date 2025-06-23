@@ -64,6 +64,13 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountDTO createStaffAccount(StaffAccountDTO dto) {
         try {
+            if (accountRepository.existsByEmailIgnoreCase(dto.getEmail())) {
+                throw new RuntimeException("Email đã được sử dụng");
+            }
+            if (accountRepository.existsByUsernameIgnoreCase(dto.getUsername())) {
+                throw new RuntimeException("Username đã được sử dụng");
+            }
+
             Role role = roleRepository.findByRoleNameIgnoreCase(dto.getRole())
                     .orElseThrow(() -> new RuntimeException("Role not found: " + dto.getRole()));
 
