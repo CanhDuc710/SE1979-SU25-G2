@@ -4,17 +4,15 @@ import org.example.se1979su25g2be.entity.Notification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.time.LocalDateTime;
+import org.springframework.data.jpa.repository.Query;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
+
     Page<Notification> findByUserIdOrUserIdIsNull(Long userId, Pageable pageable);
 
-    Page<Notification> findByUserIdOrUserIdIsNullAndTimeBetween(
-            Long userId, LocalDateTime start, LocalDateTime end, Pageable pageable
-    );
+    @Query("SELECT n FROM Notification n WHERE (n.userId = :userId OR n.userId IS NULL) AND " +
+            "FUNCTION('YEAR', n.time) = :year AND FUNCTION('MONTH', n.time) = :month")
+    Page<Notification> findByUserIdAndMonth(Long userId, int year, int month, Pageable pageable);
 
-    Page<Notification> findByUserIdOrUserIdIsNullAndTitleContainingIgnoreCase(
-            Long userId, String keyword, Pageable pageable
-    );
+    Page<Notification> findByUserIdAndTitleContainingIgnoreCase(Long userId, String keyword, Pageable pageable);
 }

@@ -1,23 +1,26 @@
 package org.example.se1979su25g2be.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.example.se1979su25g2be.entity.Notification;
+import org.example.se1979su25g2be.entity.User;
 import org.example.se1979su25g2be.service.NotificationService;
+import org.example.se1979su25g2be.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/notifications")
 @CrossOrigin("*")
+@RequiredArgsConstructor
 public class NotificationController {
 
     private final NotificationService service;
-
-    public NotificationController(NotificationService service) {
-        this.service = service;
-    }
+    private final UserService userService;
 
     @PostMapping
     public Notification create(@RequestBody Notification notification) {
@@ -78,5 +81,12 @@ public class NotificationController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);
+    }
+
+    @GetMapping
+    public List<Notification> getForCurrentUser(Authentication auth) {
+        User user = userService.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return service.getByUser(user.getUserId().longValue(), Pageable.unpaged()).getContent();
     }
 }
