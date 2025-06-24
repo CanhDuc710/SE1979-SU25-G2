@@ -40,3 +40,8 @@
 /*.read-the-docs {*/
 /*  color: #888;*/
 /*}*/
+/* Đổi màu icon lịch sang đen */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1); /* đổi trắng → đen */
+    cursor: pointer;
+}

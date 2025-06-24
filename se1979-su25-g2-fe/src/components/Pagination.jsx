@@ -1,9 +1,7 @@
 import React from "react";
 
 const Pagination = ({ currentPage, totalPages, onPageChange, className = "" }) => {
-    // if (totalPages <= 1) return null;
-
-    const firstPage = 0;
+    if (totalPages <= 1) return null;
     const lastPage = totalPages - 1;
     const start = Math.max(currentPage - 2, 0);
     const end = Math.min(currentPage + 2, lastPage);
@@ -16,40 +14,45 @@ const Pagination = ({ currentPage, totalPages, onPageChange, className = "" }) =
 
     const buttons = [];
 
-    // Nút về trang đầu « và trang trước ‹
-    if (currentPage > 0) {
-        buttons.push(
-            <button
-                key="first"
-                onClick={() => handleClick(0)}
-                title="Trang đầu"
-                className="w-10 h-10 rounded border font-bold bg-white text-gray-800 hover:bg-gray-100"
-            >
-                «
-            </button>
-        );
-        buttons.push(
-            <button
-                key="prev"
-                onClick={() => handleClick(currentPage - 1)}
-                title="Trang trước"
-                className="w-10 h-10 rounded border font-bold bg-white text-gray-800 hover:bg-gray-100"
-            >
-                ‹
-            </button>
-        );
-    }
+    const baseButtonClass =
+        "w-10 h-10 rounded border font-bold transition disabled:cursor-not-allowed disabled:opacity-50";
+
+    // Nút Trang đầu «
+    buttons.push(
+        <button
+            key="first"
+            onClick={() => handleClick(0)}
+            title="Trang đầu"
+            disabled={currentPage === 0}
+            className={`${baseButtonClass} bg-white text-gray-800 hover:bg-gray-100`}
+        >
+            «
+        </button>
+    );
+
+    // Nút Trang trước ‹
+    buttons.push(
+        <button
+            key="prev"
+            onClick={() => handleClick(currentPage - 1)}
+            title="Trang trước"
+            disabled={currentPage === 0}
+            className={`${baseButtonClass} bg-white text-gray-800 hover:bg-gray-100`}
+        >
+            ‹
+        </button>
+    );
 
     // Ellipsis đầu nếu cần
     if (start > 1) {
         buttons.push(
             <span key="left-ellipsis" className="w-10 h-10 flex items-center justify-center">
-        ...
-      </span>
+                ...
+            </span>
         );
     }
 
-    // Các nút trang
+    // Các nút số trang
     for (let i = start; i <= end; i++) {
         buttons.push(
             <button
@@ -70,34 +73,36 @@ const Pagination = ({ currentPage, totalPages, onPageChange, className = "" }) =
     if (end < lastPage - 1) {
         buttons.push(
             <span key="right-ellipsis" className="w-10 h-10 flex items-center justify-center">
-        ...
-      </span>
+                ...
+            </span>
         );
     }
 
-    // Nút trang sau › và trang cuối »
-    if (currentPage < lastPage) {
-        buttons.push(
-            <button
-                key="next"
-                onClick={() => handleClick(currentPage + 1)}
-                title="Trang sau"
-                className="w-10 h-10 rounded border font-bold bg-white text-gray-800 hover:bg-gray-100"
-            >
-                ›
-            </button>
-        );
-        buttons.push(
-            <button
-                key="last"
-                onClick={() => handleClick(lastPage)}
-                title="Trang cuối"
-                className="w-10 h-10 rounded border font-bold bg-white text-gray-800 hover:bg-gray-100"
-            >
-                »
-            </button>
-        );
-    }
+    // Nút Trang sau ›
+    buttons.push(
+        <button
+            key="next"
+            onClick={() => handleClick(currentPage + 1)}
+            title="Trang sau"
+            disabled={currentPage === lastPage}
+            className={`${baseButtonClass} bg-white text-gray-800 hover:bg-gray-100`}
+        >
+            ›
+        </button>
+    );
+
+    // Nút Trang cuối »
+    buttons.push(
+        <button
+            key="last"
+            onClick={() => handleClick(lastPage)}
+            title="Trang cuối"
+            disabled={currentPage === lastPage}
+            className={`${baseButtonClass} bg-white text-gray-800 hover:bg-gray-100`}
+        >
+            »
+        </button>
+    );
 
     return <div className={`flex flex-wrap gap-1 ${className}`}>{buttons}</div>;
 };

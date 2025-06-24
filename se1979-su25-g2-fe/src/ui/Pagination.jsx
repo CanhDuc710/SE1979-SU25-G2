@@ -1,20 +1,31 @@
 export default function Pagination({ currentPage, totalPages, onPageChange }) {
+    const isFirstPage = currentPage === 0;
+    const isLastPage = currentPage + 1 >= totalPages;
+
     return (
-        <div className="flex justify-center mt-6">
+        <div className="flex justify-center items-center mt-4 space-x-4 text-sm">
             <button
-                disabled={currentPage === 0}
+                disabled={isFirstPage}
                 onClick={() => onPageChange(currentPage - 1)}
-                className="px-3 py-1 border rounded mr-2"
+                className={`px-3 py-1 border rounded ${
+                    isFirstPage ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "hover:bg-blue-100"
+                }`}
             >
-                Trước
+                ← Trước
             </button>
-            <span className="px-4 py-1">{currentPage + 1} / {totalPages}</span>
+
+            <span className="font-medium">
+                Trang <span className="text-blue-600">{currentPage + 1}</span> / {totalPages}
+            </span>
+
             <button
-                disabled={currentPage + 1 >= totalPages}
+                disabled={isLastPage}
                 onClick={() => onPageChange(currentPage + 1)}
-                className="px-3 py-1 border rounded ml-2"
+                className={`px-3 py-1 border rounded ${
+                    isLastPage ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "hover:bg-blue-100"
+                }`}
             >
-                Sau
+                Sau →
             </button>
         </div>
     );

@@ -9,7 +9,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 public class Se1979Su25G2BeApplication {
 
     public static void main(String[] args) {
-        System.out.println("ddsadsadsadads");
         SpringApplication.run(Se1979Su25G2BeApplication.class, args);
     }
 }
