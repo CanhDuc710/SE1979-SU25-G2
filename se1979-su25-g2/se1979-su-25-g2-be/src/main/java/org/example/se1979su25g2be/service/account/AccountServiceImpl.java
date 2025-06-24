@@ -89,7 +89,7 @@ public class AccountServiceImpl implements AccountService {
 
             return mapToDTO(accountRepository.save(user));
         } catch (Exception e) {
-            e.printStackTrace(); // in log BE
+            e.printStackTrace();
             throw new RuntimeException("Lỗi khi tạo tài khoản: " + e.getMessage());
         }
     }
