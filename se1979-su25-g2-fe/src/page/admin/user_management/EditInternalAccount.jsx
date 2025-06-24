@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../../../components/Sidebar";
-import { useNavigate } from "react-router-dom";
-import { createAccount } from "../../../service/accountService";
-import {FaArrowCircleLeft} from "react-icons/fa";
+import { useNavigate, useParams } from "react-router-dom";
+import { getAccountById, updateAccount } from "../../../service/accountService";
+import { FaArrowCircleLeft } from "react-icons/fa";
 import { validateAccountForm } from "/src/ValidateForm.js";
 
-export default function AddInternalAccount() {
+export default function EditInternalAccount() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const navigate = useNavigate();
+    const { id } = useParams();
 
     const [formData, setFormData] = useState({
         firstName: "",
@@ -16,9 +17,9 @@ export default function AddInternalAccount() {
         email: "",
         password: "",
         phone: "",
-        gender: "MALE",
+        gender: "",
         dob: "",
-        role: "STAFF",
+        role: "",
     });
 
     const handleChange = (e) => {
@@ -28,7 +29,6 @@ export default function AddInternalAccount() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         const errors = validateAccountForm(formData);
         if (Object.keys(errors).length > 0) {
             alert(Object.values(errors)[0]);
@@ -36,37 +36,56 @@ export default function AddInternalAccount() {
         }
 
         try {
-            await createAccount(formData);
-            alert("Tạo tài khoản thành công!");
+            await updateAccount(id, formData);
+            alert("Cập nhật tài khoản thành công!");
             navigate("/admin/accounts");
         } catch (err) {
-            console.error("Lỗi khi tạo tài khoản:", err);
-            alert("Tạo tài khoản thất bại!");
+            console.error("Lỗi khi cập nhật tài khoản:", err);
+            alert("Cập nhật tài khoản thất bại!");
         }
     };
 
 
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getAccountById(id);
+                setFormData({
+                    firstName: data.firstName || "",
+                    lastName: data.lastName || "",
+                    username: data.username || "",
+                    email: data.email || "",
+                    password: "",
+                    phone: data.phone || "",
+                    gender: data.gender || "",
+                    dob: data.dob || "",
+                    role: data.role || "",
+                });
+            } catch (err) {
+                console.error("Lỗi khi lấy dữ liệu tài khoản:", err);
+                alert("Không thể tải dữ liệu người dùng.");
+            }
+        };
+        fetchData();
+    }, [id]);
+
     return (
         <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white">
-            {/* Sidebar */}
+            <div className={`transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"} flex-shrink-0`}>
+                <Sidebar sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />
+            </div>
 
-
-            {/* Main content */}
             <div className="flex-1 p-6">
                 <button
                     className="bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200"
-                    onClick={() =>
-                        navigate(`/admin/accounts`)
-                    }
+                    onClick={() => navigate(`/admin/accounts`)}
                 >
-                    <FaArrowCircleLeft	 />
+                    <FaArrowCircleLeft />
                 </button>
 
-                {/* Tiêu đề */}
-                <h1 className="text-xl font-bold mb-1">Quản lý tài khoản người dùng {'>'} Thêm tài khoản</h1>
+                <h1 className="text-xl font-bold mb-1">Quản lý tài khoản người dùng {'>'} Chỉnh sửa tài khoản</h1>
                 <hr className="mb-6" />
 
-                {/* Form */}
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl">
                     <div>
                         <label className="block text-sm font-medium">Họ</label>
@@ -77,25 +96,28 @@ export default function AddInternalAccount() {
                     <div>
                         <label className="block text-sm font-medium">Tên</label>
                         <input name="firstName" value={formData.firstName} onChange={handleChange}
-                               className="w-full border px-3 py-2 rounded"  />
+                               className="w-full border px-3 py-2 rounded" />
+
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium">Tên tài khoản</label>
                         <input name="username" value={formData.username} onChange={handleChange}
-                               className="w-full border px-3 py-2 rounded"  />
+                               className="w-full border px-3 py-2 rounded" required />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium">Mật khẩu</label>
+                        <label className="block text-sm font-medium">Mật khẩu mới</label>
                         <input type="password" name="password" value={formData.password} onChange={handleChange}
-                               className="w-full border px-3 py-2 rounded"  />
+                               placeholder="Để trống nếu không đổi"
+                               className="w-full border px-3 py-2 rounded" />
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium">Email</label>
                         <input type="email" name="email" value={formData.email} onChange={handleChange}
-                               className="w-full border px-3 py-2 rounded"  />
+                               className="w-full border px-3 py-2 rounded" />
+
                     </div>
 
                     <div>
@@ -125,13 +147,13 @@ export default function AddInternalAccount() {
 
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium">Số điện thoại</label>
-                        <input name="phone" value={formData.phone} onChange={handleChange}
+                        <input type="number" name="phone" value={formData.phone} onChange={handleChange}
                                className="w-full border px-3 py-2 rounded" />
                     </div>
 
                     <div className="md:col-span-2 flex justify-end mt-4">
                         <button type="submit" className="bg-gray-800 text-white px-6 py-2 rounded hover:bg-gray-700">
-                            Thêm
+                            Cập nhật
                         </button>
                     </div>
                 </form>

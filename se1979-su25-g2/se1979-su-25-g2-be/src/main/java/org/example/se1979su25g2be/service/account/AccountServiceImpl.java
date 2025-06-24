@@ -64,6 +64,13 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountDTO createStaffAccount(StaffAccountDTO dto) {
         try {
+            if (accountRepository.existsByEmailIgnoreCase(dto.getEmail())) {
+                throw new RuntimeException("Email đã được sử dụng");
+            }
+            if (accountRepository.existsByUsernameIgnoreCase(dto.getUsername())) {
+                throw new RuntimeException("Username đã được sử dụng");
+            }
+
             Role role = roleRepository.findByRoleNameIgnoreCase(dto.getRole())
                     .orElseThrow(() -> new RuntimeException("Role not found: " + dto.getRole()));
 
@@ -82,12 +89,51 @@ public class AccountServiceImpl implements AccountService {
 
             return mapToDTO(accountRepository.save(user));
         } catch (Exception e) {
-            e.printStackTrace(); // in log BE
+            e.printStackTrace();
             throw new RuntimeException("Lỗi khi tạo tài khoản: " + e.getMessage());
         }
     }
 
+    @Override
+    public StaffAccountDTO getStaffAccountById(Integer id) {
+        User user = accountRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với ID: " + id));
 
+        return StaffAccountDTO.builder()
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .phone(user.getPhoneNumber())
+                .dob(user.getDob())
+                .gender(user.getSex().name())
+                .role(user.getRole().getRoleName())
+                .build();
+    }
+
+    @Override
+    public AccountDTO updateStaffAccount(Integer id, StaffAccountDTO dto) {
+        User user = accountRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Role role = roleRepository.findByRoleNameIgnoreCase(dto.getRole())
+                .orElseThrow(() -> new RuntimeException("Role not found: " + dto.getRole()));
+
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getEmail());
+        user.setPhoneNumber(dto.getPhone());
+        user.setSex(User.Sex.valueOf(dto.getGender()));
+        user.setDob(dto.getDob());
+        user.setRole(role);
+
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        return mapToDTO(accountRepository.save(user));
+    }
 
     private AccountDTO mapToDTO(User u) {
         return AccountDTO.builder()
@@ -115,6 +161,7 @@ public class AccountServiceImpl implements AccountService {
                 .fullName(u.getFirstName() + " " + u.getLastName())
                 .build();
     }
+
 
 }
 

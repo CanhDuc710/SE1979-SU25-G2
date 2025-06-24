@@ -1,5 +1,6 @@
 package org.example.se1979su25g2be.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.se1979su25g2be.dto.Account.AccountDTO;
 import org.example.se1979su25g2be.dto.Account.AccountDetailDTO;
@@ -47,13 +48,21 @@ public class AccountController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Void> createInternalAccount(@RequestBody StaffAccountDTO dto) {
+    public ResponseEntity<Void> createInternalAccount(@Valid @RequestBody StaffAccountDTO dto) {
         System.out.println("RECEIVED: " + dto); // in log
         accountService.createStaffAccount(dto);
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/edit/{id}")
+    public ResponseEntity<StaffAccountDTO> getInternalAccountById(@PathVariable Integer id) {
+        StaffAccountDTO dto = accountService.getStaffAccountById(id);
+        return ResponseEntity.ok(dto);
+    }
 
-
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<AccountDTO> updateInternalAccount(@Valid @PathVariable Integer id, @RequestBody StaffAccountDTO dto) {
+        return ResponseEntity.ok(accountService.updateStaffAccount(id, dto));
+    }
 
 }

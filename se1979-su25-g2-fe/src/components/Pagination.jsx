@@ -1,7 +1,7 @@
 import React from "react";
 
 const Pagination = ({ currentPage, totalPages, onPageChange, className = "" }) => {
-    if (totalPages <= 1) return null;
+    // if (totalPages <= 1) return null;
 
     const firstPage = 0;
     const lastPage = totalPages - 1;
