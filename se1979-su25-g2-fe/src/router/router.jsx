@@ -14,6 +14,9 @@ const LoginLazy = lazy(() => import("../page/User/Login.jsx"));
 const RegisterLazy = lazy(() => import("../page/User/Register.jsx"));
 const UserProfileLazy = lazy(() => import("../page/User/UserProfile.jsx"));
 const FAQLazy = lazy(() => import("../page/FAQ/FAQPage.jsx"));
+const NotificationLazy = React.lazy(() => import("../page/Notification/NotificationPage.jsx"));
+const AdminNotificationPageLazy = lazy(() => import("../page/Notification/AdminNotificationPage.jsx"));
+
 
 const withSuspense = (Component) => (
     <Suspense fallback={<div>Loading...</div>}>
@@ -39,6 +42,10 @@ const router = createBrowserRouter([
             { path: "/admin/user-management", element: withSuspense(UserListLazy) },
             { path: "/faqs", element: withSuspense(FAQLazy) },
             { path: "*", element: withSuspense(NotFoundLazy) },
+            { path: "/notifications", element: withSuspense(NotificationLazy) },
+            { path: "/admin/notifications", element: withSuspense(AdminNotificationPageLazy) }
+
+
         ],
     },
 ]);
