@@ -8,7 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/faqs")
-@CrossOrigin(origins = "http://localhost:5174")
+@CrossOrigin("*")
 public class FaqController {
 
     private final FaqService faqService;
