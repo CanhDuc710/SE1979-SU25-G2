@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "../../../components/Sidebar";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import Pagination from "../../../components/Pagination";
-import { fetchDiscounts, deleteDiscount } from "../../../service/discountService";
+import { fetchDiscounts, deleteDiscount, updateDiscount, createDiscount } from "../../../service/discountService";
+import EditDiscountModal from "../../../components/EditDiscountModal";
+import AddDiscountModal from "../../../components/AddDiscountModal"; // ✅ Modal thêm mới
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const DISCOUNTS_PER_PAGE = 8;
 
@@ -12,45 +16,19 @@ export default function DiscountList() {
     const [totalPages, setTotalPages] = useState(0);
     const [discounts, setDiscounts] = useState([]);
 
-    // --- Filter, sort state ---
     const [searchCode, setSearchCode] = useState("");
     const [minValue, setMinValue] = useState("");
     const [maxValue, setMaxValue] = useState("");
     const [sortBy, setSortBy] = useState("discountId");
-    const [direction, setDirection] = useState("asc");
+    const [direction, setDirection] = useState("desc");
 
+    const [selectedDiscount, setSelectedDiscount] = useState(null);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showAddModal, setShowAddModal] = useState(false); // ✅
 
-
-    // --- Load data ---
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const data = await fetchDiscounts({
-                    page: currentPage,
-                    size: DISCOUNTS_PER_PAGE,
-                    code: searchCode,
-                    minValue,
-                    maxValue,
-                    sortBy,
-                    direction,
-                });
-                setDiscounts(data.content);
-                setTotalPages(data.totalPages);
-            } catch (error) {
-                console.error("Lỗi khi tải danh sách discount:", error);
-            }
-        };
-        fetchData();
-    }, [currentPage, searchCode, minValue, maxValue, sortBy, direction]);
-
-    // --- Delete handler ---
-    const handleDelete = async (id) => {
-        const confirm = window.confirm("Bạn có chắc chắn muốn xóa mã giảm giá này?");
-        if (!confirm) return;
-
+    // Load data
+    const loadDiscounts = async () => {
         try {
-            await deleteDiscount(id);
-            alert("Xóa thành công!");
             const data = await fetchDiscounts({
                 page: currentPage,
                 size: DISCOUNTS_PER_PAGE,
@@ -63,57 +41,100 @@ export default function DiscountList() {
             setDiscounts(data.content);
             setTotalPages(data.totalPages);
         } catch (error) {
-            console.error("Lỗi khi xóa discount:", error);
-            alert("Xóa thất bại!");
+            console.error("Lỗi khi tải danh sách discount:", error);
         }
     };
 
-    // --- Search/filter/sort UI ---
-    const handleSearchChange = (e) => setSearchCode(e.target.value);
-    const handleMinValueChange = (e) => setMinValue(e.target.value);
-    const handleMaxValueChange = (e) => setMaxValue(e.target.value);
-    const handleSortByChange = (e) => setSortBy(e.target.value);
-    const handleDirectionChange = (e) => setDirection(e.target.value);
+    useEffect(() => {
+        loadDiscounts();
+    }, [currentPage, searchCode, minValue, maxValue, sortBy, direction]);
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("Bạn có chắc chắn muốn xóa mã giảm giá này?")) return;
+
+        try {
+            await deleteDiscount(id);
+            toast.success("Xóa thành công!");
+            loadDiscounts();
+        } catch (error) {
+            console.error("Lỗi khi xóa discount:", error);
+            toast.error("Xóa thất bại!");
+        }
+    };
+
+    const handleEdit = (discount) => {
+        setSelectedDiscount(discount);
+        setShowEditModal(true);
+    };
+
+    const handleSaveEdit = async (updatedData) => {
+        try {
+            await updateDiscount(updatedData.discountId, updatedData);
+            toast.success("Cập nhật thành công!");
+            setShowEditModal(false);
+            loadDiscounts();
+        } catch (error) {
+            console.error("Lỗi khi cập nhật:", error);
+            toast.error("Lỗi khi cập nhật!");
+        }
+    };
+
+    const handleCreateDiscount = async (data) => {
+        try {
+            await createDiscount(data);
+            toast.success("Tạo mã thành công!");
+            setShowAddModal(false);
+            loadDiscounts();
+        } catch (error) {
+            console.error("Lỗi khi tạo mã:", error);
+            toast.error("Tạo thất bại!");
+        }
+    };
 
     return (
         <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white">
             <div className={`transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"} flex-shrink-0`}>
-                <Sidebar
-                    sidebarCollapsed={sidebarCollapsed}
-                    setSidebarCollapsed={setSidebarCollapsed}
-                />
+                <Sidebar sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />
             </div>
 
             <div className="flex-1 p-6">
-                <h2 className="text-2xl font-semibold mb-6">Discount Management</h2>
+                <div className="mb-6 flex justify-between items-center">
+                    <h2 className="text-2xl font-semibold">Discount Management</h2>
+                    <button
+                        onClick={() => setShowAddModal(true)}
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                    >
+                        + Tạo mã giảm giá mới
+                    </button>
+                </div>
 
-                {/* --- Search & Filter & Sort --- */}
+                {/* Filter / Search / Sort */}
                 <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                     <input
                         type="text"
                         value={searchCode}
-                        onChange={handleSearchChange}
+                        onChange={(e) => setSearchCode(e.target.value)}
                         placeholder="Tìm theo mã code..."
                         className="bg-white text-black border p-2 rounded"
                     />
                     <input
                         type="number"
                         value={maxValue}
-                        onChange={handleMaxValueChange}
+                        onChange={(e) => setMaxValue(e.target.value)}
                         placeholder="Giá trị tối đa"
                         className="bg-white text-black border p-2 rounded"
                     />
                     <input
                         type="number"
                         value={minValue}
-                        onChange={handleMinValueChange}
+                        onChange={(e) => setMinValue(e.target.value)}
                         placeholder="Giá trị tối thiểu"
                         className="bg-white text-black border p-2 rounded"
                     />
                     <div className="flex space-x-2">
                         <select
                             value={sortBy}
-                            onChange={handleSortByChange}
+                            onChange={(e) => setSortBy(e.target.value)}
                             className="bg-white text-black border p-2 rounded w-1/2"
                         >
                             <option value="discountId">Mặc định</option>
@@ -123,7 +144,7 @@ export default function DiscountList() {
                         </select>
                         <select
                             value={direction}
-                            onChange={handleDirectionChange}
+                            onChange={(e) => setDirection(e.target.value)}
                             className="bg-white text-black border p-2 rounded w-1/2"
                         >
                             <option value="asc">Tăng dần</option>
@@ -132,8 +153,7 @@ export default function DiscountList() {
                     </div>
                 </div>
 
-
-                {/* --- Table --- */}
+                {/* Table */}
                 <div className="overflow-x-auto rounded shadow-md">
                     <table className="min-w-full text-sm bg-white rounded">
                         <thead className="bg-gradient-to-r from-blue-100 to-yellow-100 text-gray-700 text-left">
@@ -165,7 +185,10 @@ export default function DiscountList() {
                                         </span>
                                 </td>
                                 <td className="px-4 py-2 space-x-2">
-                                    <button className="bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200">
+                                    <button
+                                        onClick={() => handleEdit(d)}
+                                        className="bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200"
+                                    >
                                         <FaEdit />
                                     </button>
                                     <button
@@ -181,7 +204,23 @@ export default function DiscountList() {
                     </table>
                 </div>
 
-                {/* --- Pagination --- */}
+                {/* Modals */}
+                <EditDiscountModal
+                    isOpen={showEditModal}
+                    onClose={() => setShowEditModal(false)}
+                    discount={selectedDiscount}
+                    onSave={handleSaveEdit}
+                />
+                <AddDiscountModal
+                    isOpen={showAddModal}
+                    onClose={() => setShowAddModal(false)}
+                    onSave={handleCreateDiscount}
+                />
+
+                {/* Toast */}
+                <ToastContainer position="bottom-right" autoClose={3000} />
+
+                {/* Pagination */}
                 <div className="mt-6 flex justify-between items-center text-gray-600 text-sm">
                     <Pagination
                         currentPage={currentPage}

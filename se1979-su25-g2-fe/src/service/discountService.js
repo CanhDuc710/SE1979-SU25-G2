@@ -25,6 +25,10 @@ export const fetchDiscounts = async ({
     return response.data;
 };
 
+export const updateDiscount = async (id, updatedData) => {
+    const res = await axios.put(`/api/discounts/${id}`, updatedData);
+    return res.data;
+};
 
 // Tạo mới discount
 export const createDiscount = async (data) => {
@@ -32,11 +36,6 @@ export const createDiscount = async (data) => {
     return response.data;
 };
 
-// Cập nhật discount theo ID
-export const updateDiscount = async (id, data) => {
-    const response = await axios.put(`${API_BASE_URL}/discounts/${id}`, data);
-    return response.data;
-};
 
 // Xóa discount theo ID
 export const deleteDiscount = async (id) => {
