@@ -39,9 +39,7 @@ export default function AddInternalAccount() {
     return (
         <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white">
             {/* Sidebar */}
-            <div className={`transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"} flex-shrink-0`}>
-                <Sidebar sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />
-            </div>
+
 
             {/* Main content */}
             <div className="flex-1 p-6">

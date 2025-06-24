@@ -224,8 +224,9 @@ export default function OrderPage() {
                             value={form.shippingName}
                             onChange={handleChange}
                             required
-                            className="w-full p-2 border rounded focus:outline-none focus:ring"
+                            className={`w-full p-2 border rounded focus:outline-none focus:ring ${form.shippingName ? '' : 'border-red-500'}`}
                         />
+                        {!form.shippingName && <div className="text-red-500 text-xs mt-1">Name is required</div>}
                     </div>
                     <div>
                         <label className="block mb-1 font-medium">Phone</label>
@@ -234,8 +235,9 @@ export default function OrderPage() {
                             value={form.shippingPhone}
                             onChange={handleChange}
                             required
-                            className="w-full p-2 border rounded focus:outline-none focus:ring"
+                            className={`w-full p-2 border rounded focus:outline-none focus:ring ${form.shippingPhone ? '' : 'border-red-500'}`}
                         />
+                        {!form.shippingPhone && <div className="text-red-500 text-xs mt-1">Phone is required</div>}
                     </div>
                     <div>
                         <label className="block mb-1 font-medium">Address</label>
@@ -244,8 +246,9 @@ export default function OrderPage() {
                             value={form.shippingAddress}
                             onChange={handleChange}
                             required
-                            className="w-full p-2 border rounded focus:outline-none focus:ring"
+                            className={`w-full p-2 border rounded focus:outline-none focus:ring ${form.shippingAddress ? '' : 'border-red-500'}`}
                         />
+                        {!form.shippingAddress && <div className="text-red-500 text-xs mt-1">Address is required</div>}
                     </div>
                     <div className="flex gap-2">
                         <div className="flex-1">

@@ -16,7 +16,11 @@ const ProductManagementLazy = lazy(() => import("../page/admin/product/ProductMa
 const UserListLazy = lazy(() => import("../page/admin/user_management/UserList.jsx"));
 const UserDetailsLazy = lazy(() => import("../page/admin/user_management/UserDetail.jsx"));
 const AddInternalAccountLazy = lazy(() => import("../page/admin/user_management/AddInternalAccount.jsx"));
-
+const ProductDetailAdminLazy = lazy(() => import("../page/admin/product/ProductDetail.jsx"));
+const ProductEditLazy = lazy(() => import("../page/admin/product/ProductEdit.jsx"));
+const ProductCreateLazy = lazy(() => import("../page/admin/product/ProductCreate.jsx"));
+const CollectionManagementLazy = lazy(() => import("../page/admin/collection/CollectionList.jsx"));
+const CollectionDetailLazy = lazy(() => import("../page/admin/collection/CollectionDetail.jsx"));
 const router = createBrowserRouter([
     {
         path: "/",
@@ -39,9 +43,15 @@ const router = createBrowserRouter([
             { path: "accounts", element: <UserListLazy /> },
             { path: "accounts/add", element: <AddInternalAccountLazy /> },
             { path: "accounts/:id", element: <UserDetailsLazy /> },
+            { path: "products/:productId", element: <ProductDetailAdminLazy /> },
+            { path: "products/:productId/edit", element: <ProductEditLazy /> },
+            { path: "products/create", element: <ProductCreateLazy /> },
+            { path: "collections", element: <CollectionManagementLazy /> },
+            { path: "collections/:id", element: <CollectionDetailLazy /> },
             { path: "*", element: <NotFoundLazy /> },
         ],
     },
 ]);
 
 export default router;
+

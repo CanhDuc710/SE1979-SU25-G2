@@ -55,9 +55,7 @@ export default function UserDetail() {
 
     return (
         <div className="flex min-h-screen bg-gray-50">
-            <div className={`transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"} flex-shrink-0`}>
-                <Sidebar sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />
-            </div>
+
 
             <div className="flex-1 p-6">
                 {user ? (

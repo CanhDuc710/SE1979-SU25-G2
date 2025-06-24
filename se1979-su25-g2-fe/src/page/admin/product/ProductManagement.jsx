@@ -4,6 +4,7 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import { fetchAllProductsPaged } from "../../../service/productService";
 import Pagination from "../../../components/Pagination";
 import { IMAGE_BASE_URL } from "../../../utils/constants";
+import { useNavigate } from "react-router-dom";
 
 const PRODUCTS_PER_PAGE = 5;
 
@@ -14,6 +15,7 @@ export default function ProductManagement() {
     const [products, setProducts] = useState([]);
     const [filterCategory, setFilterCategory] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
+    const navigate = useNavigate();
 
     // Lấy dữ liệu từ API
     useEffect(() => {
@@ -59,7 +61,15 @@ export default function ProductManagement() {
 
             {/* Main content */}
             <div className="flex-1 flex flex-col p-6" style={{ minHeight: '100vh' }}>
-                <h2 className="text-2xl font-semibold mb-6">Product Management</h2>
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-semibold">Product Management</h2>
+                    <button
+                        className="bg-gradient-to-r from-blue-400 to-pink-400 text-white px-6 py-2 rounded-full font-bold shadow hover:scale-105 hover:from-blue-500 hover:to-pink-500 transition-all duration-200"
+                        onClick={() => navigate('/admin/products/create')}
+                    >
+                        + Add Product
+                    </button>
+                </div>
 
                 {/* Filters */}
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -98,19 +108,19 @@ export default function ProductManagement() {
                         <thead className="bg-gradient-to-r from-blue-100 to-yellow-100 text-gray-700 text-left">
                         <tr>
                             <th className="px-4 py-3">ID</th>
-                            <th className="px-4 py-3">Image</th>
-                            <th className="px-4 py-3">Product Name</th>
-                            <th className="px-4 py-3">Product Code</th>
-                            <th className="px-4 py-3">Brand</th>
-                            <th className="px-4 py-3">Category</th>
-                            <th className="px-4 py-3">Material</th>
-                            <th className="px-4 py-3">Gender</th>
-                            <th className="px-4 py-3">Price</th>
-                            <th className="px-4 py-3">Available Colors</th>
-                            <th className="px-4 py-3">Available Sizes</th>
-                            <th className="px-4 py-3">Total Stock</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3">Action</th>
+                            <th className="px-4 py-3">Ảnh</th>
+                            <th className="px-4 py-3">Tên Sản Phẩm</th>
+                            <th className="px-4 py-3">Mã Sản Phẩm</th>
+                            <th className="px-4 py-3">Thương Hiệu</th>
+                            <th className="px-4 py-3">Danh Mục</th>
+                            <th className="px-4 py-3">Chất Liệu</th>
+                            <th className="px-4 py-3">Giới Tính</th>
+                            <th className="px-4 py-3">Giá Bán</th>
+                            <th className="px-4 py-3">Màu Sắc</th>
+                            <th className="px-4 py-3">Kích Cỡ</th>
+                            <th className="px-4 py-3">Kho</th>
+                            <th className="px-4 py-3">Trạng Thái</th>
+                            <th className="px-4 py-3">Thao Tác</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -139,10 +149,16 @@ export default function ProductManagement() {
                                         <img
                                             src={imageUrls?.[0] ? IMAGE_BASE_URL + imageUrls[0] : undefined}
                                             alt={name}
-                                            className="rounded w-12 h-12 object-cover border"
+                                            className="rounded w-12 h-12 object-cover border cursor-pointer"
+                                            onClick={() => navigate(`/admin/products/${productId}`)}
                                         />
                                     </td>
-                                    <td className="px-4 py-2 font-semibold text-blue-600">{name}</td>
+                                    <td
+                                        className="px-4 py-2 font-semibold text-blue-600 cursor-pointer hover:underline"
+                                        onClick={() => navigate(`/admin/products/${productId}`)}
+                                    >
+                                        {name}
+                                    </td>
                                     <td className="px-4 py-2">{productCode}</td>
                                     <td className="px-4 py-2">{brand}</td>
                                     <td className="px-4 py-2">{categoryName}</td>
