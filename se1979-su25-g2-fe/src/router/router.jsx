@@ -12,7 +12,7 @@ const OrderPageLazy = lazy(() => import("../page/Order/OrderPage.jsx"));
 const NotFoundLazy = lazy(() => import("../page/error/NotFound.jsx"));
 
 // Admin pages
-const ProductManagementLazy = lazy(() => import("../page/admin/product/ProductManagement.jsx"));
+const ProductManagementLazy = lazy(() => import("../page/admin/product/productList.jsx"));
 const UserListLazy = lazy(() => import("../page/admin/user_management/UserList.jsx"));
 const UserDetailsLazy = lazy(() => import("../page/admin/user_management/UserDetail.jsx"));
 const AddInternalAccountLazy = lazy(() => import("../page/admin/user_management/AddInternalAccount.jsx"));

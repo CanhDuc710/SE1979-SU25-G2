@@ -43,7 +43,7 @@ public class OrderServiceImpl implements OrderService {
         User user = null;
 
         if (orderRequest.getUserId() != null) {
-            user = userRepository.findById(orderRequest.getUserId().longValue())
+            user = userRepository.findById((int) orderRequest.getUserId().longValue())
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
             cartItems = cartItemRepository.findByUser(user);
         } else if (orderRequest.getSessionId() != null && !orderRequest.getSessionId().isEmpty()) {

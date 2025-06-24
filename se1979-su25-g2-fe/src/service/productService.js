@@ -56,6 +56,12 @@ export const deleteProductById = async (productId) => {
     }
 };
 
+export const fetchProductById = async (productId) => {
+    const response = await axios.get(`${API_BASE_URL}/products/${productId}`);
+    return response.data;
+};
 
-
-
+export const updateProductById = async (productId, data) => {
+    const response = await axios.put(`${API_BASE_URL}/products/${productId}`, data);
+    return response.data;
+};
