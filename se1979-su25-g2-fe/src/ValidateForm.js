@@ -14,14 +14,12 @@ export function validateAccountForm(data, { requirePassword = true } = {}) {
         errors.lastName = "Họ không được vượt quá 50 ký tự";
     }
 
-    // Tên tài khoản
     if (!data.username || data.username.trim() === "") {
         errors.username = "Vui lòng nhập tên tài khoản";
     } else if (data.username.length > 50) {
         errors.username = "Tên tài khoản không được vượt quá 50 ký tự";
     }
 
-    // Mật khẩu (tùy chỉnh theo Add/Edit)
     if (requirePassword) {
         if (!data.password || data.password.trim() === "") {
             errors.password = "Vui lòng nhập mật khẩu";
@@ -30,7 +28,6 @@ export function validateAccountForm(data, { requirePassword = true } = {}) {
         }
     }
 
-    // Email
     if (!data.email || data.email.trim() === "") {
         errors.email = "Vui lòng nhập email";
     } else if (data.email.length > 100) {
@@ -39,12 +36,10 @@ export function validateAccountForm(data, { requirePassword = true } = {}) {
         errors.email = "Email không hợp lệ";
     }
 
-    // Giới tính
     if (!data.gender || !["MALE", "FEMALE", "OTHER"].includes(data.gender)) {
         errors.gender = "Giới tính không hợp lệ";
     }
 
-    // Vai trò
     if (!data.role || !["STAFF", "ADMIN"].includes(data.role)) {
         errors.role = "Vai trò không hợp lệ";
     }
@@ -56,7 +51,6 @@ export function validateAccountForm(data, { requirePassword = true } = {}) {
     } else if (data.phone.length > 20 && data.phone.length < 9) {
         errors.phone = "Số điện thoại không được vượt quá 20 ký tự";
     }
-
 
     return errors;
 }
