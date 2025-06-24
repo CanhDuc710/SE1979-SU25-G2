@@ -53,7 +53,7 @@ export default function NotificationPage() {
                     Favorite <span className="ml-1 text-xs bg-gray-300 rounded px-2">{countFavorite}</span>
                 </button>
                 <select
-                    className="border px-3 py-1 rounded"
+                    className="border px-3 py-1 rounded bg-gray-800 text-white placeholder-gray-400"
                     value={month}
                     onChange={(e) => setMonth(e.target.value)}
                 >
@@ -66,7 +66,7 @@ export default function NotificationPage() {
                     <input
                         type="text"
                         placeholder="Search notification..."
-                        className="border pl-8 pr-2 py-1 rounded"
+                        className="border pl-8 pr-2 py-1 rounded bg-gray-800 text-white placeholder-gray-400"
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                     />
