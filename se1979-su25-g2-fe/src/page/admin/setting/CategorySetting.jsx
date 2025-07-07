@@ -70,9 +70,9 @@ export default function CategorySettings() {
 
     return (
         <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white">
-            <div className={`transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"} flex-shrink-0`}>
-                <Sidebar sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />
-            </div>
+            {/*<div className={`transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"} flex-shrink-0`}>*/}
+            {/*    <Sidebar sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />*/}
+            {/*</div>*/}
             <div className="flex-1 p-6">
                 <h1 className="text-xl font-bold mb-4">Cài đặt {'>'} Cài đặt danh mục</h1>
 
@@ -89,7 +89,6 @@ export default function CategorySettings() {
                                 setCurrentPage(0);
                             }}
                         />
-                        <FaSearch className="ml-2 text-gray-500" />
                     </div>
 
                     {/* Table */}
