@@ -1,18 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../Product/ProductCard';
+import { getActiveBanners } from '../../service/settingService';
 import { getNewArrivals, getSuggestedProducts, getProductById } from '../../service/productService';
 import { API_BASE_URL, IMAGE_BASE_URL } from '../../utils/constants';
 import axios from 'axios';
+
 export default function Homepage() {
     const [newArrivals, setNewArrivals] = useState([]);
     const [suggestedProducts, setSuggestedProducts] = useState([]);
     const [collections, setCollections] = useState([]);
     const [collectionProducts, setCollectionProducts] = useState({});
+    const [banners, setBanners] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
         getNewArrivals().then(setNewArrivals).catch(console.error);
         getSuggestedProducts().then(setSuggestedProducts).catch(console.error);
+        getActiveBanners().then((data) => {
+            console.log("[DEBUG] Banners fetched:", data);
+            setBanners(data);
+        }).catch(console.error);
 
         axios.get(`${API_BASE_URL}/collections`).then(async (res) => {
             const data = res.data;
@@ -28,11 +36,25 @@ export default function Homepage() {
         });
     }, []);
 
+    useEffect(() => {
+        if (!banners.length) return;
+
+        const timer = setInterval(() => {
+            setCurrentIndex((prev) => (prev + 1) % banners.length);
+        }, 5000);
+
+        return () => clearInterval(timer);
+    }, [banners]);
+
+    useEffect(() => {
+        console.log("[DEBUG] Current banner:", banners[currentIndex]);
+    }, [currentIndex, banners]);
+
     return (
         <main className="w-full bg-[#fffdf8] font-sans">
-            {/* Hero Section */}
             <section className="relative bg-gradient-to-r from-yellow-50 to-orange-100 py-24 px-6 md:px-16 shadow-inner">
-                <div className="flex flex-col md:flex-row items-center max-w-7xl mx-auto">
+                <div className="flex flex-col md:flex-row items-center max-w-7xl mx-auto gap-8">
+                    {/* Left section */}
                     <div className="flex-1 text-left mb-10 md:mb-0">
                         <h1 className="text-5xl md:text-6xl font-bold text-gray-800 leading-tight mb-4 animate-fadeInUp">
                             WE Store
@@ -47,13 +69,18 @@ export default function Homepage() {
                             <button className="text-sm underline hover:text-orange-600 transition">Nhận tư vấn</button>
                         </div>
                     </div>
-                    <div className="flex-1 flex justify-center">
-                        <img
-                            src="https://cdn.hpdecor.vn/wp-content/uploads/2022/05/thiet-ke-cua-hang-quan-ao-nam-5.jpg"
-                            alt="Hero"
-                            className="rounded-2xl shadow-2xl w-[320px] h-[240px] md:w-[500px] md:h-[360px] object-cover animate-fadeInUp"
-                        />
-                    </div>
+
+                    {/* Right section: Banner */}
+                    {banners.length > 0 && (
+                        <div className="w-full md:w-[480px] h-72 relative rounded-xl overflow-hidden shadow-lg animate-fadeInUp">
+                            <img
+                                key={banners[currentIndex]?.id}
+                                src={banners[currentIndex]?.imageUrl}
+                                alt="Banner"
+                                className="w-full h-full object-cover transition-all duration-500"
+                            />
+                        </div>
+                    )}
                 </div>
             </section>
 
@@ -120,7 +147,7 @@ export default function Homepage() {
                             <ProductCard
                                 name={item.name}
                                 price={item.price === 0 ? 'Contact' : `${item.price.toLocaleString()} VND`}
-                                image={item.    imageUrls?.[0] ? `${IMAGE_BASE_URL}${item.imageUrls[0]}` : null}
+                                image={item.imageUrls?.[0] ? `${IMAGE_BASE_URL}${item.imageUrls[0]}` : null}
                             />
                         </Link>
                     ))}

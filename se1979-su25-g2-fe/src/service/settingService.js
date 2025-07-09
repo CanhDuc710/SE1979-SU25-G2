@@ -21,3 +21,18 @@ export const deleteCategory = async (id) => {
     const res = await axios.delete(`${API_BASE_URL}/admin/setting/categories/${id}`);
     return res.data;
 };
+
+export const getActiveBanners = async () => {
+    const res = await axios.get(`${API_BASE_URL}/admin/setting/banners`);
+    return res.data;
+};
+
+export const uploadBanner = async (formData) => {
+    const res = await axios.post(`${API_BASE_URL}/admin/setting/banners`, formData);
+    return res.data;
+};
+
+export const deleteBanner = async (id) => {
+    const res = await axios.delete(`${API_BASE_URL}/admin/setting/banners/${id}`);
+    return res.data;
+};

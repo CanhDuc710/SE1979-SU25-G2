@@ -8,9 +8,14 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080', // Cổng backend
+        target: 'http://localhost:8080',
         changeOrigin: true,
       },
-    },
-  },
+      '/images': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      }
+    }
+  }
+
 });

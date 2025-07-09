@@ -1,14 +1,53 @@
-// src/admin/setting/BannerSetting.jsx
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FaTrashAlt, FaEdit, FaPlus } from 'react-icons/fa';
+import {
+    getActiveBanners,
+    uploadBanner,
+    deleteBanner as deleteBannerApi,
+} from '../../../service/settingService';
+import { API_BASE_URL } from '../../../utils/constants';
 
 function BannerSetting() {
     const [banners, setBanners] = useState([]);
-    const [displayBanner, setDisplayBanner] = useState(true);
+    // const [displayBanner, setDisplayBanner] = useState(true);
     const [randomize, setRandomize] = useState(false);
     const [interval, setInterval] = useState(30);
+    const [canScroll, setCanScroll] = useState(false);
     const fileInputRefs = useRef({});
+    const scrollRef = useRef(null);
 
+    // Chuẩn hóa URL ảnh để đảm bảo có đầy đủ host
+    const normalizeImageUrl = (url) => {
+        return url.startsWith('/images') ? url : `/images/${url}`;
+    };
+
+    // Gọi API lấy danh sách banner khi load component
+    useEffect(() => {
+        const fetchBanners = async () => {
+            try {
+                const data = await getActiveBanners();
+                setBanners(data.map(b => ({ ...b, preview: normalizeImageUrl(b.imageUrl) })));
+            } catch (err) {
+                console.error('Lỗi khi tải banners:', err);
+            }
+        };
+        fetchBanners();
+    }, []);
+
+    // Kiểm tra có cần hiện nút scroll không
+    useEffect(() => {
+        const checkScroll = () => {
+            if (scrollRef.current) {
+                const visibleItems = scrollRef.current.clientWidth / 160;
+                setCanScroll(banners.length > visibleItems);
+            }
+        };
+        checkScroll();
+        window.addEventListener('resize', checkScroll);
+        return () => window.removeEventListener('resize', checkScroll);
+    }, [banners]);
+
+    // Khi người dùng chọn file mới (thêm hoặc thay ảnh)
     const handleFileChange = (e, replaceId = null) => {
         const files = Array.from(e.target.files);
         if (replaceId !== null && files[0]) {
@@ -24,7 +63,7 @@ function BannerSetting() {
             setBanners(newBanners);
         } else {
             const newBanners = files.map((file) => ({
-                id: Date.now() + Math.random(),
+                id: undefined,
                 file,
                 preview: URL.createObjectURL(file),
             }));
@@ -32,83 +71,161 @@ function BannerSetting() {
         }
     };
 
-    const handleDelete = (id) => {
-        setBanners((prev) => prev.filter((b) => b.id !== id));
+    const handleDelete = async (id) => {
+        if (id) {
+            // Xóa ảnh đã lưu
+            setBanners((prev) => prev.filter((b) => b.id !== id));
+            try {
+                await deleteBannerApi(id);
+            } catch (err) {
+                console.error("Lỗi khi xóa banner:", err);
+            }
+        } else {
+            // Xóa toàn bộ ảnh chưa có id
+            setBanners((prev) => prev.filter((b) => b.id !== undefined));
+        }
     };
 
+
+    // Trigger click vào input file khi người dùng nhấn nút sửa
     const triggerReplace = (id) => {
         if (fileInputRefs.current[id]) {
             fileInputRefs.current[id].click();
         }
     };
 
-    const handleSave = () => {
-        // TODO: Gửi dữ liệu về server (upload ảnh + cấu hình)
-        console.log('Banners:', banners);
-        console.log('Hiển thị:', displayBanner);
-        console.log('Ngẫu nhiên:', randomize);
-        console.log('Thời gian:', interval);
+    // Scroll ngang danh sách banner
+    const scrollContainer = (direction) => {
+        const scrollAmount = 180;
+        if (scrollRef.current) {
+            scrollRef.current.scrollBy({
+                left: direction * scrollAmount,
+                behavior: 'smooth',
+            });
+        }
     };
+
+    const handleSave = async () => {
+        // Lấy tất cả ảnh có file mới cần upload (mới hoặc sửa)
+        const bannersToUpload = banners.filter((b) => b.file);
+        if (bannersToUpload.length === 0) {
+            alert("Không có ảnh mới để upload.");
+            return;
+        }
+        try {
+            for (const banner of bannersToUpload) {
+                const formData = new FormData();
+                formData.append("file", banner.file);
+
+                if (banner.id) {
+                    formData.append("id", banner.id); // ảnh đã lưu thì có id để update
+                }
+                await uploadBanner(formData);
+            }
+            alert("Lưu banner thành công!");
+            const updated = await getActiveBanners();
+            setBanners(updated.map((b) => ({
+                ...b,
+                preview: b.imageUrl
+            })));
+        } catch (err) {
+            console.error("Lỗi khi upload:", err);
+            alert("Lưu thất bại.");
+        }
+    };
+
+
 
     return (
         <div className="p-6 bg-white rounded-xl shadow-md">
             <h2 className="text-xl font-semibold mb-4">Cài đặt Banner</h2>
 
-            <div className="relative mb-4">
-                <div className="flex space-x-4 overflow-x-scroll pb-4 max-w-full scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+            <div className="flex items-center space-x-4 mb-4">
+                {canScroll && (
+                    <button
+                        onClick={() => scrollContainer(-1)}
+                        className="bg-gray-200 hover:bg-gray-300 p-1 rounded-full"
+                    >
+                        ◀
+                    </button>
+                )}
+
+                <div
+                    className="flex space-x-4 overflow-hidden"
+                    style={{ maxWidth: "calc(5 * 10rem + 4 * 1rem)" }}
+                    ref={scrollRef}
+                >
                     {banners.map((banner, index) => (
-                        <div key={banner.id} className="shrink-0">
-                            <div className="text-center mb-1 font-medium text-sm text-gray-700">Banner {index + 1}</div>
+                        <div key={banner.id ? `id-${banner.id}` : `temp-${index}`} className="shrink-0 w-40">
+                            <div className="text-center mb-1 font-medium text-sm text-gray-700">
+                                Banner {index + 1}
+                            </div>
                             <div className="relative w-40 h-28 border rounded-md">
                                 <img
-                                    src={banner.preview || banner.image_url}
+                                    src={banner.preview}
                                     alt="banner"
                                     className="w-full h-full object-cover rounded"
                                 />
                                 <div className="absolute bottom-1 right-1 flex space-x-1">
-                                    <button
-                                        onClick={() => triggerReplace(banner.id)}
-                                        className="bg-white text-blue-600 p-1 rounded hover:bg-blue-100"
-                                    >
-                                        <FaEdit size={14} />
-                                    </button>
+                                    {banner.id && (
+                                        <button
+                                            onClick={() => triggerReplace(banner.id)}
+                                            className="bg-white text-blue-600 p-1 rounded hover:bg-blue-100"
+                                        >
+                                            <FaEdit size={14} />
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => handleDelete(banner.id)}
                                         className="bg-white text-red-500 p-1 rounded hover:bg-red-100"
                                     >
                                         <FaTrashAlt size={14} />
                                     </button>
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        className="hidden"
-                                        ref={(el) => (fileInputRefs.current[banner.id] = el)}
-                                        onChange={(e) => handleFileChange(e, banner.id)}
-                                    />
+                                    {banner.id && (
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            ref={(el) => (fileInputRefs.current[banner.id] = el)}
+                                            onChange={(e) => handleFileChange(e, banner.id)}
+                                        />
+                                    )}
                                 </div>
+
                             </div>
                         </div>
                     ))}
-
-                    <div className="shrink-0">
-                        <div className="text-center mb-1 font-medium text-sm text-gray-700">Thêm banner</div>
-                        <label className="w-40 h-28 flex items-center justify-center border-2 border-dashed rounded-md cursor-pointer text-gray-500">
-                            <FaPlus size={20} />
-                            <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => handleFileChange(e)} />
-                        </label>
-                    </div>
-                </div>
-                <div className="h-2 bg-gray-300 rounded-full mt-2 w-1/3 mx-auto">
-                    <div className="h-full bg-gray-500 rounded-full w-full"></div>
                 </div>
 
+                {canScroll && (
+                    <button
+                        onClick={() => scrollContainer(1)}
+                        className="bg-gray-200 hover:bg-gray-300 p-1 rounded-full"
+                    >
+                        ▶
+                    </button>
+                )}
+
+                <div className="shrink-0 w-40">
+                    <div className="text-center mb-1 font-medium text-sm text-gray-700">Thêm banner</div>
+                    <label className="w-40 h-28 flex items-center justify-center border-2 border-dashed rounded-md cursor-pointer text-gray-500">
+                        <FaPlus size={20} />
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => handleFileChange(e)}
+                        />
+                    </label>
+                </div>
             </div>
 
             <div className="space-y-3">
-                <div>
-                    <label className="mr-2">Hiển thị banner</label>
-                    <input type="checkbox" checked={displayBanner} onChange={() => setDisplayBanner(!displayBanner)} />
-                </div>
+                {/*<div>*/}
+                {/*    <label className="mr-2">Hiển thị banner</label>*/}
+                {/*    <input type="checkbox" checked={displayBanner} onChange={() => setDisplayBanner(!displayBanner)} />*/}
+                {/*</div>*/}
 
                 <div>
                     <label className="mr-2">Hiển thị banner ngẫu nhiên</label>
@@ -124,7 +241,7 @@ function BannerSetting() {
                     >
                         <option value={10}>10 giây</option>
                         <option value={20}>20 giây</option>
-                        <option value={30} className="bg-blue-100 font-bold">30 giây</option>
+                        <option value={30}>30 giây</option>
                         <option value={60}>60 giây</option>
                     </select>
                 </div>
