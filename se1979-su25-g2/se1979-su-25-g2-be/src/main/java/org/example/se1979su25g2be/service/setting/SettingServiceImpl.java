@@ -2,7 +2,9 @@ package org.example.se1979su25g2be.service.setting;
 
 import lombok.RequiredArgsConstructor;
 import org.example.se1979su25g2be.entity.Banner;
+import org.example.se1979su25g2be.entity.BannerConfig;
 import org.example.se1979su25g2be.entity.Category;
+import org.example.se1979su25g2be.repository.BannerConfigRepository;
 import org.example.se1979su25g2be.repository.BannerRepository;
 import org.example.se1979su25g2be.repository.SettingRepository;
 import org.example.se1979su25g2be.service.LocalImageService;
@@ -19,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SettingServiceImpl implements SettingService {
     private final SettingRepository settingRepository;
+    private final BannerConfigRepository bannerConfigRepository;
     private final BannerRepository bannerRepository;
     private final LocalImageService localImageService;
 
@@ -101,4 +104,22 @@ public class SettingServiceImpl implements SettingService {
     public void deleteBanner(Long id) {
         bannerRepository.deleteById(id);
     }
+
+    @Override
+    public BannerConfig getBannerConfig() {
+        return bannerConfigRepository.findById(1L).orElseGet(() -> {
+            BannerConfig config = new BannerConfig();
+            config.setDisplayBanner(true);
+            config.setRandomize(false);
+            config.setInterval(30);
+            return bannerConfigRepository.save(config);
+        });
+    }
+
+    @Override
+    public BannerConfig saveBannerConfig(BannerConfig config) {
+        config.setId(1L);
+        return bannerConfigRepository.save(config);
+    }
+
 }

@@ -1,6 +1,7 @@
 package org.example.se1979su25g2be.service.setting;
 
 import org.example.se1979su25g2be.entity.Banner;
+import org.example.se1979su25g2be.entity.BannerConfig;
 import org.example.se1979su25g2be.entity.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,5 +18,7 @@ public interface SettingService {
     Banner saveBanner(MultipartFile file) throws IOException;
     void deleteBanner(Long id);
     Banner updateBannerImage(MultipartFile file, Long id) throws IOException;
+    BannerConfig getBannerConfig();
+    BannerConfig saveBannerConfig(BannerConfig config);
 
 }
