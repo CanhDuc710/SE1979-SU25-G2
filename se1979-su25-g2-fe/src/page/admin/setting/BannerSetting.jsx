@@ -3,13 +3,12 @@ import { FaTrashAlt, FaEdit, FaPlus } from 'react-icons/fa';
 import {
     getActiveBanners,
     uploadBanner,
-    deleteBanner as deleteBannerApi,
+    deleteBanner as deleteBannerApi, getBannerConfig, updateBannerConfig,
 } from '../../../service/settingService';
-import { API_BASE_URL } from '../../../utils/constants';
 
 function BannerSetting() {
     const [banners, setBanners] = useState([]);
-    // const [displayBanner, setDisplayBanner] = useState(true);
+    const [displayBanner, setDisplayBanner] = useState(true);
     const [randomize, setRandomize] = useState(false);
     const [interval, setInterval] = useState(30);
     const [canScroll, setCanScroll] = useState(false);
@@ -23,16 +22,30 @@ function BannerSetting() {
 
     // Gọi API lấy danh sách banner khi load component
     useEffect(() => {
-        const fetchBanners = async () => {
+        const loadAll = async () => {
             try {
-                const data = await getActiveBanners();
-                setBanners(data.map(b => ({ ...b, preview: normalizeImageUrl(b.imageUrl) })));
+                const [banners, config] = await Promise.all([
+                    getActiveBanners(),
+                    getBannerConfig()
+                ]);
+
+                setBanners(banners.map(b => ({
+                    ...b,
+                    preview: normalizeImageUrl(b.imageUrl)
+                })));
+
+                setDisplayBanner(config.displayBanner);
+                setRandomize(config.randomize);
+                setInterval(config.interval);
+
             } catch (err) {
-                console.error('Lỗi khi tải banners:', err);
+                console.error("Lỗi khi tải dữ liệu:", err);
             }
         };
-        fetchBanners();
+
+        loadAll();
     }, []);
+
 
     // Kiểm tra có cần hiện nút scroll không
     useEffect(() => {
@@ -106,30 +119,34 @@ function BannerSetting() {
     };
 
     const handleSave = async () => {
-        // Lấy tất cả ảnh có file mới cần upload (mới hoặc sửa)
         const bannersToUpload = banners.filter((b) => b.file);
-        if (bannersToUpload.length === 0) {
-            alert("Không có ảnh mới để upload.");
-            return;
-        }
+
         try {
             for (const banner of bannersToUpload) {
                 const formData = new FormData();
                 formData.append("file", banner.file);
-
                 if (banner.id) {
-                    formData.append("id", banner.id); // ảnh đã lưu thì có id để update
+                    formData.append("id", banner.id);
                 }
                 await uploadBanner(formData);
             }
-            alert("Lưu banner thành công!");
+
+            // Luôn lưu cấu hình
+            await updateBannerConfig({
+                displayBanner,
+                randomize,
+                interval
+            });
+
+            alert("Lưu thành công!");
+
             const updated = await getActiveBanners();
             setBanners(updated.map((b) => ({
                 ...b,
                 preview: b.imageUrl
             })));
         } catch (err) {
-            console.error("Lỗi khi upload:", err);
+            console.error("Lỗi khi upload hoặc lưu cấu hình:", err);
             alert("Lưu thất bại.");
         }
     };
@@ -222,10 +239,10 @@ function BannerSetting() {
             </div>
 
             <div className="space-y-3">
-                {/*<div>*/}
-                {/*    <label className="mr-2">Hiển thị banner</label>*/}
-                {/*    <input type="checkbox" checked={displayBanner} onChange={() => setDisplayBanner(!displayBanner)} />*/}
-                {/*</div>*/}
+                <div>
+                    <label className="mr-2">Hiển thị banner</label>
+                    <input type="checkbox" checked={displayBanner} onChange={() => setDisplayBanner(!displayBanner)} />
+                </div>
 
                 <div>
                     <label className="mr-2">Hiển thị banner ngẫu nhiên</label>
@@ -239,10 +256,10 @@ function BannerSetting() {
                         onChange={(e) => setInterval(Number(e.target.value))}
                         className="border px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                     >
+                        <option value={5}>5 giây</option>
                         <option value={10}>10 giây</option>
-                        <option value={20}>20 giây</option>
+                        <option value={15}>15 giây</option>
                         <option value={30}>30 giây</option>
-                        <option value={60}>60 giây</option>
                     </select>
                 </div>
             </div>

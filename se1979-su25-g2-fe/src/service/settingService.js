@@ -36,3 +36,14 @@ export const deleteBanner = async (id) => {
     const res = await axios.delete(`${API_BASE_URL}/admin/setting/banners/${id}`);
     return res.data;
 };
+
+export const getBannerConfig = async () => {
+    const res = await axios.get(`${API_BASE_URL}/admin/setting/banner-config`);
+    return res.data;
+};
+
+export const updateBannerConfig = async (config) => {
+    const res = await axios.post(`${API_BASE_URL}/admin/setting/banner-config`, config);
+    return res.data;
+};
+

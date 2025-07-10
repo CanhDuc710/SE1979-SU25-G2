@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../Product/ProductCard';
-import { getActiveBanners } from '../../service/settingService';
+import {getActiveBanners, getBannerConfig} from '../../service/settingService';
 import { getNewArrivals, getSuggestedProducts, getProductById } from '../../service/productService';
 import { API_BASE_URL, IMAGE_BASE_URL } from '../../utils/constants';
 import axios from 'axios';
@@ -13,14 +13,34 @@ export default function Homepage() {
     const [collectionProducts, setCollectionProducts] = useState({});
     const [banners, setBanners] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [config, setConfig] = useState(null);
 
     useEffect(() => {
-        getNewArrivals().then(setNewArrivals).catch(console.error);
-        getSuggestedProducts().then(setSuggestedProducts).catch(console.error);
-        getActiveBanners().then((data) => {
-            console.log("[DEBUG] Banners fetched:", data);
-            setBanners(data);
-        }).catch(console.error);
+        const fetchAll = async () => {
+            try {
+                const [config, newArrivals, suggestedProducts, banners] = await Promise.all([
+                    getBannerConfig(),
+                    getNewArrivals(),
+                    getSuggestedProducts(),
+                    getActiveBanners()
+                ]);
+
+                setConfig(config);
+                setNewArrivals(newArrivals);
+                setSuggestedProducts(suggestedProducts);
+
+                // random nếu bật
+                const finalBanners = config.randomize
+                    ? [...banners].sort(() => 0.5 - Math.random())
+                    : banners;
+
+                setBanners(finalBanners);
+            } catch (err) {
+                console.error("Lỗi khi load dữ liệu:", err);
+            }
+        };
+
+        fetchAll();
 
         axios.get(`${API_BASE_URL}/collections`).then(async (res) => {
             const data = res.data;
@@ -36,15 +56,16 @@ export default function Homepage() {
         });
     }, []);
 
+//banner chạy
     useEffect(() => {
-        if (!banners.length) return;
-
+        if (!banners.length || !config?.displayBanner) return;
+        const intervalTime = (config.interval || 30) * 1000;
         const timer = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % banners.length);
-        }, 5000);
-
+        }, intervalTime);
         return () => clearInterval(timer);
-    }, [banners]);
+    }, [banners, config]);
+
 
     useEffect(() => {
         console.log("[DEBUG] Current banner:", banners[currentIndex]);
@@ -71,18 +92,24 @@ export default function Homepage() {
                     </div>
 
                     {/* Right section: Banner */}
-                    {banners.length > 0 && (
-                        <div className="w-full md:w-[480px] h-72 relative rounded-xl overflow-hidden shadow-lg animate-fadeInUp">
-                            <img
-                                key={banners[currentIndex]?.id}
-                                src={banners[currentIndex]?.imageUrl}
-                                alt="Banner"
-                                className="w-full h-full object-cover transition-all duration-500"
-                            />
+                    {config?.displayBanner && banners.length > 0 && (
+                        <div className="w-[480px] h-[270px] relative overflow-hidden">
+                            {banners.map((banner, i) => (
+                                <img
+                                    key={banner.id}
+                                    src={banner.imageUrl}
+                                    alt={`Banner ${i}`}
+                                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+                                        i === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                                    }`}
+                                />
+                            ))}
                         </div>
+
                     )}
                 </div>
             </section>
+
 
             {/* Collections */}
             {collections.map((col) => (
