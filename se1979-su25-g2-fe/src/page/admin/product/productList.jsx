@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../../components/Sidebar";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import {deleteProductById, fetchAllProductsPaged} from "../../../service/productService";
+import { fetchAllProductsPaged } from "../../../service/productService";
 import Pagination from "../../../components/Pagination";
+import { IMAGE_BASE_URL } from "../../../utils/constants";
+import { useNavigate } from "react-router-dom";
 
-const PRODUCTS_PER_PAGE = 8;
+const PRODUCTS_PER_PAGE = 5;
 
-export default function ProductList() {
+export default function ProductManagement() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [currentPage, setCurrentPage] = useState(0); // Backend dùng index = 0
     const [totalPages, setTotalPages] = useState(0);
     const [products, setProducts] = useState([]);
     const [filterCategory, setFilterCategory] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
+    const navigate = useNavigate();
 
     // Lấy dữ liệu từ API
     useEffect(() => {
@@ -52,41 +55,21 @@ export default function ProductList() {
 
     const categories = [...new Set(products.map((p) => p.categoryName))];
 
-    const handleDelete = async (productId) => {
-        const confirm = window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?");
-        if (!confirm) return;
-
-        try {
-            await deleteProductById(productId);
-            alert("Xóa thành công!");
-            // Sau khi xóa thành công, gọi lại API trang hiện tại
-            const data = await fetchAllProductsPaged(currentPage, PRODUCTS_PER_PAGE);
-            setProducts(data.content);
-            setTotalPages(data.totalPages);
-        } catch (error) {
-            console.error("Lỗi khi xóa sản phẩm:", error);
-            alert("Xóa thất bại!");
-        }
-    };
-
-
     return (
-        <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white">
-            {/* Sidebar */}
-            <div
-                className={`transition-all duration-300 ${
-                    sidebarCollapsed ? "w-16" : "w-64"
-                } flex-shrink-0`}
-            >
-                <Sidebar
-                    sidebarCollapsed={sidebarCollapsed}
-                    setSidebarCollapsed={setSidebarCollapsed}
-                />
-            </div>
+        <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white" style={{ minHeight: '100vh' }}>
+
 
             {/* Main content */}
-            <div className="flex-1 p-6">
-                <h2 className="text-2xl font-semibold mb-6">Product Management</h2>
+            <div className="flex-1 flex flex-col p-6" style={{ minHeight: '100vh' }}>
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-semibold">Product Management</h2>
+                    <button
+                        className="bg-gradient-to-r from-blue-400 to-pink-400 text-white px-6 py-2 rounded-full font-bold shadow hover:scale-105 hover:from-blue-500 hover:to-pink-500 transition-all duration-200"
+                        onClick={() => navigate('/admin/products/create')}
+                    >
+                        + Add Product
+                    </button>
+                </div>
 
                 {/* Filters */}
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -120,85 +103,98 @@ export default function ProductList() {
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto rounded shadow-md">
-                    <table className="min-w-full text-sm bg-white rounded">
+                <div className="overflow-x-auto rounded shadow-md flex-1">
+                    <table className="min-w-full w-full text-sm bg-white rounded table-auto">
                         <thead className="bg-gradient-to-r from-blue-100 to-yellow-100 text-gray-700 text-left">
                         <tr>
-                            <th className="px-4 py-3">Product</th>
-                            <th className="px-4 py-3">Brand</th>
-                            <th className="px-4 py-3">Category</th>
-                            <th className="px-4 py-3">Price</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3">Action</th>
+                            <th className="px-4 py-3">ID</th>
+                            <th className="px-4 py-3">Ảnh</th>
+                            <th className="px-4 py-3">Tên Sản Phẩm</th>
+                            <th className="px-4 py-3">Mã Sản Phẩm</th>
+                            <th className="px-4 py-3">Thương Hiệu</th>
+                            <th className="px-4 py-3">Danh Mục</th>
+                            <th className="px-4 py-3">Chất Liệu</th>
+                            <th className="px-4 py-3">Giới Tính</th>
+                            <th className="px-4 py-3">Giá Bán</th>
+                            <th className="px-4 py-3">Màu Sắc</th>
+                            <th className="px-4 py-3">Kích Cỡ</th>
+                            <th className="px-4 py-3">Kho</th>
+                            <th className="px-4 py-3">Trạng Thái</th>
+                            <th className="px-4 py-3">Thao Tác</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {filteredProducts.map(
-                            ({
-                                 productId,
-                                 name,
-                                 brand,
-                                 categoryName,
-                                 price,
-                                 imageUrls,
-                                 isActive,
-                             }) => (
-                                <tr
-                                    key={productId}
-                                    className="border-t hover:bg-gray-50 transition"
-                                >
-                                    <td className="px-4 py-2 flex items-center gap-2">
-                                        <img
-                                            src={imageUrls?.[0]}
-                                            alt={name}
-                                            className="rounded-full w-8 h-8 object-cover"
-                                        />
-                                        <span className="font-semibold text-blue-600 hover:underline cursor-pointer">
-                        {name}
-                      </span>
-                                    </td>
-                                    <td className="px-4 py-2">{brand}</td>
-                                    <td className="px-4 py-2">{categoryName}</td>
+                        {filteredProducts.map((product, idx) => {
+                            const {
+                                productId,
+                                productCode,
+                                name,
+                                brand,
+                                categoryName,
+                                material,
+                                gender,
+                                price,
+                                imageUrls,
+                                isActive,
+                                availableColors,
+                                availableSizes,
+                                totalStock
+                            } = product;
+                            // Calculate the correct index based on pagination
+                            const displayId = currentPage * PRODUCTS_PER_PAGE + idx + 1;
+                            return (
+                                <tr key={productId} className="border-t hover:bg-gray-50 transition">
+                                    <td className="px-4 py-2 font-bold">{displayId}</td>
                                     <td className="px-4 py-2">
-                                        {price.toLocaleString("vi-VN")} VND
+                                        <img
+                                            src={imageUrls?.[0] ? IMAGE_BASE_URL + imageUrls[0] : undefined}
+                                            alt={name}
+                                            className="rounded w-12 h-12 object-cover border cursor-pointer"
+                                            onClick={() => navigate(`/admin/products/${productId}`)}
+                                        />
                                     </td>
                                     <td
-                                        className={`px-4 py-2 ${
-                                            getStatusStyle(isActive ? "Active" : "Inactive")
-                                        }`}
+                                        className="px-4 py-2 font-semibold text-blue-600 cursor-pointer hover:underline"
+                                        onClick={() => navigate(`/admin/products/${productId}`)}
                                     >
-                                        {isActive ? "Active" : "Inactive"}
+                                        {name}
                                     </td>
-                                    <td className="px-4 py-2 space-x-2">
-                                        <button className="bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200">
+                                    <td className="px-4 py-2">{productCode}</td>
+                                    <td className="px-4 py-2">{brand}</td>
+                                    <td className="px-4 py-2">{categoryName}</td>
+                                    <td className="px-4 py-2">{material}</td>
+                                    <td className="px-4 py-2">{gender}</td>
+                                    <td className="px-4 py-2">{price.toLocaleString()}₫</td>
+                                    <td className="px-4 py-2">{availableColors && availableColors.length > 0 ? availableColors.join(", ") : '-'}</td>
+                                    <td className="px-4 py-2">{availableSizes && availableSizes.length > 0 ? availableSizes.join(", ") : '-'}</td>
+                                    <td className="px-4 py-2">{totalStock}</td>
+                                    <td className="px-4 py-2">
+                                        <span className={getStatusStyle(isActive ? "Active" : "Inactive")}>{isActive ? "Active" : "Inactive"}</span>
+                                    </td>
+                                    <td className="px-4 py-2 flex gap-2">
+                                        <button
+                                            className="text-blue-500 hover:text-blue-700 p-1 rounded border border-blue-200 hover:bg-blue-50"
+                                            title="Edit product"
+                                            onClick={() => alert(`Edit product ${productId}`)}
+                                        >
                                             <FaEdit />
                                         </button>
-                                        <button
-                                            onClick={() => handleDelete(productId)}
-                                            className="bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200"
-                                        >
-                                            <FaTrash/>
-                                        </button>
-
                                     </td>
                                 </tr>
-                            )
-                        )}
+                            );
+                        })}
                         </tbody>
                     </table>
                 </div>
 
-                <div className="mt-6 flex justify-between items-center text-gray-600 text-sm">
+                {/* Pagination */}
+                <div className="mt-6 flex justify-center">
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
                         onPageChange={setCurrentPage}
                     />
-                    <div>
-                        Trang {currentPage + 1} / {totalPages}
-                    </div>
                 </div>
-
             </div>
         </div>
     );

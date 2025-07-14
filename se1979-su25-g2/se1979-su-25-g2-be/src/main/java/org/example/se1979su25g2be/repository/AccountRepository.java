@@ -24,6 +24,6 @@ public interface AccountRepository extends JpaRepository<User, Integer> {
             @Param("role") Role role,
             Pageable pageable
     );
-
-
+    boolean existsByEmailIgnoreCase(String email);
+    boolean existsByUsernameIgnoreCase(String username);
 }

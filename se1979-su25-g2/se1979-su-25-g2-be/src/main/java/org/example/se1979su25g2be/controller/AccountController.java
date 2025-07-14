@@ -1,8 +1,10 @@
 package org.example.se1979su25g2be.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.se1979su25g2be.dto.Account.AccountDTO;
 import org.example.se1979su25g2be.dto.Account.AccountDetailDTO;
+import org.example.se1979su25g2be.dto.Account.StaffAccountDTO;
 import org.example.se1979su25g2be.service.account.AccountService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +45,24 @@ public class AccountController {
     public ResponseEntity<AccountDetailDTO> getAccountDetail(@PathVariable Integer id) {
         AccountDetailDTO accountDetailDTO = accountService.getAccountDetail(id);
         return ResponseEntity.ok(accountDetailDTO);
+    }
+
+    @PostMapping("/add")
+    public ResponseEntity<Void> createInternalAccount(@Valid @RequestBody StaffAccountDTO dto) {
+        System.out.println("RECEIVED: " + dto); // in log
+        accountService.createStaffAccount(dto);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/edit/{id}")
+    public ResponseEntity<StaffAccountDTO> getInternalAccountById(@PathVariable Integer id) {
+        StaffAccountDTO dto = accountService.getStaffAccountById(id);
+        return ResponseEntity.ok(dto);
+    }
+
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<AccountDTO> updateInternalAccount(@Valid @PathVariable Integer id, @RequestBody StaffAccountDTO dto) {
+        return ResponseEntity.ok(accountService.updateStaffAccount(id, dto));
     }
 
 }

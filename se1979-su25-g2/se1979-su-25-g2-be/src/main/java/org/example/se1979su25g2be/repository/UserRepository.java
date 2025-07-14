@@ -15,6 +15,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findByEmail(String email);
 
+    //List<User> findByAuthorities_Authority(String role);
     /**
      * CORRECTED: Finds users by the `roleName` of their associated Role entity.
      */
@@ -22,6 +23,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     List<User> findByEmailContaining(String email);
 
+    //List<User> findByAuthorities_AuthorityAndEmailContaining(String role, String email);
     /**
      * CORRECTED: Finds users by role name AND a partial email match.
      */

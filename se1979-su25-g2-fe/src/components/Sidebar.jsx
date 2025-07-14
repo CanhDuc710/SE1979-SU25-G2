@@ -23,7 +23,7 @@ export default function Sidebar({ sidebarCollapsed, setSidebarCollapsed }) {
                     <SidebarItem to="/admin/orders" icon={<FaClipboardList />} label="Orders" collapsed={sidebarCollapsed} />
                     <SidebarItem to="/admin/products" icon={<FaBoxOpen />} label="Products" collapsed={sidebarCollapsed} />
                     <SidebarItem to="/admin/discount" icon={<FaBoxOpen />} label="Discount" collapsed={sidebarCollapsed} />
-                    <SidebarItem to="/admin/users" icon={<FaUser />} label="Users" collapsed={sidebarCollapsed} />
+                    <SidebarItem to="/admin/accounts" icon={<FaUser />} label="Users" collapsed={sidebarCollapsed} />
                     <SidebarItem to="/admin/settings" icon={<FaCogs />} label="Settings" collapsed={sidebarCollapsed} />
                 </ul>
             </div>
