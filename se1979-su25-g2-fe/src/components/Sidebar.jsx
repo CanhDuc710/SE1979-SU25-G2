@@ -49,7 +49,7 @@ export default function Sidebar({ sidebarCollapsed, setSidebarCollapsed }) {
                         {/* Submenu */}
                         {!sidebarCollapsed && settingsOpen && (
                             <ul className="ml-8 mt-1 space-y-1 text-sm text-gray-700">
-                                <SidebarItem to="/admin/settings/info" icon={<FaInfoCircle />} label="Thông tin" collapsed={sidebarCollapsed} />
+                                <SidebarItem to="/admin/settings/storeInformation" icon={<FaInfoCircle />} label="Thông tin cửa hàng" collapsed={sidebarCollapsed} />
                                 <SidebarItem to="/admin/settings/banners" icon={<FaImage />} label="Banner" collapsed={sidebarCollapsed} />
                                 <SidebarItem to="/admin/settings/categories" icon={<FaThList />} label="Danh mục sản phẩm" collapsed={sidebarCollapsed} />
                             </ul>

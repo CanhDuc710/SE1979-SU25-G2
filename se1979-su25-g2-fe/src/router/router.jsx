@@ -20,6 +20,7 @@ const ProductDetailAdminLazy = lazy(() => import("../page/admin/product/ProductD
 const ProductEditLazy = lazy(() => import("../page/admin/product/ProductEdit.jsx"));
 const BannerSettingLazy = lazy(() => import("../page/admin/setting/BannerSetting.jsx"));
 const CategorySettingLazy = lazy(() => import("../page/admin/setting/CategorySetting.jsx"));
+const StoreInformationLazy = lazy(() => import("../page/admin/setting/StoreInformation.jsx"));
 const ProductCreateLazy = lazy(() => import("../page/admin/product/ProductCreate.jsx"));
 const CollectionManagementLazy = lazy(() => import("../page/admin/collection/CollectionList.jsx"));
 const CollectionDetailLazy = lazy(() => import("../page/admin/collection/CollectionDetail.jsx"));
@@ -49,6 +50,7 @@ const router = createBrowserRouter([
             { path: "products/:productId/edit", element: <ProductEditLazy /> },
             { path:"/admin/settings/categories", element:<CategorySettingLazy />},
             { path:"/admin/settings/banners", element:<BannerSettingLazy />},
+            { path:"/admin/settings/storeInformation", element:<StoreInformationLazy />},
             { path: "products/create", element: <ProductCreateLazy /> },
             { path: "collections", element: <CollectionManagementLazy /> },
             { path: "collections/:id", element: <CollectionDetailLazy /> },

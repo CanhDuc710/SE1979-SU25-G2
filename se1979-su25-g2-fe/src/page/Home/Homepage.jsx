@@ -93,7 +93,7 @@ export default function Homepage() {
 
                     {/* Right section: Banner */}
                     {config?.displayBanner && banners.length > 0 && (
-                        <div className="w-[480px] h-[270px] relative overflow-hidden">
+                        <div className="w-[550px] h-[360px] relative overflow-hidden">
                             {banners.map((banner, i) => (
                                 <img
                                     key={banner.id}
