@@ -4,24 +4,59 @@ import {
     FaInfoCircle, FaImage, FaThList
 } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import * as storeService from "../service/storeService";
 
 export default function Sidebar({ sidebarCollapsed, setSidebarCollapsed }) {
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [store, setStore] = useState({ storeName: "", logo: "" });
     const location = useLocation();
 
+    useEffect(() => {
+        (async () => {
+            try {
+                const data = await storeService.getStoreInformation();
+                setStore({ storeName: data.storeName, logo: data.logo });
+            } catch {}
+        })();
+    }, []);
+
+    const sidebarWidth = sidebarCollapsed ? "w-16" : "w-64";
     return (
-        <div className="h-full bg-gray-100 text-gray-800 flex flex-col justify-between shadow-md">
+        <div
+            className={`h-screen bg-gray-100 text-gray-800 flex flex-col justify-between shadow-md transition-all duration-200 ${sidebarWidth} fixed top-0 left-0 z-40`}
+            style={{ minHeight: "100vh" }}
+        >
             <div>
-                <div className="p-4 flex items-center justify-between">
-                    <div className="font-bold text-lg">{sidebarCollapsed ? "🛍" : "WE"}</div>
-                    <button
-                        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                        className="p-2 rounded hover:bg-gray-200 transition"
-                        title={sidebarCollapsed ? "Mở rộng" : "Thu gọn"}
-                    >
-                        {sidebarCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
-                    </button>
+                {/* Logo + Tên shop */}
+                <div className={`flex items-center ${sidebarCollapsed ? "justify-center" : "justify-between"} p-4`}>
+                    <Link to="/" className="flex items-center gap-2 min-w-0">
+                        {store.logo
+                            ? <img src={store.logo} alt="Logo" className="h-10 w-10 object-contain rounded-full bg-white p-1" />
+                            : <span className="font-bold text-2xl bg-white text-gray-800 rounded-full w-10 h-10 flex items-center justify-center">WE</span>
+                        }
+                        {!sidebarCollapsed && (
+                            <span className="ml-2 font-bold text-lg truncate">{store.storeName || ""}</span>
+                        )}
+                    </Link>
+                    {/*{!sidebarCollapsed && (*/}
+                    {/*    <button*/}
+                    {/*        onClick={() => setSidebarCollapsed(true)}*/}
+                    {/*        className="p-2 rounded hover:bg-gray-200 transition ml-2"*/}
+                    {/*        title="Thu gọn"*/}
+                    {/*    >*/}
+                    {/*        <FaChevronLeft />*/}
+                    {/*    </button>*/}
+                    {/*)}*/}
+                    {sidebarCollapsed && (
+                        <button
+                            onClick={() => setSidebarCollapsed(false)}
+                            className="p-2 rounded hover:bg-gray-200 transition"
+                            title="Mở rộng"
+                        >
+                            <FaChevronRight />
+                        </button>
+                    )}
                 </div>
 
                 <ul className="space-y-2 px-2">
@@ -61,12 +96,15 @@ export default function Sidebar({ sidebarCollapsed, setSidebarCollapsed }) {
     );
 }
 
+// Item component
 function SidebarItem({ to, icon, label, collapsed }) {
     return (
         <li>
             <Link
                 to={to}
-                className="flex items-center gap-3 px-4 py-2 rounded hover:bg-gray-200 transition"
+                className={`flex items-center gap-3 px-4 py-2 rounded hover:bg-gray-200 transition ${
+                    collapsed ? "justify-center" : ""
+                }`}
             >
                 <span className="text-lg">{icon}</span>
                 {!collapsed && <span>{label}</span>}
