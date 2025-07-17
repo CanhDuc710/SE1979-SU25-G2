@@ -27,6 +27,19 @@ public class AdminOrderController {
         return ResponseEntity.ok(orders); // Trả về 200 OK với danh sách đơn hàng
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<OrderSummaryResponse>> searchOrders(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(required = false) String searchBy,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(defaultValue = "orderDate") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+        Page<OrderSummaryResponse> orders = adminOrderService.searchOrders(status, searchTerm, searchBy, page, size, sortBy, direction);
+        return ResponseEntity.ok(orders);
+    }
+
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponse> getOrderById(@PathVariable Integer orderId) {
         return adminOrderService.getOrderById(orderId)

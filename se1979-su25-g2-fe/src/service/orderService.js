@@ -6,12 +6,34 @@ export const createOrder = async (orderData) => {
     return res.data;
 };
 
-// Admin Order Management APIs
-export const getAllOrders = async (page = 0, size = 10, sort = "orderDate,desc") => {
-    const res = await axios.get(`${API_BASE_URL}/admin/orders`, {
-        params: { page, size, sort }
-    });
-    return res.data;
+// Admin Order Management APIs - Following discount pattern
+export const getAllOrders = async ({
+    page = 0,
+    size = 8,
+    status,
+    searchTerm,
+    searchBy,
+    sortBy = 'orderDate',
+    direction = 'desc'
+} = {}) => {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('size', size.toString());
+    params.append('sortBy', sortBy);
+    params.append('direction', direction);
+    
+    if (status && status !== "all") {
+        params.append('status', status);
+    }
+    
+    if (searchTerm && searchTerm.trim()) {
+        params.append('searchTerm', searchTerm.trim());
+        params.append('searchBy', searchBy || "all");
+    }
+
+    console.log("Making API call with params:", params.toString());
+    const response = await axios.get(`${API_BASE_URL}/admin/orders/search?${params.toString()}`);
+    return response.data;
 };
 
 export const getOrderById = async (orderId) => {

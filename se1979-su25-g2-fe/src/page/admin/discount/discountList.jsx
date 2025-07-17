@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Sidebar from "../../../components/Sidebar";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import Pagination from "../../../components/Pagination";
 import { fetchDiscounts, deleteDiscount, updateDiscount, createDiscount } from "../../../service/discountService";
@@ -11,7 +10,6 @@ import "react-toastify/dist/ReactToastify.css";
 const DISCOUNTS_PER_PAGE = 8;
 
 export default function DiscountList() {
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [discounts, setDiscounts] = useState([]);
@@ -102,12 +100,7 @@ export default function DiscountList() {
 
 
     return (
-        <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white">
-            <div className={`transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"} flex-shrink-0`}>
-                <Sidebar sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />
-            </div>
-
-            <div className="flex-1 p-6">
+        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
                 <div className="mb-6 flex justify-between items-center">
                     <h2 className="text-2xl font-semibold">Discount Management</h2>
                     <button
@@ -241,7 +234,6 @@ export default function DiscountList() {
                         Trang {currentPage + 1} / {totalPages}
                     </div>
                 </div>
-            </div>
         </div>
     );
 }

@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface AdminOrderService {
 
     Page<OrderSummaryResponse> getAllOrders(Pageable pageable);
+    
+    Page<OrderSummaryResponse> searchOrders(String status, String searchTerm, String searchBy, int page, int size, String sortBy, String direction);
 
     Optional<OrderResponse> getOrderById(Integer orderId);
 

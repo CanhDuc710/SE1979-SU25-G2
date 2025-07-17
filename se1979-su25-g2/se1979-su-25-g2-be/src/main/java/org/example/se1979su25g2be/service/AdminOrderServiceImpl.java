@@ -179,6 +179,56 @@ public class AdminOrderServiceImpl implements AdminOrderService { // Triển kha
         return orders.map(this::mapOrderToOrderSummaryResponse);
     }
 
+    @Override
+    public Page<OrderSummaryResponse> searchOrders(String status, String searchTerm, String searchBy, int page, int size, String sortBy, String direction) {
+        // Create Pageable with sorting
+        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by(
+            "desc".equalsIgnoreCase(direction) ? 
+                org.springframework.data.domain.Sort.Direction.DESC : 
+                org.springframework.data.domain.Sort.Direction.ASC, 
+            sortBy
+        );
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, sort);
+        
+        Page<Order> orders;
+        
+        // If no filters, return all orders
+        if ((status == null || status.equals("all")) && 
+            (searchTerm == null || searchTerm.trim().isEmpty())) {
+            orders = orderRepository.findAll(pageable);
+        } else {
+            // Apply filters
+            Order.Status statusEnum = null;
+            if (status != null && !status.equals("all")) {
+                try {
+                    statusEnum = Order.Status.valueOf(status.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    // Invalid status, ignore
+                }
+            }
+            
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                String searchPattern = "%" + searchTerm.toLowerCase() + "%";
+                
+                if ("customer".equals(searchBy)) {
+                    orders = orderRepository.findByStatusAndCustomerName(statusEnum, searchPattern, pageable);
+                } else if ("phone".equals(searchBy)) {
+                    orders = orderRepository.findByStatusAndPhone(statusEnum, searchPattern, pageable);
+                } else if ("address".equals(searchBy)) {
+                    orders = orderRepository.findByStatusAndAddress(statusEnum, searchPattern, pageable);
+                } else {
+                    // Search all fields
+                    orders = orderRepository.findByStatusAndAllFields(statusEnum, searchPattern, pageable);
+                }
+            } else {
+                // Only status filter
+                orders = orderRepository.findByStatus(statusEnum, pageable);
+            }
+        }
+        
+        return orders.map(this::mapOrderToOrderSummaryResponse);
+    }
+
     @Override // Bắt buộc phải override các phương thức từ interface
     public Optional<OrderResponse> getOrderById(Integer orderId) {
         return orderRepository.findById(orderId)
