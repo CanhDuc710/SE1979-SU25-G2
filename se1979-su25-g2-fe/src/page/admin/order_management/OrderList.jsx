@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { getAllOrders, updateOrderStatus } from "../../../service/orderService";
 
-const AdminOrderManagement = () => {
+const OrderList = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -300,4 +300,4 @@ const AdminOrderManagement = () => {
   );
 };
 
-export default AdminOrderManagement;
+export default OrderList;

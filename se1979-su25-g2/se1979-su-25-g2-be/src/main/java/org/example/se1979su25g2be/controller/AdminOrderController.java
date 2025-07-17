@@ -21,28 +21,12 @@ public class AdminOrderController {
     @Autowired
     private AdminOrderService adminOrderService; // Inject Interface thay vì Implementation cụ thể
 
-    /**
-     * API để lấy danh sách tất cả các đơn hàng (có phân trang và sắp xếp).
-     * Trả về thông tin tóm tắt.
-     * GET /api/admin/orders
-     * Ví dụ: /api/admin/orders?page=0&size=10&sort=orderDate,desc
-     * @param pageable Đối tượng Pageable tự động được Spring tạo từ các tham số request.
-     * @return ResponseEntity chứa Page các OrderSummaryResponse.
-     */
     @GetMapping
     public ResponseEntity<Page<OrderSummaryResponse>> getAllOrders(Pageable pageable) {
         Page<OrderSummaryResponse> orders = adminOrderService.getAllOrders(pageable);
         return ResponseEntity.ok(orders); // Trả về 200 OK với danh sách đơn hàng
     }
 
-    /**
-     * API để lấy chi tiết một đơn hàng theo ID.
-     * Trả về thông tin đầy đủ.
-     * GET /api/admin/orders/{orderId}
-     * Ví dụ: /api/admin/orders/123
-     * @param orderId ID của đơn hàng.
-     * @return ResponseEntity chứa OrderResponse nếu tìm thấy, hoặc 404 Not Found nếu không.
-     */
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponse> getOrderById(@PathVariable Integer orderId) {
         return adminOrderService.getOrderById(orderId)
@@ -50,14 +34,6 @@ public class AdminOrderController {
                 .orElse(ResponseEntity.notFound().build()); // Nếu không tìm thấy, trả về 404 Not Found
     }
 
-    /**
-     * API để cập nhật trạng thái của một đơn hàng.
-     * PUT /api/admin/orders/{orderId}/status
-     * Request Body (JSON): "CONFIRMED" (hoặc "PENDING", "SHIPPED", "DELIVERED", "CANCELLED")
-     * @param orderId ID của đơn hàng cần cập nhật.
-     * @param newStatusString Trạng thái mới dưới dạng chuỗi.
-     * @return ResponseEntity chứa OrderResponse đã cập nhật nếu thành công, hoặc lỗi 4xx/5xx nếu có vấn đề.
-     */
     @PutMapping("/{orderId}/status")
     public ResponseEntity<OrderResponse> updateOrderStatus(@PathVariable Integer orderId,
                                                            @RequestBody String newStatusString) {
@@ -76,12 +52,6 @@ public class AdminOrderController {
         }
     }
 
-    /**
-     * API để xóa một đơn hàng.
-     * DELETE /api/admin/orders/{orderId}
-     * @param orderId ID của đơn hàng cần xóa.
-     * @return ResponseEntity 204 No Content nếu xóa thành công, hoặc 404 Not Found nếu không.
-     */
     @DeleteMapping("/{orderId}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Integer orderId) {
         try {
