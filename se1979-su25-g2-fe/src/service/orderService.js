@@ -21,11 +21,11 @@ export const getAllOrders = async ({
     params.append('size', size.toString());
     params.append('sortBy', sortBy);
     params.append('direction', direction);
-    
+
     if (status && status !== "all") {
         params.append('status', status);
     }
-    
+
     if (searchTerm && searchTerm.trim()) {
         params.append('searchTerm', searchTerm.trim());
         params.append('searchBy', searchBy || "all");
@@ -42,9 +42,17 @@ export const getOrderById = async (orderId) => {
 };
 
 export const updateOrderStatus = async (orderId, status) => {
+    console.log("Service: Updating order status", { orderId, status });
+    console.log("Service: Request URL:", `${API_BASE_URL}/admin/orders/${orderId}/status`);
+
+    // Send the status as plain text
+    console.log("Service: Request body:", status);
+
     const res = await axios.put(`${API_BASE_URL}/admin/orders/${orderId}/status`, status, {
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'text/plain' }
     });
+
+    console.log("Service: Response received:", res.data);
     return res.data;
 };
 

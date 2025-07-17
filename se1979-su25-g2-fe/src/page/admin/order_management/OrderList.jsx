@@ -15,6 +15,47 @@ const OrderList = () => {
   const [error, setError] = useState(null);
   const [sortBy, setSortBy] = useState("orderDate");
   const [direction, setDirection] = useState("desc");
+  const [notification, setNotification] = useState(null);
+
+  // Notification function
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    // Auto-hide notification after 3 seconds
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+  };
+
+  // Get available status options based on current status
+  const getAvailableStatusOptions = (currentStatus) => {
+    const statusOptions = {
+      PENDING: [
+        { value: 'PENDING', label: 'Pending' },
+        { value: 'CONFIRMED', label: 'Confirmed' },
+        { value: 'CANCELLED', label: 'Cancelled' }
+      ],
+      CONFIRMED: [
+        { value: 'CONFIRMED', label: 'Confirmed' },
+        { value: 'SHIPPED', label: 'Shipped' },
+        { value: 'CANCELLED', label: 'Cancelled' }
+      ],
+      SHIPPED: [
+        { value: 'SHIPPED', label: 'Shipped' },
+        { value: 'DELIVERED', label: 'Delivered' },
+        { value: 'CANCELLED', label: 'Cancelled' }
+      ],
+      DELIVERED: [
+        { value: 'DELIVERED', label: 'Delivered' }
+      ],
+      CANCELLED: [
+        { value: 'CANCELLED', label: 'Cancelled' }
+      ]
+    };
+
+    return statusOptions[currentStatus] || [
+      { value: currentStatus, label: currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1).toLowerCase() }
+    ];
+  };
 
   // Load data - Following discount pattern
   const loadOrders = async () => {
@@ -125,6 +166,8 @@ const OrderList = () => {
   };
 
   const handleStatusChange = async (orderId, newStatus) => {
+    console.log("Attempting to change status:", { orderId, newStatus });
+
     try {
       // Update local state immediately for better UX
       setOrders(
@@ -134,11 +177,28 @@ const OrderList = () => {
       );
 
       // Make API call to update status on backend
-      await updateOrderStatus(orderId, newStatus);
+      console.log("Making API call to update status...");
+      const response = await updateOrderStatus(orderId, newStatus);
+      console.log("Status update successful:", response);
+
+      // Show success notification
+      showNotification(`Order #${orderId} status updated to ${newStatus.toLowerCase()} successfully!`, 'success');
+
+      // Optionally reload orders to ensure consistency
+      // loadOrders();
     } catch (error) {
       console.error("Error updating order status:", error);
+      console.error("Error details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+
       // Revert the change if API call fails
       loadOrders();
+
+      // Show error notification
+      showNotification(`Failed to update order status: ${error.response?.data?.message || error.message}`, 'error');
     }
   };
 
@@ -373,12 +433,13 @@ const OrderList = () => {
                               handleStatusChange(order.orderId, e.target.value)
                             }
                             className="text-sm border border-gray-300 rounded px-2 py-1 bg-white dark:bg-white text-gray-900 dark:text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            disabled={order.status === 'DELIVERED' || order.status === 'CANCELLED'}
                           >
-                            <option value="PENDING">Pending</option>
-                            <option value="CONFIRMED">Confirmed</option>
-                            <option value="SHIPPED">Shipped</option>
-                            <option value="DELIVERED">Delivered</option>
-                            <option value="CANCELLED">Cancelled</option>
+                            {getAvailableStatusOptions(order.status).map(status => (
+                              <option key={status.value} value={status.value}>
+                                {status.label}
+                              </option>
+                            ))}
                           </select>
                         </div>
                       </td>
@@ -389,6 +450,45 @@ const OrderList = () => {
             </table>
           </div>
         </div>
+
+        {/* Notification */}
+        {notification && (
+          <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg border-l-4 ${notification.type === 'success'
+              ? 'bg-green-50 border-green-400 text-green-700'
+              : 'bg-red-50 border-red-400 text-red-700'
+            } transition-all duration-300 ease-in-out`}>
+            <div className="flex items-center">
+              <div className={`flex-shrink-0 ${notification.type === 'success' ? 'text-green-400' : 'text-red-400'
+                }`}>
+                {notification.type === 'success' ? (
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">{notification.message}</p>
+              </div>
+              <div className="ml-auto pl-3">
+                <button
+                  onClick={() => setNotification(null)}
+                  className={`inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 ${notification.type === 'success'
+                      ? 'text-green-500 hover:bg-green-100 focus:ring-green-600'
+                      : 'text-red-500 hover:bg-red-100 focus:ring-red-600'
+                    }`}
+                >
+                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Error Message */}
         {error && (
