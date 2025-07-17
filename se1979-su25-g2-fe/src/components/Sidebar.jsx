@@ -13,13 +13,22 @@ export default function Sidebar({ sidebarCollapsed, setSidebarCollapsed }) {
     const location = useLocation();
 
     useEffect(() => {
-        (async () => {
+        const fetchStoreInfo = async () => {
             try {
                 const data = await storeService.getStoreInformation();
                 setStore({ storeName: data.storeName, logo: data.logo });
-            } catch {}
-        })();
-    }, []);
+            } catch (error) {
+                console.error("Error fetching store info for sidebar:", error);
+                // Optionally handle error, e.g., set default values or show a message
+            }
+        };
+
+        fetchStoreInfo();
+        // Bạn có thể thêm `sidebarCollapsed` vào dependency array nếu muốn
+        // thông tin cửa hàng trên sidebar được tải lại mỗi khi trạng thái sidebar thay đổi.
+        // Tuy nhiên, việc này có thể không cần thiết nếu thông tin cửa hàng không thay đổi thường xuyên
+        // hoặc đã được cập nhật thông qua StoreInformation.jsx
+    }, []); // Dependency array rỗng để chỉ chạy một lần khi component mount
 
     const sidebarWidth = sidebarCollapsed ? "w-16" : "w-64";
     return (
@@ -39,15 +48,7 @@ export default function Sidebar({ sidebarCollapsed, setSidebarCollapsed }) {
                             <span className="ml-2 font-bold text-lg truncate">{store.storeName || ""}</span>
                         )}
                     </Link>
-                    {/*{!sidebarCollapsed && (*/}
-                    {/*    <button*/}
-                    {/*        onClick={() => setSidebarCollapsed(true)}*/}
-                    {/*        className="p-2 rounded hover:bg-gray-200 transition ml-2"*/}
-                    {/*        title="Thu gọn"*/}
-                    {/*    >*/}
-                    {/*        <FaChevronLeft />*/}
-                    {/*    </button>*/}
-                    {/*)}*/}
+                    {/* Các nút thu/mở sidebar */}
                     {sidebarCollapsed && (
                         <button
                             onClick={() => setSidebarCollapsed(false)}
@@ -55,6 +56,15 @@ export default function Sidebar({ sidebarCollapsed, setSidebarCollapsed }) {
                             title="Mở rộng"
                         >
                             <FaChevronRight />
+                        </button>
+                    )}
+                    {!sidebarCollapsed && ( // Thêm nút thu gọn khi sidebar đang mở
+                        <button
+                            onClick={() => setSidebarCollapsed(true)}
+                            className="p-2 rounded hover:bg-gray-200 transition ml-2"
+                            title="Thu gọn"
+                        >
+                            <FaChevronLeft />
                         </button>
                     )}
                 </div>
@@ -92,19 +102,24 @@ export default function Sidebar({ sidebarCollapsed, setSidebarCollapsed }) {
                     </li>
                 </ul>
             </div>
+            {/* Nếu bạn có footer riêng cho sidebar, hãy đặt nó ở đây */}
         </div>
     );
 }
 
 // Item component
 function SidebarItem({ to, icon, label, collapsed }) {
+    // Xác định xem đường dẫn hiện tại có khớp với item này không
+    const location = useLocation();
+    const isActive = location.pathname === to;
+
     return (
         <li>
             <Link
                 to={to}
-                className={`flex items-center gap-3 px-4 py-2 rounded hover:bg-gray-200 transition ${
+                className={`flex items-center gap-3 px-4 py-2 rounded transition ${
                     collapsed ? "justify-center" : ""
-                }`}
+                } ${isActive ? "bg-blue-600 text-white hover:bg-blue-700" : "hover:bg-gray-200"}`} // Highlight item đang active
             >
                 <span className="text-lg">{icon}</span>
                 {!collapsed && <span>{label}</span>}
