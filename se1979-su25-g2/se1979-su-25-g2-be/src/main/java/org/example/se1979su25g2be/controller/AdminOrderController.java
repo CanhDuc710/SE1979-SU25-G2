@@ -1,5 +1,6 @@
 package org.example.se1979su25g2be.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.example.se1979su25g2be.dto.OrderResponse;
 import org.example.se1979su25g2be.dto.OrderSummaryResponse; // Import DTO mới
 import org.example.se1979su25g2be.entity.Order; // Import Order entity để sử dụng enum Status
@@ -12,7 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/admin/orders") // Base path cho tất cả các API quản lý đơn hàng của Admin
+@RequestMapping("/api/admin/orders")
+@RequiredArgsConstructor
+@CrossOrigin("*")
 public class AdminOrderController {
 
     @Autowired
