@@ -4,6 +4,9 @@ package org.example.se1979su25g2be.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -51,6 +54,10 @@ public class Order {
     private Status status;
 
     private Double totalAmount;
+
+    @Column(name = "order_date", nullable = false, updatable = false)
+    @ColumnDefault("CURRENT_TIMESTAMP") // Thêm annotation này
+    private LocalDateTime orderDate;
 
     public enum PaymentMethod {
         COD, CARD, PAYPAL

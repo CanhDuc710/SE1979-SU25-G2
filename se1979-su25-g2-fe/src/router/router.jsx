@@ -24,6 +24,7 @@ const StoreInformationLazy = lazy(() => import("../page/admin/setting/StoreInfor
 const ProductCreateLazy = lazy(() => import("../page/admin/product/ProductCreate.jsx"));
 const CollectionManagementLazy = lazy(() => import("../page/admin/collection/CollectionList.jsx"));
 const CollectionDetailLazy = lazy(() => import("../page/admin/collection/CollectionDetail.jsx"));
+const OrderListLazy = lazy(() => import("../page/admin/order_management/OrderList.jsx"));
 const router = createBrowserRouter([
     {
         path: "/",
@@ -54,6 +55,7 @@ const router = createBrowserRouter([
             { path: "products/create", element: <ProductCreateLazy /> },
             { path: "collections", element: <CollectionManagementLazy /> },
             { path: "collections/:id", element: <CollectionDetailLazy /> },
+            { path: "orders", element: <OrderListLazy /> },
             { path: "*", element: <NotFoundLazy /> },
         ],
     },
