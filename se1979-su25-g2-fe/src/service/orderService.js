@@ -6,7 +6,6 @@ export const createOrder = async (orderData) => {
     return res.data;
 };
 
-// Admin Order Management APIs - Following discount pattern
 export const getAllOrders = async ({
     page = 0,
     size = 8,
@@ -31,7 +30,6 @@ export const getAllOrders = async ({
         params.append('searchBy', searchBy || "all");
     }
 
-    console.log("Making API call with params:", params.toString());
     const response = await axios.get(`${API_BASE_URL}/admin/orders/search?${params.toString()}`);
     return response.data;
 };
@@ -42,17 +40,9 @@ export const getOrderById = async (orderId) => {
 };
 
 export const updateOrderStatus = async (orderId, status) => {
-    console.log("Service: Updating order status", { orderId, status });
-    console.log("Service: Request URL:", `${API_BASE_URL}/admin/orders/${orderId}/status`);
-
-    // Send the status as plain text
-    console.log("Service: Request body:", status);
-
     const res = await axios.put(`${API_BASE_URL}/admin/orders/${orderId}/status`, status, {
         headers: { 'Content-Type': 'text/plain' }
     });
-
-    console.log("Service: Response received:", res.data);
     return res.data;
 };
 

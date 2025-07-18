@@ -17,16 +17,13 @@ const OrderList = () => {
   const [direction, setDirection] = useState("desc");
   const [notification, setNotification] = useState(null);
 
-  // Notification function
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
-    // Auto-hide notification after 3 seconds
     setTimeout(() => {
       setNotification(null);
     }, 3000);
   };
 
-  // Get available status options based on current status
   const getAvailableStatusOptions = (currentStatus) => {
     const statusOptions = {
       PENDING: [
@@ -57,19 +54,10 @@ const OrderList = () => {
     ];
   };
 
-  // Load data - Following discount pattern
   const loadOrders = async () => {
     try {
       setLoading(true);
       setError(null);
-
-      console.log("Loading orders with params:", {
-        page: currentPage,
-        size: 8,
-        status: selectedStatus,
-        searchTerm: searchTerm,
-        searchBy: searchBy
-      });
 
       const data = await getAllOrders({
         page: currentPage,
@@ -81,25 +69,16 @@ const OrderList = () => {
         direction: direction
       });
 
-      console.log("Received data:", data);
       setOrders(data.content || []);
       setTotalPages(data.totalPages || 0);
       setTotalElements(data.totalElements || 0);
     } catch (err) {
-      console.error("Error fetching orders:", err);
-      console.error("Error response:", err.response);
-      console.error("Error message:", err.message);
-      console.error("Error code:", err.code);
-
       let errorMessage = "Unknown error";
       if (err.response) {
-        // Server responded with error status
         errorMessage = `Server Error: ${err.response.status} - ${err.response.data?.message || err.response.statusText}`;
       } else if (err.request) {
-        // Request was made but no response received
         errorMessage = "Network Error: No response from server";
       } else {
-        // Something else happened
         errorMessage = err.message;
       }
 
@@ -166,38 +145,17 @@ const OrderList = () => {
   };
 
   const handleStatusChange = async (orderId, newStatus) => {
-    console.log("Attempting to change status:", { orderId, newStatus });
-
     try {
-      // Update local state immediately for better UX
       setOrders(
         orders.map((order) =>
           order.orderId === orderId ? { ...order, status: newStatus } : order
         )
       );
 
-      // Make API call to update status on backend
-      console.log("Making API call to update status...");
-      const response = await updateOrderStatus(orderId, newStatus);
-      console.log("Status update successful:", response);
-
-      // Show success notification
+      await updateOrderStatus(orderId, newStatus);
       showNotification(`Order #${orderId} status updated to ${newStatus.toLowerCase()} successfully!`, 'success');
-
-      // Optionally reload orders to ensure consistency
-      // loadOrders();
     } catch (error) {
-      console.error("Error updating order status:", error);
-      console.error("Error details:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-
-      // Revert the change if API call fails
       loadOrders();
-
-      // Show error notification
       showNotification(`Failed to update order status: ${error.response?.data?.message || error.message}`, 'error');
     }
   };
@@ -454,8 +412,8 @@ const OrderList = () => {
         {/* Notification */}
         {notification && (
           <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg border-l-4 ${notification.type === 'success'
-              ? 'bg-green-50 border-green-400 text-green-700'
-              : 'bg-red-50 border-red-400 text-red-700'
+            ? 'bg-green-50 border-green-400 text-green-700'
+            : 'bg-red-50 border-red-400 text-red-700'
             } transition-all duration-300 ease-in-out`}>
             <div className="flex items-center">
               <div className={`flex-shrink-0 ${notification.type === 'success' ? 'text-green-400' : 'text-red-400'
@@ -477,8 +435,8 @@ const OrderList = () => {
                 <button
                   onClick={() => setNotification(null)}
                   className={`inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 ${notification.type === 'success'
-                      ? 'text-green-500 hover:bg-green-100 focus:ring-green-600'
-                      : 'text-red-500 hover:bg-red-100 focus:ring-red-600'
+                    ? 'text-green-500 hover:bg-green-100 focus:ring-green-600'
+                    : 'text-red-500 hover:bg-red-100 focus:ring-red-600'
                     }`}
                 >
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
