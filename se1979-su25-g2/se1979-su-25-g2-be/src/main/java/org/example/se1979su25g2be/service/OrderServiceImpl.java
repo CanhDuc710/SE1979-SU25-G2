@@ -1,17 +1,24 @@
 package org.example.se1979su25g2be.service;
 
+import org.example.se1979su25g2be.dto.AccountOrderHistory.OrderHistoryDTO;
+import org.example.se1979su25g2be.dto.AccountOrderHistory.OrderItemDTO;
 import org.example.se1979su25g2be.dto.OrderRequestDTO;
 import org.example.se1979su25g2be.entity.*;
 import org.example.se1979su25g2be.repository.*;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.text.NumberFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
-
     private final OrderRepository orderRepository;
     private final ProductVariantRepository productVariantRepository;
     private final UserRepository userRepository;
@@ -19,6 +26,9 @@ public class OrderServiceImpl implements OrderService {
     private final ProvinceRepository provinceRepository;
     private final DistrictRepository districtRepository;
     private final WardRepository wardRepository;
+
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final NumberFormat VN_CURRENCY = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
 
     public OrderServiceImpl(OrderRepository orderRepository,
                             ProductVariantRepository productVariantRepository,
@@ -98,5 +108,33 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return savedOrder;
+    }
+
+    @Override
+    public Page<OrderHistoryDTO> getOrdersByUser(Integer userId, String keyword, Pageable pageable) {
+        String kw = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
+        return orderRepository.findByUserIdAndKeyword(userId, kw, pageable)
+                .map(order -> {
+                    // Map items
+                    List<OrderItemDTO> items = order.getItems().stream()
+                            .map(it -> OrderItemDTO.builder()
+                                    .productId(it.getProductVariant().getProduct().getProductId().longValue())
+                                    .name(it.getProductVariant().getProduct().getName())
+                                    .quantity(it.getQuantity())
+                                    // Lấy URL ảnh đầu tiên từ danh sách images
+                                    .img(it.getProductVariant().getProduct().getImages().get(0).getImageUrl())
+                                    .build()
+                            )
+                            .collect(Collectors.toList());
+
+                    // Build DTO with formatted date and total
+                    return OrderHistoryDTO.builder()
+                            .orderId(order.getOrderId().longValue())
+                            .date(order.getOrderDate().format(DATE_FMT))
+                            .total(VN_CURRENCY.format(order.getTotalAmount()))
+                            .status(order.getStatus().name())
+                            .items(items)
+                            .build();
+                });
     }
 }

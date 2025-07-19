@@ -56,8 +56,7 @@ public class Order {
     private Double totalAmount;
 
     @Column(name = "order_date", nullable = false, updatable = false)
-    @ColumnDefault("CURRENT_TIMESTAMP") // Thêm annotation này
-    private LocalDateTime orderDate;
+    private LocalDateTime orderDate = LocalDateTime.now();
 
     public enum PaymentMethod {
         COD, CARD, PAYPAL
