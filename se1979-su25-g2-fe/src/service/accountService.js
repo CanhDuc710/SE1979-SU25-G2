@@ -42,3 +42,18 @@ export const updateAccount = async (id, data) => {
     const response = await axios.put(`${API_BASE_URL}/admin/accounts/edit/${id}`, data);
     return response.data;
 };
+
+export const getOrderHistory = async (userId, { page = 0, size = 10, keyword = "" } = {}) => {
+    try {
+        const { data } = await axios.get(
+            `${API_BASE_URL}/admin/accounts/${userId}/orders`,
+            {
+                params: { page, size, keyword },
+            }
+        );
+        return data;
+    } catch (err) {
+        console.error("Error fetching order history:", err);
+        throw err;
+    }
+};
