@@ -1,16 +1,18 @@
 package org.example.se1979su25g2be.dto.Account;
 
-public record UpdateProfileDTO(
-        Integer userId,
-        String firstName,
-        String lastName,
-        String username,
-        String email,
-        String phoneNumber,
-        String address,
-        String gender,
-        String dob,
-        String role,
-        String status,
-        String fullName) {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class UpdateProfileDTO {
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phoneNumber;
+    private String address;
+    private String sex;
+    private String dob;
 }
