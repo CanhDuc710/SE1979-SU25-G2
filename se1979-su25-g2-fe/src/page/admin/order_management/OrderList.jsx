@@ -1,7 +1,113 @@
-// @ts-nocheck
 import React, { useState, useEffect } from "react";
 import { getAllOrders, updateOrderStatus } from "../../../service/orderService";
 import Pagination from "../../../components/Pagination";
+
+// ProductList component for displaying order items
+const ProductList = ({ items }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  if (!items || items.length === 0) {
+    return <div className="text-sm text-gray-500">No products</div>;
+  }
+
+  const firstItem = items[0];
+  const remainingCount = items.length - 1;
+
+  return (
+    <div className="space-y-2">
+      {/* First product - always visible */}
+      <div className="flex items-center space-x-3">
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+          {firstItem.productVariant?.imageUrl ? (
+            <img
+              src={`http://localhost:8080${firstItem.productVariant.imageUrl}`}
+              alt={firstItem.productVariant.productName}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyNkM5IDI2IDkgMTQgMjAgMTRTMzEgMjYgMjAgMjZaIiBmaWxsPSIjRDFENUQ5Ii8+CjxjaXJjbGUgY3g9IjIwIiBjeT0iMTgiIHI9IjMiIGZpbGw9IiNEMUQ1RDkiLz4KPC9zdmc+';
+              }}
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+              <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+              </svg>
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-medium text-gray-900 truncate">
+            {firstItem.productVariant?.productName || 'Unknown Product'}
+          </div>
+          <div className="text-xs text-gray-500">
+            {firstItem.productVariant?.color && firstItem.productVariant?.size
+              ? `${firstItem.productVariant.color} - ${firstItem.productVariant.size}`
+              : 'No variant info'} × {firstItem.quantity}
+          </div>
+        </div>
+      </div>
+
+      {/* Expand/Collapse button for multiple products */}
+      {remainingCount > 0 && (
+        <div className="border-t border-gray-200 pt-2">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex items-center text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900 px-2 py-1 rounded transition-colors"
+            style={{ backgroundColor: '#f3f4f6', color: '#374151' }}
+          >
+            <span>{remainingCount} sản phẩm</span>
+            <svg
+              className={`ml-1 w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              style={{ color: '#374151' }}
+            >
+              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Expanded products list */}
+      {isExpanded && remainingCount > 0 && (
+        <div className="space-y-2 pl-4 border-l-2 border-gray-100">
+          {items.slice(1).map((item, index) => (
+            <div key={item.orderItemId || index} className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                {item.productVariant?.imageUrl ? (
+                  <img
+                    src={`http://localhost:8080${item.productVariant.imageUrl}`}
+                    alt={item.productVariant.productName}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyNkM5IDI2IDkgMTQgMjAgMTRTMzEgMjYgMjAgMjZaIiBmaWxsPSIjRDFENUQ5Ii8+CjxjaXJjbGUgY3g9IjIwIiBjeT0iMTgiIHI9IjMiIGZpbGw9IiNEMUQ1RDkiLz4KPC9zdmc+';
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-gray-900 truncate">
+                  {item.productVariant?.productName || 'Unknown Product'}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {item.productVariant?.color && item.productVariant?.size
+                    ? `${item.productVariant.color} - ${item.productVariant.size}`
+                    : 'No variant info'} × {item.quantity}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
@@ -310,6 +416,9 @@ const OrderList = () => {
                     Order Details
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
+                    Products
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
                     Customer
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
@@ -343,6 +452,9 @@ const OrderList = () => {
                             Ship to: {order.shippingAddressFull}
                           </div>
                         </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <ProductList items={order.items || []} />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
@@ -382,7 +494,10 @@ const OrderList = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
-                          <button className="text-blue-600 hover:text-blue-900 dark:text-blue-600 dark:hover:text-blue-900 bg-transparent dark:bg-transparent border-none dark:border-none shadow-none dark:shadow-none">
+                          <button
+                            onClick={() => window.location.href = `/admin/orders/${order.orderId}`}
+                            className="text-blue-600 hover:text-blue-900 bg-transparent border-none shadow-none transition-colors"
+                          >
                             View
                           </button>
                           <select

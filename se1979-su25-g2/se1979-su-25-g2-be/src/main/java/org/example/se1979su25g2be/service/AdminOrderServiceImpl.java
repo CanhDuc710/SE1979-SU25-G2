@@ -67,6 +67,10 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             shippingAddressFull += ", " + order.getProvince().getName();
         }
 
+        List<OrderItemResponse> itemResponses = order.getItems().stream()
+                .map(this::mapOrderItemToOrderItemResponse)
+                .collect(Collectors.toList());
+
         return new OrderSummaryResponse(
                 order.getOrderId(),
                 numberOfProducts,
@@ -76,7 +80,8 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 order.getShippingPhone(),
                 shippingAddressFull,
                 order.getStatus(),
-                order.getOrderDate()
+                order.getOrderDate(),
+                itemResponses
         );
     }
 
@@ -129,27 +134,24 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
         String productName = (product != null) ? product.getName() : null;
         Double unitPrice = (product != null && product.getPrice() != null) ? product.getPrice().doubleValue() : null;
-        String variantName = "";
-        if (pv.getColor() != null && !pv.getColor().isEmpty()) {
-            variantName += pv.getColor();
-        }
-        if (pv.getSize() != null && !pv.getSize().isEmpty()) {
-            if (!variantName.isEmpty()) variantName += " - ";
-            variantName += pv.getSize();
-        }
-        if (variantName.isEmpty()) {
-            variantName = "N/A";
+        
+        String imageUrl = null;
+        if (product != null && product.getImages() != null && !product.getImages().isEmpty()) {
+            imageUrl = product.getImages().stream()
+                    .filter(img -> img.isMain())
+                    .map(img -> img.getImageUrl())
+                    .findFirst()
+                    .orElse(product.getImages().get(0).getImageUrl());
         }
 
         return new OrderItemProductVariantDTO(
                 pv.getVariantId(),
                 (product != null) ? product.getProductId() : null,
                 productName,
-                variantName,
                 pv.getColor(),
                 pv.getSize(),
                 unitPrice,
-                pv.getStockQuantity()
+                imageUrl
         );
     }
 
