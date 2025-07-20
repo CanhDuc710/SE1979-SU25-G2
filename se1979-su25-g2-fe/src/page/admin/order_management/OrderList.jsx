@@ -47,33 +47,12 @@ const ProductList = ({ items }) => {
         </div>
       </div>
 
-      {/* Expand/Collapse button for multiple products */}
-      {remainingCount > 0 && (
-        <div className="border-t border-gray-200 pt-2">
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900 px-2 py-1 rounded transition-colors"
-            style={{ backgroundColor: '#f3f4f6', color: '#374151' }}
-          >
-            <span>{remainingCount} sản phẩm</span>
-            <svg
-              className={`ml-1 w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              style={{ color: '#374151' }}
-            >
-              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </button>
-        </div>
-      )}
-
-      {/* Expanded products list */}
+      {/* Expanded products list - appears ABOVE the button */}
       {isExpanded && remainingCount > 0 && (
-        <div className="space-y-2 pl-4 border-l-2 border-gray-100">
+        <div className="mt-3 mb-2 space-y-3">
           {items.slice(1).map((item, index) => (
             <div key={item.orderItemId || index} className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
                 {item.productVariant?.imageUrl ? (
                   <img
                     src={`http://localhost:8080${item.productVariant.imageUrl}`}
@@ -85,7 +64,7 @@ const ProductList = ({ items }) => {
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
                     </svg>
                   </div>
@@ -103,6 +82,27 @@ const ProductList = ({ items }) => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Expand/Collapse button for multiple products - stays at the bottom */}
+      {remainingCount > 0 && (
+        <div className="border-t border-gray-200 pt-2">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex items-center text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900 px-2 py-1 rounded transition-colors"
+            style={{ backgroundColor: '#f3f4f6', color: '#374151' }}
+          >
+            <span>{remainingCount} sản phẩm</span>
+            <svg
+              className={`ml-1 w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              style={{ color: '#374151' }}
+            >
+              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
         </div>
       )}
     </div>
