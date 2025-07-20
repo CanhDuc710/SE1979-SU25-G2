@@ -1,198 +1,199 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { User, Upload, Edit3 } from "lucide-react"
+import { useState, useEffect } from "react";
+import { fetchProfile, updateProfile } from "../../service/profileService";
+import { User } from "lucide-react";
 
-export default function UserProfile() {
+export default function UserProfile({ userId }) {
     const [formData, setFormData] = useState({
-        lastName: "Nguyen",
-        firstName: "Van A",
-        gender: "Male",
-        birthDate: "01/01/1990",
-        phone: "0123456789",
-        city: "Ha Noi",
-        address: "Thon 3, Thach That - Hoa Lac",
-    })
+        lastName: "",
+        firstName: "",
+        email: "",
+        phoneNumber: "",
+        sex: "Male",
+        dob: "1990-01-01",
+    });
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        // load profile khi component mount
+        (async () => {
+            try {
+                const dto = await fetchProfile(userId);
+                setFormData({
+                    lastName: dto.lastName,
+                    firstName: dto.firstName,
+                    email: dto.email,
+                    phoneNumber: dto.phoneNumber,
+                    sex: dto.sex,
+                    dob: dto.dob.split("T")[0], // nếu backend trả ISO datetime
+                });
+            } catch (e) {
+                setError(e.message);
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [userId]);
 
     const handleInputChange = (field, value) => {
-        setFormData((prev) => ({
-            ...prev,
-            [field]: value,
-        }))
-    }
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
 
-    const handleUploadAvatar = () => {
-        // Xử lý upload avatar
-        console.log("Upload avatar")
-    }
+    const handleSaveProfile = async () => {
+        setSaving(true);
+        setError(null);
+        try {
+            const updated = await updateProfile(userId, {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                email: formData.email,
+                phoneNumber: formData.phoneNumber,
+                sex: formData.sex,
+                dob: formData.dob,
+            });
+            // bạn có thể cập nhật lại state nếu backend chỉnh sửa thêm
+            setFormData({
+                lastName: updated.lastName,
+                firstName: updated.firstName,
+                email: updated.email,
+                phoneNumber: updated.phoneNumber,
+                sex: updated.sex,
+                dob: updated.dob.split("T")[0] || updated.dob,
+            });
+            alert("Cập nhật thành công!");
+        } catch (e) {
+            setError(e.message);
+        } finally {
+            setSaving(false);
+        }
+    };
 
-    const handleEditProfile = () => {
-        // Xử lý chỉnh sửa profile
-        console.log("Edit profile")
-    }
-
-    const handleChangePassword = () => {
-        // Xử lý thay đổi mật khẩu
-        console.log("Change password")
-    }
-
-    const handleChangeEmail = () => {
-        // Xử lý thay đổi email
-        console.log("Change email")
+    if (loading) {
+        return <div className="p-8 text-center">Đang tải thông tin...</div>;
     }
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header Section */}
-            <div className="bg-blue-200 py-8">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-200 to-yellow-100 py-8">
                 <div className="max-w-4xl mx-auto px-4">
-                    <h1 className="text-2xl font-medium text-gray-700 text-center">Xin chào, User1</h1>
+                    <h1 className="text-2xl font-medium text-gray-700 text-center">
+                        Xin chào, {formData.firstName}
+                    </h1>
                 </div>
             </div>
 
-            {/* Profile Content */}
-            <div className="max-w-4xl mx-auto px-4 py-8">
-                {/* Profile Header */}
-                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center border-2 border-gray-300">
-                                <User className="w-8 h-8 text-gray-500" />
-                            </div>
-                            <div>
-                                <h2 className="text-xl font-semibold text-gray-800">User1</h2>
-                                <p className="text-gray-600">User1@gmail.com</p>
-                            </div>
-                        </div>
-                        <div className="flex space-x-3">
-                            <button
-                                onClick={handleUploadAvatar}
-                                className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
-                            >
-                                <Upload className="w-4 h-4" />
-                                <span>Tải lên avatar mới</span>
-                            </button>
-                            <button
-                                onClick={handleEditProfile}
-                                className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
-                            >
-                                <Edit3 className="w-4 h-4" />
-                                <span>Chỉnh sửa</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+                {error && (
+                    <div className="text-red-600 bg-red-100 p-3 rounded">{error}</div>
+                )}
 
                 {/* Profile Form */}
                 <div className="bg-white rounded-lg shadow-sm p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Họ */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Họ</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Họ
+                            </label>
                             <input
                                 type="text"
                                 value={formData.lastName}
-                                onChange={(e) => handleInputChange("lastName", e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Nguyen"
+                                onChange={e =>
+                                    handleInputChange("lastName", e.target.value)
+                                }
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
 
                         {/* Tên */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Tên</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Tên
+                            </label>
                             <input
                                 type="text"
                                 value={formData.firstName}
-                                onChange={(e) => handleInputChange("firstName", e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Van A"
+                                onChange={e =>
+                                    handleInputChange("firstName", e.target.value)
+                                }
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
 
-                        {/* Giới tính */}
+                        {/* Email */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Giới tính</label>
-                            <select
-                                value={formData.gender}
-                                onChange={(e) => handleInputChange("gender", e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-
-                        {/* Ngày sinh */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Ngày sinh</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Email
+                            </label>
                             <input
-                                type="date"
-                                value="1990-01-01"
-                                onChange={(e) => handleInputChange("birthDate", e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                type="email"
+                                value={formData.email}
+                                onChange={e => handleInputChange("email", e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
 
                         {/* Số điện thoại */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Số điện thoại
+                            </label>
                             <input
                                 type="tel"
-                                value={formData.phone}
-                                onChange={(e) => handleInputChange("phone", e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="0123456789"
+                                value={formData.phoneNumber}
+                                onChange={e =>
+                                    handleInputChange("phoneNumber", e.target.value)
+                                }
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
 
-                        {/* Thành phố */}
+                        {/* Giới tính */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Thành phố</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Giới tính
+                            </label>
                             <select
-                                value={formData.city}
-                                onChange={(e) => handleInputChange("city", e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                value={formData.sex}
+                                onChange={e => handleInputChange("sex", e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
-                                <option value="Ha Noi">Hà Nội</option>
-                                <option value="Ho Chi Minh">Hồ Chí Minh</option>
-                                <option value="Da Nang">Đà Nẵng</option>
-                                <option value="Can Tho">Cần Thơ</option>
-                                <option value="Hai Phong">Hải Phòng</option>
+                                <option value="Male">Nam</option>
+                                <option value="Female">Nữ</option>
+                                <option value="Other">Khác</option>
                             </select>
                         </div>
 
-                        {/* Địa chỉ */}
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Địa chỉ</label>
+                        {/* Ngày sinh */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Ngày sinh
+                            </label>
                             <input
-                                type="text"
-                                value={formData.address}
-                                onChange={(e) => handleInputChange("address", e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Thon 3, Thach That - Hoa Lac"
+                                type="date"
+                                value={formData.dob}
+                                onChange={e => handleInputChange("dob", e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex space-x-4 mt-8">
+                    {/* Save Button */}
+                    <div className="flex justify-end mt-8">
                         <button
-                            onClick={handleChangePassword}
-                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg transition-colors"
+                            onClick={handleSaveProfile}
+                            disabled={saving}
+                            className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white px-8 py-3 rounded-lg text-lg transition-colors"
                         >
-                            Thay đổi mật khẩu
-                        </button>
-                        <button
-                            onClick={handleChangeEmail}
-                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg transition-colors"
-                        >
-                            Thay đổi email
+                            {saving ? "Đang lưu..." : "Lưu"}
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }
