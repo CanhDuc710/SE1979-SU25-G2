@@ -10,7 +10,6 @@ import {
 import Pagination from "../../../components/Pagination.jsx";
 
 export default function CategorySettings() {
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [categories, setCategories] = useState([]);
     const [newCategory, setNewCategory] = useState("");
     const [newDescription, setNewDescription] = useState("");

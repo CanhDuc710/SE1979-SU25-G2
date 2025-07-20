@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import Pagination from "../../../components/Pagination.jsx";
 
 export default function UserList() {
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [filterRole, setFilterRole] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
     const [search, setSearch] = useState("");

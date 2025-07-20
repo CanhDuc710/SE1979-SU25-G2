@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import * as storeService from "../../../service/storeService.js";
+import * as storeService from '../../../service/storeService.js';
+import { storeInformation } from '../../../validation/storeInformation.js';
 
 const StoreInformation = () => {
     const [storeData, setStoreData] = useState({
@@ -12,6 +13,7 @@ const StoreInformation = () => {
         logo: '',
     });
 
+    const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(true);
     const [logoPreview, setLogoPreview] = useState('');
 
@@ -28,12 +30,9 @@ const StoreInformation = () => {
                 description: data.description || '',
                 logo: data.logo || '',
             });
-            // Thiết lập logoPreview ban đầu nếu có logo từ backend
-            if (data.logo) {
-                setLogoPreview(data.logo);
-            }
+            if (data.logo) setLogoPreview(data.logo);
         } catch (error) {
-            console.error("Error fetching store data:", error);
+            console.error('Error fetching store data:', error);
         } finally {
             setLoading(false);
         }
@@ -45,20 +44,39 @@ const StoreInformation = () => {
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
+        setErrors((prev) => ({ ...prev, [name]: undefined }));
+
         if (name === 'logo' && files.length > 0) {
             const file = files[0];
-            setStoreData({ ...storeData, logo: file })
+            setStoreData((prev) => ({ ...prev, logo: file }));
             setLogoPreview(URL.createObjectURL(file));
         } else {
-            setStoreData({ ...storeData, [name]: value });
+            setStoreData((prev) => ({ ...prev, [name]: value }));
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Validate với Yup
+        try {
+            await storeInformation.validate(storeData, { abortEarly: false });
+            setErrors({});
+        } catch (validationError) {
+            const validationErrors = {};
+            validationError.inner.forEach((err) => {
+                if (!validationErrors[err.path]) {
+                    validationErrors[err.path] = err.message;
+                }
+            });
+            setErrors(validationErrors);
+            return;
+        }
+
         try {
             let updatedStoreData = { ...storeData };
+
+            // Nếu có file logo mới, upload trước
             if (storeData.logo && typeof storeData.logo === 'object') {
                 const formData = new FormData();
                 formData.append('logo', storeData.logo);
@@ -67,21 +85,20 @@ const StoreInformation = () => {
                     const uploadRes = await storeService.uploadStoreLogo(formData);
                     updatedStoreData.logo = uploadRes.logoUrl;
                 } catch (uploadError) {
-                    console.error("Error uploading logo:", uploadError);
-                    alert(uploadError.message || "Lỗi khi tải lên logo.");
+                    console.error('Error uploading logo:', uploadError);
+                    alert(uploadError.message || 'Lỗi khi tải lên logo.');
                     return;
                 }
             }
 
             const updateRes = await storeService.updateStoreInformation(updatedStoreData);
-            alert(updateRes.message);
-            await fetchStoreData(); // Tải lại dữ liệu mới nhất từ server
+            alert(updateRes.message || 'Cập nhật thành công!');
+            await fetchStoreData();
         } catch (error) {
-            console.error("Error during store update:", error);
-            alert(error.message || "Cập nhật thông tin cửa hàng thất bại.");
+            console.error('Error during store update:', error);
+            alert(error.message || 'Cập nhật thông tin cửa hàng thất bại.');
         }
     };
-
 
     if (loading) return <div>Đang tải...</div>;
 
@@ -93,71 +110,79 @@ const StoreInformation = () => {
                     <div>
                         <label className="block font-medium">Tên cửa hàng</label>
                         <input
-                            type="text" name="storeName"
-                            value={storeData.storeName || ''}
+                            type="text"
+                            name="storeName"
+                            value={storeData.storeName}
                             onChange={handleChange}
-                            className="w-full border border-gray-300 rounded px-3 py-2" required
+                            className="w-full border border-gray-300 rounded px-3 py-2"
                         />
+                        {errors.storeName && <p className="text-red-600 text-sm mt-1">{errors.storeName}</p>}
                     </div>
 
                     <div>
                         <label className="block font-medium">Email</label>
                         <input
-                            type="email" name="email"
-                            value={storeData.email || ''}
+                            type="email"
+                            name="email"
+                            value={storeData.email}
                             onChange={handleChange}
-                            className="w-full border border-gray-300 rounded px-3 py-2" required
+                            className="w-full border border-gray-300 rounded px-3 py-2"
                         />
+                        {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
                     </div>
 
                     <div>
                         <label className="block font-medium">Fanpage</label>
                         <input
-                            type="url" name="fanpage"
-                            value={storeData.fanpage || ''}
+                            type="url"
+                            name="fanpage"
+                            value={storeData.fanpage}
                             onChange={handleChange}
                             className="w-full border border-gray-300 rounded px-3 py-2"
                         />
+                        {errors.fanpage && <p className="text-red-600 text-sm mt-1">{errors.fanpage}</p>}
                     </div>
 
                     <div>
                         <label className="block font-medium">Số điện thoại</label>
                         <input
-                            type="text" name="phone"
-                            value={storeData.phone || ''}
+                            type="text"
+                            name="phone"
+                            value={storeData.phone}
                             onChange={handleChange}
                             className="w-full border border-gray-300 rounded px-3 py-2"
                         />
+                        {errors.phone && <p className="text-red-600 text-sm mt-1">{errors.phone}</p>}
                     </div>
 
                     <div>
                         <label className="block font-medium">Địa chỉ</label>
                         <input
-                            type="text" name="address"
-                            value={storeData.address || ''}
+                            type="text"
+                            name="address"
+                            value={storeData.address}
                             onChange={handleChange}
                             className="w-full border border-gray-300 rounded px-3 py-2"
                         />
+                        {errors.address && <p className="text-red-600 text-sm mt-1">{errors.address}</p>}
                     </div>
 
                     <div>
                         <label className="block font-medium">Mô tả</label>
                         <textarea
-                            name="description" value={storeData.description || ''}
+                            name="description"
+                            value={storeData.description}
                             onChange={handleChange}
                             className="w-full border border-gray-300 rounded px-3 py-2 min-h-[80px]"
                         />
+                        {errors.description && <p className="text-red-600 text-sm mt-1">{errors.description}</p>}
                     </div>
                 </div>
 
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-32 h-32 border border-gray-300 rounded overflow-hidden flex items-center justify-center bg-gray-50">
                         {logoPreview ? (
-                            <img
-                                src={logoPreview}
-                                alt="Logo preview"
-                                className="object-contain w-full h-full"
-                            />
+                            <img src={logoPreview} alt="Logo preview" className="object-contain w-full h-full" />
                         ) : (
                             <span className="text-gray-400">Logo</span>
                         )}
@@ -170,11 +195,14 @@ const StoreInformation = () => {
                             Chọn ảnh mới
                         </label>
                         <input
-                            id="logo-upload" type="file" name="logo"
+                            id="logo-upload"
+                            type="file"
+                            name="logo"
                             accept="image/*"
                             onChange={handleChange}
                             className="hidden"
                         />
+                        {errors.logo && <p className="text-red-600 text-sm mt-1">{errors.logo}</p>}
                     </div>
                 </div>
 
