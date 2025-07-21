@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -54,6 +56,9 @@ public class Order {
     private Status status;
 
     private Double totalAmount;
+
+    @CreationTimestamp
+    private Timestamp createdAt;
 
     @Column(name = "order_date", nullable = false, updatable = false)
     private LocalDateTime orderDate = LocalDateTime.now();

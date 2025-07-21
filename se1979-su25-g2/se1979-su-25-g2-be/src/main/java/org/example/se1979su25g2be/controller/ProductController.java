@@ -120,4 +120,12 @@ public class ProductController {
 
         return ResponseEntity.ok(urls);
     }
+
+    @GetMapping("/active-count")
+    public ResponseEntity<Long> getActiveProductsCount() {
+        Long count = productRepository.countByIsActiveTrue();
+        return ResponseEntity.ok(count);
+    }
+
+
 }
