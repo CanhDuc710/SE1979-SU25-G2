@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../../../components/Sidebar";
-import { FaEdit, FaTrash, FaPlus, FaSearch } from "react-icons/fa";
+import { FaEdit, FaTrash } from "react-icons/fa";
+
 import {
     getAllCategories,
     createCategory,
@@ -8,6 +9,16 @@ import {
     deleteCategory
 } from "../../../service/settingService.js";
 import Pagination from "../../../components/Pagination.jsx";
+import * as yup from "yup";
+
+// Define Yup schema for category
+const categorySchema = yup.object({
+    name: yup
+        .string()
+        .required("Vui lòng nhập tên danh mục")
+        .min(2, "Tên danh mục phải ít nhất 2 ký tự"),
+    description: yup.string().nullable()
+});
 
 export default function CategorySettings() {
     const [categories, setCategories] = useState([]);
@@ -35,7 +46,17 @@ export default function CategorySettings() {
     };
 
     const handleAdd = async () => {
-        if (!newCategory.trim()) return;
+        try {
+            // Validate with Yup
+            await categorySchema.validate(
+                { name: newCategory, description: newDescription },
+                { abortEarly: true }
+            );
+        } catch (err) {
+            alert(err.message);
+            return;
+        }
+
         try {
             const res = await createCategory({ name: newCategory, description: newDescription });
             setNewCategory("");
@@ -47,6 +68,17 @@ export default function CategorySettings() {
     };
 
     const handleUpdate = async (id) => {
+        try {
+            // Validate edited values
+            await categorySchema.validate(
+                { name: editedName, description: editedDescription },
+                { abortEarly: true }
+            );
+        } catch (err) {
+            alert(err.message);
+            return;
+        }
+
         try {
             await updateCategory(id, { name: editedName, description: editedDescription });
             setEditingId(null);
@@ -69,12 +101,9 @@ export default function CategorySettings() {
 
     return (
         <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white">
-            {/*<div className={`transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"} flex-shrink-0`}>*/}
-            {/*    <Sidebar sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />*/}
-            {/*</div>*/}
+            <Sidebar />
             <div className="flex-1 p-6">
                 <h1 className="text-xl font-bold mb-4">Cài đặt {'>'} Cài đặt danh mục</h1>
-
                 <div className="border rounded p-4 shadow bg-white">
                     {/* Search */}
                     <div className="mb-4 flex items-center">
@@ -100,6 +129,7 @@ export default function CategorySettings() {
                         </tr>
                         </thead>
                         <tbody>
+                        {/* Add new row */}
                         <tr>
                             <td className="p-2">
                                 <input
@@ -118,12 +148,16 @@ export default function CategorySettings() {
                                 />
                             </td>
                             <td className="p-2">
-                                <button onClick={handleAdd} className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">
+                                <button
+                                    onClick={handleAdd}
+                                    className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
+                                >
                                     Tạo
                                 </button>
                             </td>
                         </tr>
 
+                        {/* Existing categories */}
                         {categories.map((cat) => (
                             <tr key={cat.categoryId}>
                                 <td className="p-2">
@@ -150,7 +184,10 @@ export default function CategorySettings() {
                                 </td>
                                 <td className="p-2 space-x-2">
                                     {editingId === cat.categoryId ? (
-                                        <button onClick={() => handleUpdate(cat.categoryId)} className="text-green-600 hover:text-green-800">
+                                        <button
+                                            onClick={() => handleUpdate(cat.categoryId)}
+                                            className="text-green-600 hover:text-green-800"
+                                        >
                                             Lưu
                                         </button>
                                     ) : (
