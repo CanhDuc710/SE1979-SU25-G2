@@ -28,6 +28,8 @@ const CollectionManagementLazy = lazy(() => import("../page/admin/collection/Col
 const CollectionDetailLazy = lazy(() => import("../page/admin/collection/CollectionDetail.jsx"));
 const OrderListLazy = lazy(() => import("../page/admin/order_management/OrderList.jsx"));
 const UserProfileLazy = lazy(() => import("../page/user/UserProfile.jsx"));
+const DashboardLazy = lazy(() => import("../page/admin/dashboard/Dashboard.jsx"));
+
 const router = createBrowserRouter([
     {
         path: "/",
@@ -68,6 +70,8 @@ const router = createBrowserRouter([
             { path: "collections/:id", element: <CollectionDetailLazy /> },
             { path: "orders", element: <OrderListLazy /> },
             { path: "*", element: <NotFoundLazy /> },
+            { path: "dashboard", element: <DashboardLazy /> },
+
         ],
     },
 ]);
