@@ -10,6 +10,8 @@ const CartPageLazy = lazy(() => import("../page/Cart/CartPage.jsx"));
 const FAQLazy = lazy(() => import("../page/FAQ/FAQpage.jsx"));
 const OrderPageLazy = lazy(() => import("../page/Order/OrderPage.jsx"));
 const NotFoundLazy = lazy(() => import("../page/error/NotFound.jsx"));
+const LoginLazy = lazy(() => import("../page/User/Login.jsx"));
+const RegisterLazy = lazy(() => import("../page/User/Register.jsx"));
 
 // Admin pages
 const ProductManagementLazy = lazy(() => import("../page/admin/product/productList.jsx"));
@@ -21,6 +23,8 @@ const ProductEditLazy = lazy(() => import("../page/admin/product/ProductEdit.jsx
 const ProductCreateLazy = lazy(() => import("../page/admin/product/ProductCreate.jsx"));
 const CollectionManagementLazy = lazy(() => import("../page/admin/collection/CollectionList.jsx"));
 const CollectionDetailLazy = lazy(() => import("../page/admin/collection/CollectionDetail.jsx"));
+const DashboardLazy = lazy(() => import("../page/admin/dashboard/Dashboard.jsx"));
+
 const router = createBrowserRouter([
     {
         path: "/",
@@ -32,6 +36,8 @@ const router = createBrowserRouter([
             { path: "cart", element: <CartPageLazy /> },
             { path: "faq", element: <FAQLazy /> },
             { path: "order", element: <OrderPageLazy /> },
+            { path: "login", element: <LoginLazy /> },
+            { path: "register", element: <RegisterLazy /> },
             { path: "*", element: <NotFoundLazy /> }
         ],
     },
@@ -48,6 +54,7 @@ const router = createBrowserRouter([
             { path: "products/create", element: <ProductCreateLazy /> },
             { path: "collections", element: <CollectionManagementLazy /> },
             { path: "collections/:id", element: <CollectionDetailLazy /> },
+            { path: "dashboard", element: <DashboardLazy /> },
             { path: "*", element: <NotFoundLazy /> },
         ],
     },

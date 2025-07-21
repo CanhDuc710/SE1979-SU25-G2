@@ -4,6 +4,9 @@ package org.example.se1979su25g2be.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.sql.Timestamp;
 import java.util.List;
 
 @Entity
@@ -52,6 +55,9 @@ public class Order {
 
     private Double totalAmount;
 
+    @CreationTimestamp
+    private Timestamp createdAt;
+
     public enum PaymentMethod {
         COD, CARD, PAYPAL
     }
@@ -60,3 +66,4 @@ public class Order {
         PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
     }
 }
+
