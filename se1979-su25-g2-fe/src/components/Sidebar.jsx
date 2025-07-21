@@ -73,7 +73,7 @@ export default function Sidebar({ sidebarCollapsed, setSidebarCollapsed }) {
                     <SidebarItem to="/admin/dashboard" icon={<FaHome />} label="Thống kê" collapsed={sidebarCollapsed} />
                     <SidebarItem to="/admin/orders" icon={<FaClipboardList />} label="Đơn hàng" collapsed={sidebarCollapsed} />
                     <SidebarItem to="/admin/products" icon={<FaBoxOpen />} label="Sản phẩm" collapsed={sidebarCollapsed} />
-                    <SidebarItem to="/admin/discount" icon={<FaBoxOpen />} label="Giảm giá" collapsed={sidebarCollapsed} />
+                    <SidebarItem to="/admin/discounts" icon={<FaBoxOpen />} label="Giảm giá" collapsed={sidebarCollapsed} />
                     <SidebarItem to="/admin/accounts" icon={<FaUser />} label="Tài khoản" collapsed={sidebarCollapsed} />
 
                     {/* Mục Cài đặt với các submenu */}

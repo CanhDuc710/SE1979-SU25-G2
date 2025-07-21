@@ -11,7 +11,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -106,7 +108,10 @@ public class OrderServiceImpl implements OrderService {
         } else {
             cartItemRepository.deleteBySessionId(orderRequest.getSessionId());
         }
+        LocalDateTime now = LocalDateTime.now();
 
+        order.setCreatedAt(Timestamp.valueOf(now));
+        order.setOrderDate(now);
         return savedOrder;
     }
 

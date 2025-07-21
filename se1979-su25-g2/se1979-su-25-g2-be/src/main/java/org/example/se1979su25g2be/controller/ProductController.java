@@ -98,11 +98,6 @@ public class ProductController {
         return ResponseEntity.ok(productService.getRandomSuggestions(limit));
     }
 
-    @GetMapping("/active-count")
-    public ResponseEntity<Long> getActiveProductsCount() {
-        Long count = productRepository.countByIsActiveTrue();
-        return ResponseEntity.ok(count);
-    }
 
     @PostMapping("/{productId}/images")
     public ResponseEntity<?> uploadProductImages(@PathVariable Integer productId,

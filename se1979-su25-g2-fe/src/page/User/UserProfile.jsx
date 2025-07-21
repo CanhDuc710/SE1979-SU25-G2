@@ -2,33 +2,47 @@
 
 import { useState, useEffect } from "react";
 import { fetchProfile, updateProfile } from "../../service/profileService";
-import { User } from "lucide-react";
 
-export default function UserProfile({ userId }) {
+export default function UserProfile() {
     const [formData, setFormData] = useState({
         lastName: "",
         firstName: "",
         email: "",
         phoneNumber: "",
-        sex: "Male",
-        dob: "1990-01-01",
+        sex: "",
+        dob: "",
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
 
+    // Helper function to properly format date for input type="date"
+    const formatDateForInput = (dateString) => {
+        if (!dateString) return "";
+
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return "";
+
+            return date.toISOString().split('T')[0];
+        } catch (e) {
+            console.error("Error parsing date:", e);
+            return "";
+        }
+    };
+
     useEffect(() => {
-        // load profile khi component mount
+        // load profile when component mounts
         (async () => {
             try {
-                const dto = await fetchProfile(userId);
+                const dto = await fetchProfile();
                 setFormData({
-                    lastName: dto.lastName,
-                    firstName: dto.firstName,
-                    email: dto.email,
-                    phoneNumber: dto.phoneNumber,
-                    sex: dto.sex,
-                    dob: dto.dob.split("T")[0], // nếu backend trả ISO datetime
+                    lastName: dto.lastName || "",
+                    firstName: dto.firstName || "",
+                    email: dto.email || "",
+                    phoneNumber: dto.phoneNumber || "",
+                    sex: dto.sex || "Male",
+                    dob: formatDateForInput(dto.dob),
                 });
             } catch (e) {
                 setError(e.message);
@@ -36,7 +50,7 @@ export default function UserProfile({ userId }) {
                 setLoading(false);
             }
         })();
-    }, [userId]);
+    }, []);
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -46,7 +60,7 @@ export default function UserProfile({ userId }) {
         setSaving(true);
         setError(null);
         try {
-            const updated = await updateProfile(userId, {
+            const updated = await updateProfile({
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 email: formData.email,
@@ -54,14 +68,14 @@ export default function UserProfile({ userId }) {
                 sex: formData.sex,
                 dob: formData.dob,
             });
-            // bạn có thể cập nhật lại state nếu backend chỉnh sửa thêm
+
             setFormData({
-                lastName: updated.lastName,
-                firstName: updated.firstName,
-                email: updated.email,
-                phoneNumber: updated.phoneNumber,
-                sex: updated.sex,
-                dob: updated.dob.split("T")[0] || updated.dob,
+                lastName: updated.lastName || "",
+                firstName: updated.firstName || "",
+                email: updated.email || "",
+                phoneNumber: updated.phoneNumber || "",
+                sex: updated.sex || "Male",
+                dob: formatDateForInput(updated.dob),
             });
             alert("Cập nhật thành công!");
         } catch (e) {

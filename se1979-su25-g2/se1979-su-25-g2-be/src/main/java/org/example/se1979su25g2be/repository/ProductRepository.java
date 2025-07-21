@@ -23,6 +23,5 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
     List<String> findAllDistinctMaterials();
     Long countByIsActiveTrue();
 
-    // Count active products
-    Long countByIsActiveTrue();
+
 }

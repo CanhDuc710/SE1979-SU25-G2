@@ -60,12 +60,14 @@ public class Order {
 
     private Double totalAmount;
 
-    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private Timestamp createdAt;
 
 
-    @Column(name = "order_date", nullable = false, updatable = false)
-    private LocalDateTime orderDate = LocalDateTime.now();
+    @Column(name = "order_date", nullable = true, updatable = false)
+    @CreationTimestamp
+    private LocalDateTime orderDate;
+
 
     public enum PaymentMethod {
         COD, CARD, PAYPAL

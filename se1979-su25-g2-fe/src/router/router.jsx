@@ -34,7 +34,6 @@ const DashboardLazy = lazy(() => import("../page/admin/dashboard/Dashboard.jsx")
 
 const OrderDetailLazy = lazy(() => import("../page/admin/order_management/OrderDetail.jsx"));
 const DiscountListLazy = lazy(() => import("../page/admin/discount/discountList.jsx"));
-
 const router = createBrowserRouter([
     {
         path: "/",

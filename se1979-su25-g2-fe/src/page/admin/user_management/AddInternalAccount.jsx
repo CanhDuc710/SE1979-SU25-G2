@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Sidebar from "../../../components/Sidebar";
@@ -6,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { createAccount } from "../../../service/accountService";
 import { FaArrowCircleLeft } from "react-icons/fa";
 import { accountSchema } from "/src/validation/internalAccount.js";
+import { useEffect } from "react";
 
 export default function AddInternalAccount() {
     const navigate = useNavigate();
@@ -29,14 +29,36 @@ export default function AddInternalAccount() {
         },
     });
 
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert('Bạn cần đăng nhập để truy cập trang này');
+            navigate('/login');
+        }
+    }, [navigate]);
+
     const onSubmit = async data => {
         try {
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+                navigate('/login');
+                return;
+            }
+
             await createAccount(data);
             alert("Tạo tài khoản thành công!");
             navigate("/admin/accounts");
         } catch (err) {
             console.error("Lỗi khi tạo tài khoản:", err);
-            alert("Tạo tài khoản thất bại!");
+
+            if (err.message === "Unauthorized") {
+                alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+                navigate('/login');
+            } else {
+                alert("Tạo tài khoản thất bại!");
+            }
         }
     };
 
@@ -62,7 +84,10 @@ export default function AddInternalAccount() {
                     className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl">
                     <div>
                         <label className="block text-sm font-medium">Tên</label>
-                        <input{...register("firstName")} className="w-full border px-3 py-2 rounded"/>
+                        <input
+                            {...register("firstName")}
+                            className="w-full border px-3 py-2 rounded"
+                        />
                         {errors.firstName && (
                             <p className="text-red-600 text-sm mt-1">
                                 {errors.firstName.message}
@@ -110,7 +135,6 @@ export default function AddInternalAccount() {
                         )}
                     </div>
 
-                    {/** EMAIL **/}
                     <div>
                         <label className="block text-sm font-medium">Email</label>
                         <input

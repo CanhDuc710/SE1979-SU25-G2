@@ -72,13 +72,17 @@ public class SecurityConfig {
                 .requestMatchers("/api/faqs/**").permitAll()
                 .requestMatchers("/api/cart/**").permitAll()
                 .requestMatchers("/api/orders/**").permitAll()
-
+                    .requestMatchers("/api/profile/**").permitAll()
+                    .requestMatchers("/api/address/**").permitAll()
+                    .requestMatchers("/api/provinces/**").permitAll()
+                    .requestMatchers("/api/districts/**").permitAll()
+                    .requestMatchers("/api/wards/**").permitAll()
                 // User role required endpoints
 
                 .requestMatchers("/api/user/**").hasRole("USER")
 
                 // Admin role required endpoints
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/admin/**").permitAll()
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
                 .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
 
