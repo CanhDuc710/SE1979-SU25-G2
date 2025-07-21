@@ -1,10 +1,10 @@
 package org.example.se1979su25g2be.service;
 
 import jakarta.transaction.Transactional;
-import org.example.se1979su25g2be.dto.*; // Import tất cả DTOs
-import org.example.se1979su25g2be.entity.*; // Import tất cả entities
+import org.example.se1979su25g2be.dto.*;
+import org.example.se1979su25g2be.entity.*;
 import org.example.se1979su25g2be.entity.Order.Status;
-import org.example.se1979su25g2be.repository.*; // Import tất cả repositories
+import org.example.se1979su25g2be.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service // Đánh dấu đây là một Spring Service component
-public class AdminOrderServiceImpl implements AdminOrderService { // Triển khai Interface
+@Service
+public class AdminOrderServiceImpl implements AdminOrderService {
 
     @Autowired
     private OrderRepository orderRepository;
@@ -27,32 +27,28 @@ public class AdminOrderServiceImpl implements AdminOrderService { // Triển kha
     @Autowired
     private ProductVariantRepository productVariantRepository;
     @Autowired
-    private ProductRepository productRepository; // Cần thiết để lấy giá sản phẩm và tên sản phẩm
+    private ProductRepository productRepository;
     @Autowired
     private ProvinceRepository provinceRepository;
     @Autowired
     private DistrictRepository districtRepository;
     @Autowired
     private WardRepository wardRepository;
-
-
-    // --- Mapper methods: Convert Entity to DTO ---
     private OrderSummaryResponse mapOrderToOrderSummaryResponse(Order order) {
         if (order == null) return null;
 
         UserDTO customerInfo = null;
         if (order.getUser() != null) {
-            // Ghép firstName và lastName để tạo fullName
             String fullName = (order.getUser().getFirstName() != null ? order.getUser().getFirstName() : "") +
                     (order.getUser().getLastName() != null ? " " + order.getUser().getLastName() : "");
-            fullName = fullName.trim(); // Loại bỏ khoảng trắng thừa nếu một trong hai trường rỗng
+            fullName = fullName.trim();
 
             customerInfo = new UserDTO(
                     order.getUser().getUserId(),
                     order.getUser().getUsername(),
-                    fullName, // <-- Đã sửa
+                    fullName,
                     order.getUser().getEmail(),
-                    order.getUser().getPhoneNumber() // <-- Đã sửa
+                    order.getUser().getPhoneNumber()
             );
         }
 
@@ -71,6 +67,10 @@ public class AdminOrderServiceImpl implements AdminOrderService { // Triển kha
             shippingAddressFull += ", " + order.getProvince().getName();
         }
 
+        List<OrderItemResponse> itemResponses = order.getItems().stream()
+                .map(this::mapOrderItemToOrderItemResponse)
+                .collect(Collectors.toList());
+
         return new OrderSummaryResponse(
                 order.getOrderId(),
                 numberOfProducts,
@@ -80,7 +80,8 @@ public class AdminOrderServiceImpl implements AdminOrderService { // Triển kha
                 order.getShippingPhone(),
                 shippingAddressFull,
                 order.getStatus(),
-                order.getOrderDate()
+                order.getOrderDate(),
+                itemResponses
         );
     }
 
@@ -89,17 +90,16 @@ public class AdminOrderServiceImpl implements AdminOrderService { // Triển kha
 
         UserDTO userDTO = null;
         if (order.getUser() != null) {
-            // Ghép firstName và lastName để tạo fullName
             String fullName = (order.getUser().getFirstName() != null ? order.getUser().getFirstName() : "") +
                     (order.getUser().getLastName() != null ? " " + order.getUser().getLastName() : "");
-            fullName = fullName.trim(); // Loại bỏ khoảng trắng thừa nếu một trong hai trường rỗng
+            fullName = fullName.trim();
 
             userDTO = new UserDTO(
                     order.getUser().getUserId(),
                     order.getUser().getUsername(),
-                    fullName, // <-- Đã sửa ở đây
+                    fullName,
                     order.getUser().getEmail(),
-                    order.getUser().getPhoneNumber() // <-- LƯU Ý: Trường này là phoneNumber chứ không phải phone
+                    order.getUser().getPhoneNumber()
             );
         }
 
@@ -107,9 +107,9 @@ public class AdminOrderServiceImpl implements AdminOrderService { // Triển kha
                 .map(this::mapOrderItemToOrderItemResponse)
                 .collect(Collectors.toList());
 
-        AddressDTO provinceDTO = order.getProvince() != null ? new AddressDTO(order.getProvince().getProvinceId(), order.getProvince().getName()) : null; // Sử dụng getProvinceId()
-        AddressDTO districtDTO = order.getDistrict() != null ? new AddressDTO(order.getDistrict().getDistrictId(), order.getDistrict().getName()) : null; // Sử dụng getDistrictId()
-        AddressDTO wardDTO = order.getWard() != null ? new AddressDTO(order.getWard().getWardId(), order.getWard().getName()) : null; // Sử dụng getWardId()
+        AddressDTO provinceDTO = order.getProvince() != null ? new AddressDTO(order.getProvince().getProvinceId(), order.getProvince().getName()) : null;
+        AddressDTO districtDTO = order.getDistrict() != null ? new AddressDTO(order.getDistrict().getDistrictId(), order.getDistrict().getName()) : null;
+        AddressDTO wardDTO = order.getWard() != null ? new AddressDTO(order.getWard().getWardId(), order.getWard().getName()) : null;
         return new OrderResponse(
                 order.getOrderId(),
                 userDTO,
@@ -130,33 +130,28 @@ public class AdminOrderServiceImpl implements AdminOrderService { // Triển kha
     private OrderItemProductVariantDTO mapProductVariantToOrderItemProductVariantDTO(ProductVariant pv) {
         if (pv == null) return null;
 
-        Product product = pv.getProduct(); // Lấy Product entity từ ProductVariant
+        Product product = pv.getProduct();
 
         String productName = (product != null) ? product.getName() : null;
         Double unitPrice = (product != null && product.getPrice() != null) ? product.getPrice().doubleValue() : null;
-
-        // Ghép tên biến thể từ color và size
-        String variantName = "";
-        if (pv.getColor() != null && !pv.getColor().isEmpty()) {
-            variantName += pv.getColor();
-        }
-        if (pv.getSize() != null && !pv.getSize().isEmpty()) {
-            if (!variantName.isEmpty()) variantName += " - ";
-            variantName += pv.getSize();
-        }
-        if (variantName.isEmpty()) {
-            variantName = "N/A";
+        
+        String imageUrl = null;
+        if (product != null && product.getImages() != null && !product.getImages().isEmpty()) {
+            imageUrl = product.getImages().stream()
+                    .filter(img -> img.isMain())
+                    .map(img -> img.getImageUrl())
+                    .findFirst()
+                    .orElse(product.getImages().get(0).getImageUrl());
         }
 
         return new OrderItemProductVariantDTO(
                 pv.getVariantId(),
                 (product != null) ? product.getProductId() : null,
                 productName,
-                variantName,
                 pv.getColor(),
                 pv.getSize(),
                 unitPrice,
-                pv.getStockQuantity()
+                imageUrl
         );
     }
 
@@ -170,22 +165,63 @@ public class AdminOrderServiceImpl implements AdminOrderService { // Triển kha
                 item.getPrice()
         );
     }
-    // --- End Mapper methods ---
-
-
-    @Override // Bắt buộc phải override các phương thức từ interface
+    @Override
     public Page<OrderSummaryResponse> getAllOrders(Pageable pageable) {
         Page<Order> orders = orderRepository.findAll(pageable);
         return orders.map(this::mapOrderToOrderSummaryResponse);
     }
 
-    @Override // Bắt buộc phải override các phương thức từ interface
+    @Override
+    public Page<OrderSummaryResponse> searchOrders(String status, String searchTerm, String searchBy, int page, int size, String sortBy, String direction) {
+        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by(
+            "desc".equalsIgnoreCase(direction) ? 
+                org.springframework.data.domain.Sort.Direction.DESC : 
+                org.springframework.data.domain.Sort.Direction.ASC, 
+            sortBy
+        );
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, sort);
+        
+        Page<Order> orders;
+        
+        if ((status == null || status.equals("all")) && 
+            (searchTerm == null || searchTerm.trim().isEmpty())) {
+            orders = orderRepository.findAll(pageable);
+        } else {
+            Order.Status statusEnum = null;
+            if (status != null && !status.equals("all")) {
+                try {
+                    statusEnum = Order.Status.valueOf(status.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                }
+            }
+            
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                String searchPattern = "%" + searchTerm.toLowerCase() + "%";
+                
+                if ("customer".equals(searchBy)) {
+                    orders = orderRepository.findByStatusAndCustomerName(statusEnum, searchPattern, pageable);
+                } else if ("phone".equals(searchBy)) {
+                    orders = orderRepository.findByStatusAndPhone(statusEnum, searchPattern, pageable);
+                } else if ("address".equals(searchBy)) {
+                    orders = orderRepository.findByStatusAndAddress(statusEnum, searchPattern, pageable);
+                } else {
+                    orders = orderRepository.findByStatusAndAllFields(statusEnum, searchPattern, pageable);
+                }
+            } else {
+                orders = orderRepository.findByStatus(statusEnum, pageable);
+            }
+        }
+        
+        return orders.map(this::mapOrderToOrderSummaryResponse);
+    }
+
+    @Override
     public Optional<OrderResponse> getOrderById(Integer orderId) {
         return orderRepository.findById(orderId)
                 .map(this::mapOrderToOrderResponse);
     }
 
-    @Override // Bắt buộc phải override các phương thức từ interface
+    @Override
     @Transactional
     public Optional<OrderResponse> updateOrderStatus(Integer orderId, Status newStatus) {
         return orderRepository.findById(orderId).map(order -> {
@@ -211,7 +247,6 @@ public class AdminOrderServiceImpl implements AdminOrderService { // Triển kha
             }
 
             if (newStatus == Status.DELIVERED) {
-                // Logic khi đơn hàng được giao
             } else if (newStatus == Status.CANCELLED) {
                 for (OrderItem item : order.getItems()) {
                     ProductVariant pv = item.getProductVariant();
@@ -226,7 +261,7 @@ public class AdminOrderServiceImpl implements AdminOrderService { // Triển kha
         });
     }
 
-    @Override // Bắt buộc phải override các phương thức từ interface
+    @Override
     @Transactional
     public void deleteOrder(Integer orderId) {
         Order order = orderRepository.findById(orderId)
