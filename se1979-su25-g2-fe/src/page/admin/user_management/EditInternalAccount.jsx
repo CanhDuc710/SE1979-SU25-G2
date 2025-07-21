@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
-import Sidebar from "../../../components/Sidebar";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getAccountById, updateAccount } from "../../../service/accountService";
 import { FaArrowCircleLeft } from "react-icons/fa";
-import { validateAccountForm } from "/src/ValidateForm.js";
+import { accountSchema } from "/src/validation/editInfor.js";
 
 export default function EditInternalAccount() {
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const navigate = useNavigate();
     const { id } = useParams();
 
@@ -17,34 +15,49 @@ export default function EditInternalAccount() {
         email: "",
         password: "",
         phone: "",
-        gender: "",
+        gender: "MALE",
         dob: "",
-        role: "",
+        role: "STAFF",
     });
+
+    const [errors, setErrors] = useState({});
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormData(prev => ({ ...prev, [name]: value }));
+        setErrors(prev => ({ ...prev, [name]: undefined }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const errors = validateAccountForm(formData);
-        if (Object.keys(errors).length > 0) {
-            alert(Object.values(errors)[0]);
+
+        // Validate với Yup
+        try {
+            await accountSchema.validate(formData, { abortEarly: false });
+            setErrors({});
+        } catch (validationError) {
+            const validationErrors = {};
+            validationError.inner.forEach(err => {
+                if (err.path) validationErrors[err.path] = err.message;
+            });
+            setErrors(validationErrors);
             return;
         }
 
+        // Gửi lên server
         try {
             await updateAccount(id, formData);
             alert("Cập nhật tài khoản thành công!");
             navigate("/admin/accounts");
-        } catch (err) {
-            console.error("Lỗi khi cập nhật tài khoản:", err);
-            alert("Cập nhật tài khoản thất bại!");
+        } catch (apiError) {
+            console.error("Lỗi khi cập nhật tài khoản:", apiError);
+            if (apiError.response?.status === 400 && typeof apiError.response.data === 'object') {
+                setErrors(apiError.response.data);
+            } else {
+                alert("Cập nhật tài khoản thất bại! Vui lòng thử lại.");
+            }
         }
     };
-
 
     useEffect(() => {
         const fetchData = async () => {
@@ -57,103 +70,167 @@ export default function EditInternalAccount() {
                     email: data.email || "",
                     password: "",
                     phone: data.phone || "",
-                    gender: data.gender || "",
+                    gender: data.gender || "MALE",
                     dob: data.dob || "",
-                    role: data.role || "",
+                    role: data.role || "STAFF",
                 });
-            } catch (err) {
-                console.error("Lỗi khi lấy dữ liệu tài khoản:", err);
+            } catch (fetchError) {
+                console.error("Lỗi khi lấy dữ liệu tài khoản:", fetchError);
                 alert("Không thể tải dữ liệu người dùng.");
+                navigate("/admin/accounts");
             }
         };
-        fetchData();
-    }, [id]);
+        if (id) fetchData();
+    }, [id, navigate]);
 
     return (
         <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white">
-            <div className={`transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"} flex-shrink-0`}>
-                <Sidebar sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />
-            </div>
-
             <div className="flex-1 p-6">
-                <button
-                    className="bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200"
-                    onClick={() => navigate(`/admin/accounts`)}
+                <div className="px-6 py-4 bg-white shadow-sm mb-6 flex items-center">
+                    <button
+                        onClick={() => navigate("/admin/accounts")}
+                        className="text-blue-600 hover:text-blue-800 p-2 rounded-full bg-blue-100 hover:bg-blue-200 transition-colors"
+                    >
+                        <FaArrowCircleLeft size={24} />
+                    </button>
+                    <h1 className="ml-4 text-3xl font-extrabold text-gray-800">
+                        Chỉnh sửa tài khoản người dùng
+                    </h1>
+                </div>
+                <hr className="mb-8 border-gray-300" />
+
+                <form
+                    onSubmit={handleSubmit}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-lg"
                 >
-                    <FaArrowCircleLeft />
-                </button>
-
-                <h1 className="text-xl font-bold mb-1">Quản lý tài khoản người dùng {'>'} Chỉnh sửa tài khoản</h1>
-                <hr className="mb-6" />
-
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl">
+                    {/* First Name */}
                     <div>
-                        <label className="block text-sm font-medium">Họ</label>
-                        <input name="lastName" value={formData.lastName} onChange={handleChange}
-                               className="w-full border px-3 py-2 rounded"  />
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Tên <span className="text-red-500">*</span></label>
+                        <input
+                            name="firstName"
+                            value={formData.firstName}
+                            onChange={handleChange}
+                            className={`w-full border ${errors.firstName ? 'border-red-500' : 'border-gray-300'} px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        />
+                        {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
                     </div>
 
+                    {/* Last Name */}
                     <div>
-                        <label className="block text-sm font-medium">Tên</label>
-                        <input name="firstName" value={formData.firstName} onChange={handleChange}
-                               className="w-full border px-3 py-2 rounded" />
-
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Họ <span className="text-red-500">*</span></label>
+                        <input
+                            name="lastName"
+                            value={formData.lastName}
+                            onChange={handleChange}
+                            className={`w-full border ${errors.lastName ? 'border-red-500' : 'border-gray-300'} px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        />
+                        {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
                     </div>
 
+                    {/* Username */}
                     <div>
-                        <label className="block text-sm font-medium">Tên tài khoản</label>
-                        <input name="username" value={formData.username} onChange={handleChange}
-                               className="w-full border px-3 py-2 rounded" required />
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Tên tài khoản <span className="text-red-500">*</span></label>
+                        <input
+                            name="username"
+                            value={formData.username}
+                            onChange={handleChange}
+                            className={`w-full border ${errors.username ? 'border-red-500' : 'border-gray-300'} px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                            required
+                        />
+                        {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
                     </div>
 
+                    {/* Password */}
                     <div>
-                        <label className="block text-sm font-medium">Mật khẩu mới</label>
-                        <input type="password" name="password" value={formData.password} onChange={handleChange}
-                               placeholder="Để trống nếu không đổi"
-                               className="w-full border px-3 py-2 rounded" />
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Mật khẩu mới</label>
+                        <input
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            placeholder="Để trống nếu không đổi"
+                            className={`w-full border ${errors.password ? 'border-red-500' : 'border-gray-300'} px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        />
+                        {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
                     </div>
 
+                    {/* Email */}
                     <div>
-                        <label className="block text-sm font-medium">Email</label>
-                        <input type="email" name="email" value={formData.email} onChange={handleChange}
-                               className="w-full border px-3 py-2 rounded" />
-
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
+                        <input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            className={`w-full border ${errors.email ? 'border-red-500' : 'border-gray-300'} px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        />
+                        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                     </div>
 
+                    {/* Date of Birth */}
                     <div>
-                        <label className="block text-sm font-medium">Ngày sinh</label>
-                        <input type="date" name="dob" value={formData.dob} onChange={handleChange}
-                               className="w-full border px-3 py-2 rounded" />
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Ngày sinh <span className="text-red-500">*</span></label>
+                        <input
+                            type="date"
+                            name="dob"
+                            value={formData.dob}
+                            onChange={handleChange}
+                            className={`w-full border ${errors.dob ? 'border-red-500' : 'border-gray-300'} px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        />
+                        {errors.dob && <p className="text-red-500 text-xs mt-1">{errors.dob}</p>}
                     </div>
 
+                    {/* Role */}
                     <div>
-                        <label className="block text-sm font-medium">Vai trò</label>
-                        <select name="role" value={formData.role} onChange={handleChange}
-                                className="w-full border px-3 py-2 rounded">
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Vai trò <span className="text-red-500">*</span></label>
+                        <select
+                            name="role"
+                            value={formData.role}
+                            onChange={handleChange}
+                            className={`w-full border ${errors.role ? 'border-red-500' : 'border-gray-300'} px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        >
                             <option value="STAFF">Nhân viên</option>
                             <option value="ADMIN">Quản trị viên</option>
                         </select>
+                        {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role}</p>}
                     </div>
 
+                    {/* Gender */}
                     <div>
-                        <label className="block text-sm font-medium">Giới tính</label>
-                        <select name="gender" value={formData.gender} onChange={handleChange}
-                                className="w-full border px-3 py-2 rounded">
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Giới tính <span className="text-red-500">*</span></label>
+                        <select
+                            name="gender"
+                            value={formData.gender}
+                            onChange={handleChange}
+                            className={`w-full border ${errors.gender ? 'border-red-500' : 'border-gray-300'} px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        >
                             <option value="MALE">Nam</option>
                             <option value="FEMALE">Nữ</option>
                             <option value="OTHER">Khác</option>
                         </select>
+                        {errors.gender && <p className="text-red-500 text-xs mt-1">{errors.gender}</p>}
                     </div>
 
+                    {/* Phone */}
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium">Số điện thoại</label>
-                        <input type="number" name="phone" value={formData.phone} onChange={handleChange}
-                               className="w-full border px-3 py-2 rounded" />
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Số điện thoại <span className="text-red-500">*</span></label>
+                        <input
+                            type="text"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            className={`w-full border ${errors.phone ? 'border-red-500' : 'border-gray-300'} px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        />
+                        {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
                     </div>
 
-                    <div className="md:col-span-2 flex justify-end mt-4">
-                        <button type="submit" className="bg-gray-800 text-white px-6 py-2 rounded hover:bg-gray-700">
-                            Cập nhật
+                    {/* Submit */}
+                    <div className="md:col-span-2 flex justify-center mt-6">
+                        <button
+                            type="submit"
+                            className="bg-blue-500 text-white px-8 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 font-semibold text-lg"
+                        >
+                            Cập nhật tài khoản
                         </button>
                     </div>
                 </form>

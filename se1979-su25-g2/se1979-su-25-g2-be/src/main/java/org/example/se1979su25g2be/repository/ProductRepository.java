@@ -21,6 +21,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
     List<String> findAllDistinctBrands();
     @Query("SELECT DISTINCT p.material FROM Product p WHERE p.material IS NOT NULL")
     List<String> findAllDistinctMaterials();
+    Long countByIsActiveTrue();
 
     // Count active products
     Long countByIsActiveTrue();

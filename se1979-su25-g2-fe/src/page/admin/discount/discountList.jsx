@@ -84,12 +84,22 @@ export default function DiscountList() {
             await createDiscount(data);
             toast.success("Tạo mã thành công!");
             setShowAddModal(false);
-            loadDiscounts();
+            loadDiscounts(); // refresh lại danh sách
         } catch (error) {
             console.error("Lỗi khi tạo mã:", error);
-            toast.error("Tạo thất bại!");
+
+            if (
+                error.response &&
+                error.response.status === 400 &&
+                error.response.data?.includes("already exists")
+            ) {
+                toast.error("Tạo mã thất bại!");
+            } else {
+                toast.error("Mã giảm giá đã tồn tại!");
+            }
         }
     };
+
 
     return (
         <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white">

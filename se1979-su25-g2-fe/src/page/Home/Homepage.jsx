@@ -1,18 +1,46 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../Product/ProductCard';
+import {getActiveBanners, getBannerConfig} from '../../service/settingService';
 import { getNewArrivals, getSuggestedProducts, getProductById } from '../../service/productService';
 import { API_BASE_URL, IMAGE_BASE_URL } from '../../utils/constants';
 import axios from 'axios';
+
 export default function Homepage() {
     const [newArrivals, setNewArrivals] = useState([]);
     const [suggestedProducts, setSuggestedProducts] = useState([]);
     const [collections, setCollections] = useState([]);
     const [collectionProducts, setCollectionProducts] = useState({});
+    const [banners, setBanners] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [config, setConfig] = useState(null);
 
     useEffect(() => {
-        getNewArrivals().then(setNewArrivals).catch(console.error);
-        getSuggestedProducts().then(setSuggestedProducts).catch(console.error);
+        const fetchAll = async () => {
+            try {
+                const [config, newArrivals, suggestedProducts, banners] = await Promise.all([
+                    getBannerConfig(),
+                    getNewArrivals(),
+                    getSuggestedProducts(),
+                    getActiveBanners()
+                ]);
+
+                setConfig(config);
+                setNewArrivals(newArrivals);
+                setSuggestedProducts(suggestedProducts);
+
+                // random nếu bật
+                const finalBanners = config.randomize
+                    ? [...banners].sort(() => 0.5 - Math.random())
+                    : banners;
+
+                setBanners(finalBanners);
+            } catch (err) {
+                console.error("Lỗi khi load dữ liệu:", err);
+            }
+        };
+
+        fetchAll();
 
         axios.get(`${API_BASE_URL}/collections`).then(async (res) => {
             const data = res.data;
@@ -28,11 +56,26 @@ export default function Homepage() {
         });
     }, []);
 
+//banner chạy
+    useEffect(() => {
+        if (!banners.length || !config?.displayBanner) return;
+        const intervalTime = (config.interval || 30) * 1000;
+        const timer = setInterval(() => {
+            setCurrentIndex((prev) => (prev + 1) % banners.length);
+        }, intervalTime);
+        return () => clearInterval(timer);
+    }, [banners, config]);
+
+
+    useEffect(() => {
+        console.log("[DEBUG] Current banner:", banners[currentIndex]);
+    }, [currentIndex, banners]);
+
     return (
         <main className="w-full bg-[#fffdf8] font-sans">
-            {/* Hero Section */}
             <section className="relative bg-gradient-to-r from-yellow-50 to-orange-100 py-24 px-6 md:px-16 shadow-inner">
-                <div className="flex flex-col md:flex-row items-center max-w-7xl mx-auto">
+                <div className="flex flex-col md:flex-row items-center max-w-7xl mx-auto gap-8">
+                    {/* Left section */}
                     <div className="flex-1 text-left mb-10 md:mb-0">
                         <h1 className="text-5xl md:text-6xl font-bold text-gray-800 leading-tight mb-4 animate-fadeInUp">
                             WE Store
@@ -47,15 +90,26 @@ export default function Homepage() {
                             <button className="text-sm underline hover:text-orange-600 transition">Nhận tư vấn</button>
                         </div>
                     </div>
-                    <div className="flex-1 flex justify-center">
-                        <img
-                            src="https://cdn.hpdecor.vn/wp-content/uploads/2022/05/thiet-ke-cua-hang-quan-ao-nam-5.jpg"
-                            alt="Hero"
-                            className="rounded-2xl shadow-2xl w-[320px] h-[240px] md:w-[500px] md:h-[360px] object-cover animate-fadeInUp"
-                        />
-                    </div>
+
+                    {/* Right section: Banner */}
+                    {config?.displayBanner && banners.length > 0 && (
+                        <div className="w-[550px] h-[360px] relative overflow-hidden">
+                            {banners.map((banner, i) => (
+                                <img
+                                    key={banner.id}
+                                    src={banner.imageUrl}
+                                    alt={`Banner ${i}`}
+                                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+                                        i === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                                    }`}
+                                />
+                            ))}
+                        </div>
+
+                    )}
                 </div>
             </section>
+
 
             {/* Collections */}
             {collections.map((col) => (
@@ -120,7 +174,7 @@ export default function Homepage() {
                             <ProductCard
                                 name={item.name}
                                 price={item.price === 0 ? 'Contact' : `${item.price.toLocaleString()} VND`}
-                                image={item.    imageUrls?.[0] ? `${IMAGE_BASE_URL}${item.imageUrls[0]}` : null}
+                                image={item.imageUrls?.[0] ? `${IMAGE_BASE_URL}${item.imageUrls[0]}` : null}
                             />
                         </Link>
                     ))}

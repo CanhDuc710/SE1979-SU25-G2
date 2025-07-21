@@ -1,10 +1,14 @@
 package org.example.se1979su25g2be.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.se1979su25g2be.entity.Banner;
 import org.example.se1979su25g2be.entity.Category;
 import org.example.se1979su25g2be.service.setting.SettingService;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/setting/categories")
@@ -37,4 +41,7 @@ public class SettingController {
     public void deleteCategory(@PathVariable Integer id) {
         settingService.deleteCategory(id);
     }
+
 }
+
+

@@ -7,6 +7,11 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -57,6 +62,10 @@ public class Order {
 
     @CreationTimestamp
     private Timestamp createdAt;
+
+
+    @Column(name = "order_date", nullable = false, updatable = false)
+    private LocalDateTime orderDate = LocalDateTime.now();
 
     public enum PaymentMethod {
         COD, CARD, PAYPAL

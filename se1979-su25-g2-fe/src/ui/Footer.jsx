@@ -1,15 +1,69 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaFacebookF } from "react-icons/fa";
+import * as storeService from "../service/storeService.js";
 
 export default function Footer() {
+    const [store, setStore] = useState({
+        storeName: '',
+        email: '',
+        fanpage: '',
+        phone: '',
+        address: '',
+        logo: '',
+    });
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const data = await storeService.getStoreInformation();
+                setStore(data);
+            } catch {
+                // fallback nếu fetch lỗi
+            }
+        })();
+    }, []);
+
     return (
-        <footer className="bg-gray-800 text-white mt-10 p-6">
-            <div className="container mx-auto grid grid-cols-4 gap-6 text-sm">
-                {/* Các cột hiện tại */}
+        <footer className="bg-gray-800 text-white mt-10 pt-8 pb-4">
+            <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 text-sm">
+                {/* Cột Store Information */}
                 <div>
-                    <h4 className="font-bold mb-2">WE</h4>
-                    <input type="email" placeholder="Enter email…" className="p-1 text-black w-full mb-2"/>
-                    <p className="text-xs">Your Privacy Policy warning text here.</p>
+                    <div className="flex items-center gap-2 mb-3">
+                        {store.logo
+                            ? <img src={store.logo} alt="Logo" className="h-12 w-12 object-contain rounded-full bg-white p-1" />
+                            : <span className="font-bold text-2xl bg-white text-gray-800 rounded-full w-12 h-12 flex items-center justify-center">WE</span>
+                        }
+                        <div className="font-bold text-lg">{store.storeName}</div>
+                    </div>
+                    <ul className="space-y-1">
+                        {store.address &&
+                            <li className="flex items-start gap-2">
+                                <FaMapMarkerAlt className="mt-1 text-blue-400" />
+                                <span>{store.address}</span>
+                            </li>
+                        }
+                        {store.phone &&
+                            <li className="flex items-start gap-2">
+                                <FaPhoneAlt className="mt-1 text-green-400" />
+                                <a href={`tel:${store.phone}`} className="hover:underline">{store.phone}</a>
+                            </li>
+                        }
+                        {store.email &&
+                            <li className="flex items-start gap-2">
+                                <FaEnvelope className="mt-1 text-yellow-400" />
+                                <a href={`mailto:${store.email}`} className="hover:underline">{store.email}</a>
+                            </li>
+                        }
+                        {store.fanpage &&
+                            <li className="flex items-start gap-2">
+                                <FaFacebookF className="mt-1 text-blue-500" />
+                                <a href={store.fanpage} target="_blank" rel="noopener noreferrer"
+                                   className="hover:underline text-blue-400">Fanpage</a>
+                            </li>
+                        }
+                    </ul>
                 </div>
+                {/* Các cột còn lại giữ nguyên */}
                 <div>
                     <h4 className="font-bold mb-2">SERVICE</h4>
                     <ul className="space-y-1">
@@ -37,7 +91,6 @@ export default function Footer() {
                 </div>
             </div>
 
-            {/* Google Map */}
             <div className="mt-6">
                 <h4 className="font-bold mb-2 text-sm">OUR STORE</h4>
                 <div className="w-full h-[200px]">
@@ -51,7 +104,9 @@ export default function Footer() {
                     ></iframe>
                 </div>
             </div>
-
+            <div className="container mx-auto mt-6 text-xs text-center text-gray-400">
+                &copy; {new Date().getFullYear()} {store.storeName || 'WE'} — All rights reserved.
+            </div>
         </footer>
     );
 }
