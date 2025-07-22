@@ -1,9 +1,13 @@
-import { FaHome, FaUser, FaBoxOpen, FaClipboardList, FaCogs, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import React, { useState } from "react";
+import { FaHome, FaUser, FaBoxOpen, FaClipboardList, FaCogs, FaChevronLeft, FaChevronRight, FaLayerGroup } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
-export default function Sidebar({ sidebarCollapsed, setSidebarCollapsed }) {
+export default function Sidebar() {
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     return (
-        <div className="h-full bg-gray-100 text-gray-800 flex flex-col justify-between shadow-md">
+        <div className={`h-screen bg-gray-100 text-gray-800 flex flex-col shadow-md transition-all duration-300 ${
+            sidebarCollapsed ? 'w-16' : 'w-64'
+        }`}>
             <div>
                 <div className="p-4 flex items-center justify-between">
                     <div className="font-bold text-lg">
@@ -22,7 +26,8 @@ export default function Sidebar({ sidebarCollapsed, setSidebarCollapsed }) {
                     <SidebarItem to="/admin/dashboard" icon={<FaHome />} label="Dashboard" collapsed={sidebarCollapsed} />
                     <SidebarItem to="/admin/orders" icon={<FaClipboardList />} label="Orders" collapsed={sidebarCollapsed} />
                     <SidebarItem to="/admin/products" icon={<FaBoxOpen />} label="Products" collapsed={sidebarCollapsed} />
-                    <SidebarItem to="/admin/discount" icon={<FaBoxOpen />} label="Discount" collapsed={sidebarCollapsed} />
+                    <SidebarItem to="/admin/collections" icon={<FaLayerGroup />} label="Collections" collapsed={sidebarCollapsed} />
+                    <SidebarItem to="/admin/discounts" icon={<FaBoxOpen />} label="Discount" collapsed={sidebarCollapsed} />
                     <SidebarItem to="/admin/accounts" icon={<FaUser />} label="Users" collapsed={sidebarCollapsed} />
                     <SidebarItem to="/admin/settings" icon={<FaCogs />} label="Settings" collapsed={sidebarCollapsed} />
                 </ul>
