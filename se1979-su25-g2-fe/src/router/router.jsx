@@ -34,7 +34,9 @@ const DashboardLazy = lazy(() => import("../page/admin/dashboard/Dashboard.jsx")
 
 const OrderDetailLazy = lazy(() => import("../page/admin/order_management/OrderDetail.jsx"));
 const DiscountListLazy = lazy(() => import("../page/admin/discount/discountList.jsx"));
-const router = createBrowserRouter([
+const ForgotPasswordLazy = lazy(() => import("../page/password/ForgotPassword.jsx"));
+const OtpResetLazy = lazy(() => import("../page/password/OtpReset.jsx"));
+const ChangePasswordLazy = lazy(() => import("../page/password/ChangePassword.jsx"));const router = createBrowserRouter([
     {
         path: "/",
         element: <UserLayout />,
@@ -48,7 +50,10 @@ const router = createBrowserRouter([
             { path: "order", element: <OrderPageLazy /> },
             { path: "login", element: <LoginLazy /> },
             { path: "register", element: <RegisterLazy /> },
-            { path: "*", element: <NotFoundLazy /> }
+            { path: "*", element: <NotFoundLazy /> },
+            { path: "forgot-password", element: <ForgotPasswordLazy /> },
+            { path: "reset-otp", element: <OtpResetLazy /> },
+            { path: "change-password", element: <ChangePasswordLazy /> },
         ],
     },
     {

@@ -62,6 +62,8 @@ export default function CategorySettings() {
             setNewCategory("");
             setNewDescription("");
             setCategories(prev => [res, ...prev]);
+            alert("Thêm danh mục thành công!");
+
         } catch (error) {
             alert("Lỗi khi thêm danh mục");
         }
@@ -83,6 +85,7 @@ export default function CategorySettings() {
             await updateCategory(id, { name: editedName, description: editedDescription });
             setEditingId(null);
             fetchCategories();
+            alert("Cập nhật danh mục thành công!");
         } catch (error) {
             alert("Lỗi khi cập nhật danh mục");
         }
@@ -93,6 +96,7 @@ export default function CategorySettings() {
             try {
                 await deleteCategory(id);
                 fetchCategories();
+                alert("Xóa danh mục thành công!");
             } catch (error) {
                 alert("Lỗi khi xóa danh mục");
             }

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Sidebar from "../../../components/Sidebar";
 import { FaEye, FaBan, FaCheckCircle, FaCheck } from "react-icons/fa";
 import { getAccounts, banAccount, unbanAccount } from "../../../service/accountService";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +17,7 @@ export default function UserList() {
     const roleLabels = {
         ADMIN: "Quản trị viên",
         STAFF: "Nhân viên",
-        USER: "Người dùng",
+        CUSTOMER: "Người dùng",
     };
 
     const statusLabels = {
