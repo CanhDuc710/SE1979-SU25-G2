@@ -104,8 +104,8 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<OrdersByPeriodDTO> findYearlyCompletedOrders();
 
 
-    @Query(
-            value = """
+    //Get order history
+    @Query(value = """
       SELECT DISTINCT o
       FROM Order o
       LEFT JOIN FETCH o.items oi
