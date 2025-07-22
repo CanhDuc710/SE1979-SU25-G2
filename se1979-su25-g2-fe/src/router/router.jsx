@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { lazy } from "react";
 import UserLayout from "../layout/UserLayout.jsx";
 import AdminLayout from "../layout/AdminLayout.jsx";
+import ProtectedAdminRoute from "../components/ProtectedAdminRoute.jsx";
 
 const HomepageLazy = lazy(() => import("../page/Home/Homepage.jsx"));
 const ProductListLazy = lazy(() => import("../page/Product/ProductList.jsx"));
@@ -9,6 +10,7 @@ const ProductDetailLazy = lazy(() => import("../page/Product/ProductDetail.jsx")
 const CartPageLazy = lazy(() => import("../page/Cart/CartPage.jsx"));
 const FAQLazy = lazy(() => import("../page/FAQ/FAQpage.jsx"));
 const OrderPageLazy = lazy(() => import("../page/Order/OrderPage.jsx"));
+const VNPayReturnPageLazy = lazy(() => import("../page/Order/VNPayReturnPage.jsx"));
 const NotFoundLazy = lazy(() => import("../page/error/NotFound.jsx"));
 const LoginLazy = lazy(() => import("../page/User/Login.jsx"));
 const RegisterLazy = lazy(() => import("../page/User/Register.jsx"));
@@ -46,6 +48,7 @@ const router = createBrowserRouter([
             { path: "user", element: <UserProfileLazy /> },
             { path: "faq", element: <FAQLazy /> },
             { path: "order", element: <OrderPageLazy /> },
+            { path: "order/vnpay-return", element: <VNPayReturnPageLazy /> },
             { path: "login", element: <LoginLazy /> },
             { path: "register", element: <RegisterLazy /> },
             { path: "*", element: <NotFoundLazy /> }
@@ -53,7 +56,11 @@ const router = createBrowserRouter([
     },
     {
         path: "/admin",
-        element: <AdminLayout />,
+        element: (
+            <ProtectedAdminRoute>
+                <AdminLayout />
+            </ProtectedAdminRoute>
+        ),
         children: [
             { path: "products", element: <ProductManagementLazy /> },
             { path: "accounts", element: <UserListLazy /> },
@@ -86,4 +93,3 @@ const router = createBrowserRouter([
 ]);
 
 export default router;
-

@@ -70,7 +70,7 @@ public class Order {
 
 
     public enum PaymentMethod {
-        COD, CARD, PAYPAL
+        COD, CARD
     }
 
     public enum Status {

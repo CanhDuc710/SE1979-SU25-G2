@@ -129,6 +129,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- VNPay Dependencies -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.15</version>
+        </dependency>
+
     </dependencies>
 
     <build>
