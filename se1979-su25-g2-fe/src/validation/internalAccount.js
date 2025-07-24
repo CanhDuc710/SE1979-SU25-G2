@@ -39,8 +39,12 @@ export const accountSchema = yup.object({
         .oneOf(["MALE", "FEMALE", "OTHER"], "Chọn giới tính hợp lệ"),
     dob: yup
         .date()
-        .required("Vui lòng chọn ngày sinh")
-        .max(new Date(), "Ngày sinh không thể lớn hơn hôm nay").nullable(),
+        .nullable() // Cho phép giá trị là null
+        .transform((value, originalValue) => {
+            // Nếu giá trị gốc là chuỗi rỗng, chuyển thành null
+            return originalValue === "" ? null : value;
+        })
+        .max(new Date(), "Ngày sinh không thể lớn hơn hôm nay"),
     role: yup
         .string()
         .oneOf(["STAFF", "ADMIN"], "Chọn vai trò hợp lệ"),

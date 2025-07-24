@@ -1,7 +1,6 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { fetchProfile, updateProfile } from "../../service/profileService";
+import { accountSchema } from "../../validation/editInfor";
 
 export default function UserProfile() {
     const [formData, setFormData] = useState({
@@ -15,8 +14,8 @@ export default function UserProfile() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
+    const [errors, setErrors] = useState({});
 
-    // Helper function to properly format date for input type="date"
     const formatDateForInput = (dateString) => {
         if (!dateString) return "";
 
@@ -32,7 +31,6 @@ export default function UserProfile() {
     };
 
     useEffect(() => {
-        // load profile when component mounts
         (async () => {
             try {
                 const dto = await fetchProfile();
@@ -54,11 +52,34 @@ export default function UserProfile() {
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
+        setErrors(prev => ({ ...prev, [field]: undefined })); // Clear error for the field being changed
     };
 
     const handleSaveProfile = async () => {
         setSaving(true);
         setError(null);
+
+        try {
+            const profileSchema = accountSchema.pick([
+                "firstName",
+                "lastName",
+                "email",
+                "phoneNumber",
+                "sex",
+                "dob",
+            ]);
+            await profileSchema.validate(formData, { abortEarly: false });
+            setErrors({});
+        } catch (validationError) {
+            const validationErrors = {};
+            validationError.inner.forEach(err => {
+                if (err.path) validationErrors[err.path] = err.message;
+            });
+            setErrors(validationErrors);
+            setSaving(false);
+            return;
+        }
+
         try {
             const updated = await updateProfile({
                 firstName: formData.firstName,
@@ -79,7 +100,13 @@ export default function UserProfile() {
             });
             alert("Cập nhật thành công!");
         } catch (e) {
-            setError(e.message);
+            console.error("Lỗi khi cập nhật hồ sơ:", e);
+            if (e.response?.data && typeof e.response.data === 'object') {
+                setErrors(e.response.data);
+                setError("Có lỗi xảy ra khi cập nhật. Vui lòng kiểm tra lại thông tin.");
+            } else {
+                setError("Cập nhật thất bại! Vui lòng thử lại.");
+            }
         } finally {
             setSaving(false);
         }
@@ -108,7 +135,6 @@ export default function UserProfile() {
                 {/* Profile Form */}
                 <div className="bg-white rounded-lg shadow-sm p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Họ */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Họ
@@ -119,11 +145,11 @@ export default function UserProfile() {
                                 onChange={e =>
                                     handleInputChange("lastName", e.target.value)
                                 }
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className={`w-full px-3 py-2 border ${errors.lastName ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             />
+                            {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
                         </div>
 
-                        {/* Tên */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Tên
@@ -134,11 +160,11 @@ export default function UserProfile() {
                                 onChange={e =>
                                     handleInputChange("firstName", e.target.value)
                                 }
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className={`w-full px-3 py-2 border ${errors.firstName ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             />
+                            {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
                         </div>
 
-                        {/* Email */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Email
@@ -147,11 +173,10 @@ export default function UserProfile() {
                                 type="email"
                                 value={formData.email}
                                 onChange={e => handleInputChange("email", e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             />
+                            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                         </div>
-
-                        {/* Số điện thoại */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Số điện thoại
@@ -162,11 +187,11 @@ export default function UserProfile() {
                                 onChange={e =>
                                     handleInputChange("phoneNumber", e.target.value)
                                 }
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className={`w-full px-3 py-2 border ${errors.phoneNumber ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             />
+                            {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>}
                         </div>
 
-                        {/* Giới tính */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Giới tính
@@ -174,15 +199,15 @@ export default function UserProfile() {
                             <select
                                 value={formData.sex}
                                 onChange={e => handleInputChange("sex", e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className={`w-full px-3 py-2 border ${errors.sex ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             >
                                 <option value="Male">Nam</option>
                                 <option value="Female">Nữ</option>
                                 <option value="Other">Khác</option>
                             </select>
+                            {errors.sex && <p className="text-red-500 text-xs mt-1">{errors.sex}</p>}
                         </div>
 
-                        {/* Ngày sinh */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Ngày sinh
@@ -191,12 +216,12 @@ export default function UserProfile() {
                                 type="date"
                                 value={formData.dob}
                                 onChange={e => handleInputChange("dob", e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className={`w-full px-3 py-2 border ${errors.dob ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             />
+                            {errors.dob && <p className="text-red-500 text-xs mt-1">{errors.dob}</p>}
                         </div>
                     </div>
 
-                    {/* Save Button */}
                     <div className="flex justify-end mt-8">
                         <button
                             onClick={handleSaveProfile}

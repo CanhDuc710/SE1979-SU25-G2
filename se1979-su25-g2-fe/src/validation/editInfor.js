@@ -48,13 +48,22 @@ export const accountSchema = yup.object({
         .required("Vui lòng nhập số điện thoại")
         .matches(/^[0-9]{9,11}$/, "Số điện thoại phải 9–11 chữ số"),
 
+    phoneNumber: yup
+        .string()
+        .required("Vui lòng nhập số điện thoại")
+        .matches(/^[0-9]{9,11}$/, "Số điện thoại phải 9–11 chữ số"),
+
     gender: yup
         .string()
         .oneOf(["MALE", "FEMALE", "OTHER"], "Chọn giới tính hợp lệ"),
 
     dob: yup
         .date()
-        .required("Vui lòng chọn ngày sinh")
+        .nullable()
+        .transform((value, originalValue) => {
+            // Nếu giá trị gốc là chuỗi rỗng, chuyển thành null
+            return originalValue === "" ? null : value;
+        })
         .max(new Date(), "Ngày sinh không thể lớn hơn hôm nay"),
 
     role: yup
