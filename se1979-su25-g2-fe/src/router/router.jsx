@@ -21,6 +21,8 @@ const ProductEditLazy = lazy(() => import("../page/admin/product/ProductEdit.jsx
 const ProductCreateLazy = lazy(() => import("../page/admin/product/ProductCreate.jsx"));
 const CollectionManagementLazy = lazy(() => import("../page/admin/collection/CollectionList.jsx"));
 const CollectionDetailLazy = lazy(() => import("../page/admin/collection/CollectionDetail.jsx"));
+const CollectionCreateLazy = lazy(() => import("../page/admin/collection/CollectionCreate.jsx"));
+const CollectionEditLazy = lazy(() => import("../page/admin/collection/CollectionEdit.jsx"));
 const OrderListLazy = lazy(() => import("../page/admin/order_management/OrderList.jsx"));
 const OrderDetailLazy = lazy(() => import("../page/admin/order_management/OrderDetail.jsx"));
 const DiscountListLazy = lazy(() => import("../page/admin/discount/discountList.jsx"));
@@ -52,6 +54,8 @@ const router = createBrowserRouter([
             { path: "products/:productId/edit", element: <ProductEditLazy /> },
             { path: "products/create", element: <ProductCreateLazy /> },
             { path: "collections", element: <CollectionManagementLazy /> },
+            { path: "collections/create", element: <CollectionCreateLazy /> },
+            { path: "collections/:id/edit", element: <CollectionEditLazy /> },
             { path: "collections/:id", element: <CollectionDetailLazy /> },
             { path: "orders", element: <OrderListLazy /> },
             { path: "orders/:orderId", element: <OrderDetailLazy /> },
