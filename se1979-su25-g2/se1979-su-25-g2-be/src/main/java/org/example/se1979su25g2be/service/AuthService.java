@@ -9,9 +9,9 @@ import org.example.se1979su25g2be.repository.RoleRepository;
 import org.example.se1979su25g2be.repository.UserRepository;
 import org.example.se1979su25g2be.security.jwt.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -74,30 +74,42 @@ public class AuthService {
     }
 
     public ResponseEntity<?> authenticateUser(LoginRequestDTO loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsername(),
-                        loginRequest.getPassword())
-        );
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getUsername(),
+                            loginRequest.getPassword()
+                    )
+            );
+            // Thành công: sinh token và trả về JWT...
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = tokenProvider.generateToken(authentication);
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            User user = userRepository.findByUsername(loginRequest.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            String roleName = user.getRole() != null
+                    ? user.getRole().getRoleName()
+                    : "USER";
 
-        String jwt = tokenProvider.generateToken(authentication);
+            JwtResponseDTO resp = new JwtResponseDTO(
+                    jwt,
+                    user.getUserId(),
+                    user.getUsername(),
+                    user.getEmail(),
+                    roleName
+            );
+            return ResponseEntity.ok(resp);
 
-        // Get user details from authentication
-        User user = userRepository.findByUsername(loginRequest.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        String roleName = user.getRole() != null ? user.getRole().getRoleName() : "USER";
-
-        JwtResponseDTO jwtResponse = new JwtResponseDTO(
-                jwt,
-                user.getUserId(),
-                user.getUsername(),
-                user.getEmail(),
-                roleName
-        );
-
-        return ResponseEntity.ok(jwtResponse);
+        } catch (LockedException | DisabledException ex) {
+            // 403 Forbidden cho cả trường hợp banned (locked) và disabled
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body("Tài khoản đã bị ban");
+        } catch (BadCredentialsException ex) {
+            // 401 Unauthorized cho sai username/password
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("Sai tài khoản hoặc mật khẩu");
+        }
     }
 }
