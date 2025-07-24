@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../../components/Sidebar";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import { fetchAllProductsPaged } from "../../../service/productService";
+import { fetchAllProductsPaged, deleteProductById } from "../../../service/productService";
 import Pagination from "../../../components/Pagination";
 import { IMAGE_BASE_URL } from "../../../utils/constants";
 import { useNavigate } from "react-router-dom";
@@ -54,6 +54,20 @@ export default function ProductManagement() {
 
 
     const categories = [...new Set(products.map((p) => p.categoryName))];
+
+    const handleDeleteProduct = async (productId) => {
+        if (!window.confirm("Are you sure you want to delete this product?")) return;
+        try {
+            await deleteProductById(productId);
+            // Refresh the product list
+            const data = await fetchAllProductsPaged(currentPage, PRODUCTS_PER_PAGE);
+            setProducts(data.content);
+            setTotalPages(data.totalPages);
+        } catch (error) {
+            console.error("Failed to delete product:", error);
+            alert("Failed to delete product");
+        }
+    };
 
     return (
         <div className="flex min-h-screen bg-gradient-to-b from-blue-50 to-white" style={{ minHeight: '100vh' }}>
@@ -175,9 +189,16 @@ export default function ProductManagement() {
                                         <button
                                             className="text-blue-500 hover:text-blue-700 p-1 rounded border border-blue-200 hover:bg-blue-50"
                                             title="Edit product"
-                                            onClick={() => alert(`Edit product ${productId}`)}
+                                            onClick={() => navigate(`/admin/products/${productId}/edit`)}
                                         >
                                             <FaEdit />
+                                        </button>
+                                        <button
+                                            className="text-red-500 hover:text-red-700 p-1 rounded border border-red-200 hover:bg-red-50"
+                                            title="Delete product"
+                                            onClick={() => handleDeleteProduct(productId)}
+                                        >
+                                            <FaTrash />
                                         </button>
                                     </td>
                                 </tr>

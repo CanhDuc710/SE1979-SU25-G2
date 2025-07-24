@@ -1,7 +1,6 @@
 import React, {useState, useRef, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { API_BASE_URL } from "../../../utils/constants";
+import { createProduct, createProductWithImages, getCategories } from "../../../service/productService";
 
 const initialForm = {
   productCode: "",
@@ -47,11 +46,9 @@ const ProductCreate = () => {
         const formData = new FormData();
         formData.append("product", new Blob([JSON.stringify(form)], { type: "application/json" }));
         imageFiles.forEach((file) => formData.append("images", file));
-        await axios.post(`${API_BASE_URL}/admin/products/with-images`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await createProductWithImages(formData);
       } else {
-        await axios.post(`${API_BASE_URL}/admin/products`, form);
+        await createProduct(form);
       }
       setSuccess("Product created successfully!");
       setTimeout(() => navigate("/admin/products"), 1200);
@@ -63,9 +60,16 @@ const ProductCreate = () => {
   };
 
   useEffect(() => {
-    axios.get(`${API_BASE_URL}/categories`)
-        .then(res => setCategories(res.data))
-        .catch(() => setCategories([]));
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories();
+        setCategories(data);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+        setCategories([]);
+      }
+    };
+    fetchCategories();
   }, []);
 
   return (
@@ -102,7 +106,7 @@ const ProductCreate = () => {
               >
                 <option value="">Select category</option>
                 {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
+                    <option key={cat.categoryId} value={cat.categoryId}>
                       {cat.name}
                     </option>
                 ))}
