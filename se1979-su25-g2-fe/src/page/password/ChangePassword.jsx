@@ -9,14 +9,12 @@ export default function ChangePassword() {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    const token = localStorage.getItem('jwtToken');
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
         try {
-            await changePassword(currentPassword, newPassword, token);
+            await changePassword(currentPassword, newPassword);
             alert('Đổi mật khẩu thành công');
             navigate('/profile');
         } catch (err) {

@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 public class VNPayConfig {
 
     public static final String VNP_PAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static final String VNP_RETURN_URL = "http://localhost:3000/order/vnpay-return";
+    public static final String VNP_RETURN_URL = "http://localhost:5173/order/vnpay-return";
     public static final String VNP_TMN_CODE = "8CWAWKX6";
     public static final String VNP_HASH_SECRET = "VHUKLWGJCKPWW44VWLSMX2M967A2DVSR";
     public static final String VNP_API_URL = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
