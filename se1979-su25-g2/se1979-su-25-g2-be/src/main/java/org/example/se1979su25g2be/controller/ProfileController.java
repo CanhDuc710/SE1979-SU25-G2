@@ -1,5 +1,6 @@
 package org.example.se1979su25g2be.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.se1979su25g2be.dto.Account.AccountDetailDTO;
 import org.example.se1979su25g2be.dto.Account.UpdateProfileDTO;
@@ -21,7 +22,7 @@ public class ProfileController {
     @PutMapping("/{userId}")
     public ResponseEntity<AccountDetailDTO> updateProfile(
             @PathVariable Integer userId,
-            @RequestBody UpdateProfileDTO dto
+            @Valid @RequestBody UpdateProfileDTO dto
     ) {
         return ResponseEntity.ok(profileService.updateMyProfile(userId, dto));
     }
