@@ -1,53 +1,70 @@
-import { useState } from 'react';
-import { sendOtp } from '../../service/authService';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigate } from 'react-router-dom';
+import { sendOtp } from '../../service/authService';
+import { forgotPasswordSchema } from '../../validation/authSchema.js';
 
 export default function ForgotPassword() {
-    const [email, setEmail] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
     const navigate = useNavigate();
+    const {
+        register,
+        handleSubmit,
+        setError,
+        clearErrors,
+        formState: { errors, isSubmitting }
+    } = useForm({
+        resolver: yupResolver(forgotPasswordSchema)
+    });
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
+    const onSubmit = async ({ email }) => {
+        clearErrors();
         try {
             await sendOtp(email);
             alert('OTP đã được gửi tới email của bạn');
             navigate('/reset-otp', { state: { email } });
         } catch (err) {
-            const msg =
-                typeof err.response?.data === 'string'
-                    ? err.response.data
-                    : err.response?.data?.message || err.message || 'Gửi OTP thất bại';
-            setError(msg);
-        } finally {
-            setLoading(false);
+            const status = err.response?.status;
+            if (status === 404) {
+                setError('email', {
+                    type: 'server',
+                    message: 'Email này chưa được đăng ký.'
+                });
+            } else {
+                setError('root', {
+                    type: 'server',
+                    message: err.response?.data?.message || 'Gửi mã OTP thất bại. Vui lòng thử lại.'
+                });
+            }
         }
     };
 
     return (
         <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow">
             <h2 className="text-2xl font-semibold mb-4">Quên mật khẩu</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
                     <label className="block text-sm font-medium">Email</label>
                     <input
                         type="email"
-                        required
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        className="mt-1 block w-full border rounded p-2"
+                        {...register('email')}
+                        className={`mt-1 block w-full border rounded p-2 ${errors.email ? 'border-red-500' : ''}`}
                     />
+                    {errors.email && (
+                        <p className="text-red-500 text-sm">{errors.email.message}</p>
+                    )}
                 </div>
-                {error && <p className="text-red-500 text-sm">{error}</p>}
+
+                {errors.root && (
+                    <p className="text-red-500 text-center">{errors.root.message}</p>
+                )}
+
                 <button
                     type="submit"
-                    disabled={loading}
-                    className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+                    disabled={isSubmitting}
+                    className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                 >
-                    {loading ? 'Đang gửi...' : 'Gửi mã OTP'}
+                    {isSubmitting ? 'Đang gửi...' : 'Gửi mã OTP'}
                 </button>
             </form>
         </div>

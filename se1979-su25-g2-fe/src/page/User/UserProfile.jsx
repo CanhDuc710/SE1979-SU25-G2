@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { fetchProfile, updateProfile } from "../../service/profileService";
-import { accountSchema } from "../../validation/editInfor";
+import { profileSchema } from "../../validation/profileSchema";
 
 export default function UserProfile() {
     const [formData, setFormData] = useState({
+        username: "",
         lastName: "",
         firstName: "",
         email: "",
@@ -16,18 +17,19 @@ export default function UserProfile() {
     const [error, setError] = useState(null);
     const [errors, setErrors] = useState({});
 
-    const formatDateForInput = (dateString) => {
-        if (!dateString) return "";
+    const formatDateForInput = (iso) => {
+        if (!iso) return "";
+        const d = new Date(iso);
+        return isNaN(d) ? "" : d.toISOString().split("T")[0];
+    };
 
-        try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return "";
-
-            return date.toISOString().split('T')[0];
-        } catch (e) {
-            console.error("Error parsing date:", e);
-            return "";
-        }
+    const normalizeSex = (raw) => {
+        if (!raw) return "";
+        const lower = raw.toLowerCase();
+        if (lower === "male") return "Male";
+        if (lower === "female") return "Female";
+        if (lower === "other") return "Other";
+        return "";
     };
 
     useEffect(() => {
@@ -35,24 +37,28 @@ export default function UserProfile() {
             try {
                 const dto = await fetchProfile();
                 setFormData({
+                    username: dto.username || "",
                     lastName: dto.lastName || "",
                     firstName: dto.firstName || "",
                     email: dto.email || "",
                     phoneNumber: dto.phoneNumber || "",
-                    sex: dto.sex || "Male",
+                    sex: normalizeSex(dto.sex),
                     dob: formatDateForInput(dto.dob),
                 });
             } catch (e) {
-                setError(e.message);
+                console.error(e);
+                setError("Không thể lấy thông tin hồ sơ.");
             } finally {
                 setLoading(false);
             }
         })();
     }, []);
 
-    const handleInputChange = (field, value) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
-        setErrors(prev => ({ ...prev, [field]: undefined })); // Clear error for the field being changed
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+        setErrors((prev) => ({ ...prev, [name]: undefined }));
+        setError(null);
     };
 
     const handleSaveProfile = async () => {
@@ -60,50 +66,37 @@ export default function UserProfile() {
         setError(null);
 
         try {
-            const profileSchema = accountSchema.pick([
-                "firstName",
-                "lastName",
-                "email",
-                "phoneNumber",
-                "sex",
-                "dob",
-            ]);
-            await profileSchema.validate(formData, { abortEarly: false });
+            await profileSchema
+                .pick(["firstName", "lastName", "email", "phoneNumber", "sex", "dob"])
+                .validate(formData, { abortEarly: false });
             setErrors({});
-        } catch (validationError) {
-            const validationErrors = {};
-            validationError.inner.forEach(err => {
-                if (err.path) validationErrors[err.path] = err.message;
+        } catch (ve) {
+            const fieldErrors = {};
+            ve.inner.forEach((err) => {
+                if (err.path) fieldErrors[err.path] = err.message;
             });
-            setErrors(validationErrors);
+            setErrors(fieldErrors);
             setSaving(false);
             return;
         }
 
         try {
-            const updated = await updateProfile({
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                email: formData.email,
-                phoneNumber: formData.phoneNumber,
-                sex: formData.sex,
-                dob: formData.dob,
-            });
-
+            const updated = await updateProfile(formData);
             setFormData({
+                username: updated.username || "",
                 lastName: updated.lastName || "",
                 firstName: updated.firstName || "",
                 email: updated.email || "",
                 phoneNumber: updated.phoneNumber || "",
-                sex: updated.sex || "Male",
+                sex: normalizeSex(updated.sex),
                 dob: formatDateForInput(updated.dob),
             });
             alert("Cập nhật thành công!");
         } catch (e) {
             console.error("Lỗi khi cập nhật hồ sơ:", e);
-            if (e.response?.data && typeof e.response.data === 'object') {
+            if (e.response?.data && typeof e.response.data === "object") {
                 setErrors(e.response.data);
-                setError("Có lỗi xảy ra khi cập nhật. Vui lòng kiểm tra lại thông tin.");
+                setError("Vui lòng kiểm tra lại thông tin.");
             } else {
                 setError("Cập nhật thất bại! Vui lòng thử lại.");
             }
@@ -113,16 +106,16 @@ export default function UserProfile() {
     };
 
     if (loading) {
-        return <div className="p-8 text-center">Đang tải thông tin...</div>;
+        return <div className="p-8 text-center text-gray-600">Đang tải...</div>;
     }
 
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-200 to-yellow-100 py-8">
-                <div className="max-w-4xl mx-auto px-4">
-                    <h1 className="text-2xl font-medium text-gray-700 text-center">
-                        Xin chào, {formData.firstName}
+                <div className="max-w-4xl mx-auto text-center">
+                    <h1 className="text-2xl font-medium text-gray-700">
+                        Xin chào, {formData.username}
                     </h1>
                 </div>
             </div>
@@ -132,93 +125,130 @@ export default function UserProfile() {
                     <div className="text-red-600 bg-red-100 p-3 rounded">{error}</div>
                 )}
 
-                {/* Profile Form */}
                 <div className="bg-white rounded-lg shadow-sm p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Họ */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Họ
                             </label>
                             <input
+                                name="lastName"
                                 type="text"
                                 value={formData.lastName}
-                                onChange={e =>
-                                    handleInputChange("lastName", e.target.value)
-                                }
-                                className={`w-full px-3 py-2 border ${errors.lastName ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                onChange={handleChange}
+                                className={`w-full px-3 py-2 border ${
+                                    errors.lastName ? "border-red-500" : "border-gray-300"
+                                } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             />
-                            {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
+                            {errors.lastName && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.lastName}
+                                </p>
+                            )}
                         </div>
 
+                        {/* Tên */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Tên
                             </label>
                             <input
+                                name="firstName"
                                 type="text"
                                 value={formData.firstName}
-                                onChange={e =>
-                                    handleInputChange("firstName", e.target.value)
-                                }
-                                className={`w-full px-3 py-2 border ${errors.firstName ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                onChange={handleChange}
+                                className={`w-full px-3 py-2 border ${
+                                    errors.firstName ? "border-red-500" : "border-gray-300"
+                                } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             />
-                            {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
+                            {errors.firstName && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.firstName}
+                                </p>
+                            )}
                         </div>
 
+                        {/* Email */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Email
                             </label>
                             <input
+                                name="email"
                                 type="email"
                                 value={formData.email}
-                                onChange={e => handleInputChange("email", e.target.value)}
-                                className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                onChange={handleChange}
+                                className={`w-full px-3 py-2 border ${
+                                    errors.email ? "border-red-500" : "border-gray-300"
+                                } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             />
-                            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                            {errors.email && (
+                                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                            )}
                         </div>
+
+                        {/* Số điện thoại */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Số điện thoại
                             </label>
                             <input
+                                name="phoneNumber"
                                 type="tel"
                                 value={formData.phoneNumber}
-                                onChange={e =>
-                                    handleInputChange("phoneNumber", e.target.value)
-                                }
-                                className={`w-full px-3 py-2 border ${errors.phoneNumber ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                onChange={handleChange}
+                                className={`w-full px-3 py-2 border ${
+                                    errors.phoneNumber ? "border-red-500" : "border-gray-300"
+                                } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             />
-                            {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>}
+                            {errors.phoneNumber && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.phoneNumber}
+                                </p>
+                            )}
                         </div>
 
+                        {/* Giới tính – sẽ tự động chọn đúng option */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Giới tính
                             </label>
                             <select
+                                name="sex"
                                 value={formData.sex}
-                                onChange={e => handleInputChange("sex", e.target.value)}
-                                className={`w-full px-3 py-2 border ${errors.sex ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                onChange={handleChange}
+                                className={`w-full px-3 py-2 border ${
+                                    errors.sex ? "border-red-500" : "border-gray-300"
+                                } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             >
+                                <option value="">-- Chọn --</option>
                                 <option value="Male">Nam</option>
                                 <option value="Female">Nữ</option>
                                 <option value="Other">Khác</option>
                             </select>
-                            {errors.sex && <p className="text-red-500 text-xs mt-1">{errors.sex}</p>}
+                            {errors.sex && (
+                                <p className="text-red-500 text-xs mt-1">{errors.sex}</p>
+                            )}
                         </div>
 
+                        {/* Ngày sinh */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Ngày sinh
                             </label>
                             <input
+                                name="dob"
                                 type="date"
                                 value={formData.dob}
-                                onChange={e => handleInputChange("dob", e.target.value)}
-                                className={`w-full px-3 py-2 border ${errors.dob ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                onChange={handleChange}
+                                className={`w-full px-3 py-2 border ${
+                                    errors.dob ? "border-red-500" : "border-gray-300"
+                                } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             />
-                            {errors.dob && <p className="text-red-500 text-xs mt-1">{errors.dob}</p>}
+                            {errors.dob && (
+                                <p className="text-red-500 text-xs mt-1">{errors.dob}</p>
+                            )}
                         </div>
                     </div>
 
