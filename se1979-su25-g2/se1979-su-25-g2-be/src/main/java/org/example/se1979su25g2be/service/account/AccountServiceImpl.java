@@ -23,19 +23,19 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Override
-    public Page<AccountDTO> getAllAccounts(String keyword, String status, String role, int page, int size) {
-        User.Status statusEnum = (status != null) ? User.Status.valueOf(status.toUpperCase()) : null;
-        Pageable pageable = PageRequest.of(page, size);
+        @Override
+        public Page<AccountDTO> getAllAccounts(String keyword, String status, String role, int page, int size) {
+            User.Status statusEnum = (status != null) ? User.Status.valueOf(status.toUpperCase()) : null;
+            Pageable pageable = PageRequest.of(page, size);
 
-        Role userRole = null;
-        if (role != null && !role.isBlank()) {
-            userRole = roleRepository.findByRoleNameIgnoreCase(role).orElse(null);
+            Role userRole = null;
+            if (role != null && !role.isBlank()) {
+                userRole = roleRepository.findByRoleNameIgnoreCase(role).orElse(null);
+            }
+
+            return accountRepository.searchUsers(keyword, statusEnum, userRole, pageable)
+                    .map(this::mapToDTO);
         }
-
-        return accountRepository.searchUsers(keyword, statusEnum, userRole, pageable)
-                .map(this::mapToDTO);
-    }
 
     @Override
     public AccountDTO banAccount(Integer id) {
