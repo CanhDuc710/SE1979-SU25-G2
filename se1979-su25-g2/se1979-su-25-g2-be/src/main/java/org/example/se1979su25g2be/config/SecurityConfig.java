@@ -78,6 +78,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/provinces/**").permitAll()
                     .requestMatchers("/api/districts/**").permitAll()
                     .requestMatchers("/api/wards/**").permitAll()
+                    .requestMatchers("/api/discounts/**").permitAll()
                 // User role required endpoints
 
                 .requestMatchers("/api/user/**").hasRole("USER")

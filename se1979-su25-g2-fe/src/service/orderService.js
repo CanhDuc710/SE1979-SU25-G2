@@ -1,8 +1,29 @@
 import axios from "axios";
 import { API_BASE_URL } from "../utils/constants";
 
+// Helper to create headers with authorization token
+const createAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    const headers = { "Content-Type": "application/json" };
+    if (token) {
+        headers["Authorization"] = token;
+    }
+    return headers;
+};
+
 export const createOrder = async (orderData) => {
     const res = await axios.post(`${API_BASE_URL}/orders`, orderData);
+    return res.data;
+};
+
+export const createVNPayPayment = async (orderData) => {
+    const res = await axios.post(`${API_BASE_URL}/orders/vnpay`, orderData);
+    return res.data;
+};
+
+export const checkVNPayReturn = async (params) => {
+    const queryString = new URLSearchParams(params).toString();
+    const res = await axios.get(`${API_BASE_URL}/orders/vnpay-return?${queryString}`);
     return res.data;
 };
 
@@ -30,22 +51,26 @@ export const getAllOrders = async ({
         params.append('searchBy', searchBy || "all");
     }
 
-    const response = await axios.get(`${API_BASE_URL}/admin/orders/search?${params.toString()}`);
+    const response = await axios.get(`${API_BASE_URL}/admin/orders/search?${params.toString()}`,
+        { headers: createAuthHeaders() });
     return response.data;
 };
 
 export const getOrderById = async (orderId) => {
-    const res = await axios.get(`${API_BASE_URL}/admin/orders/${orderId}`);
+    const res = await axios.get(`${API_BASE_URL}/admin/orders/${orderId}`,
+        { headers: createAuthHeaders() });
     return res.data;
 };
 
 export const updateOrderStatus = async (orderId, status) => {
     const res = await axios.put(`${API_BASE_URL}/admin/orders/${orderId}/status`, status, {
-        headers: { 'Content-Type': 'text/plain' }
+        headers: { ...createAuthHeaders(), 'Content-Type': 'text/plain' }
     });
     return res.data;
 };
 
 export const deleteOrder = async (orderId) => {
-    await axios.delete(`${API_BASE_URL}/admin/orders/${orderId}`);
+    await axios.delete(`${API_BASE_URL}/admin/orders/${orderId}`,
+        { headers: createAuthHeaders() });
 };
+

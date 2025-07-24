@@ -99,19 +99,29 @@ public class OrderServiceImpl implements OrderService {
         }).collect(Collectors.toList());
 
         order.setItems(orderItems);
-        order.setTotalAmount(orderItems.stream().mapToDouble(OrderItem::getPrice).sum());
+
+        // Sử dụng finalTotal từ frontend thay vì tự tính từ cart items
+        if (orderRequest.getFinalTotal() != null) {
+            order.setTotalAmount(orderRequest.getFinalTotal()); // Đã là Double, không cần convert
+        } else {
+            // Fallback: tự tính nếu không có finalTotal từ frontend
+            order.setTotalAmount(orderItems.stream().mapToDouble(OrderItem::getPrice).sum());
+        }
+
+        // Set thời gian trước khi save
+        LocalDateTime now = LocalDateTime.now();
+        order.setCreatedAt(Timestamp.valueOf(now));
+        order.setOrderDate(now);
 
         Order savedOrder = orderRepository.save(order);
 
+        // Clear cart sau khi tạo order thành công
         if (user != null) {
             cartItemRepository.deleteByUser(user);
         } else {
             cartItemRepository.deleteBySessionId(orderRequest.getSessionId());
         }
-        LocalDateTime now = LocalDateTime.now();
 
-        order.setCreatedAt(Timestamp.valueOf(now));
-        order.setOrderDate(now);
         return savedOrder;
     }
 
@@ -143,3 +153,4 @@ public class OrderServiceImpl implements OrderService {
                 });
     }
 }
+

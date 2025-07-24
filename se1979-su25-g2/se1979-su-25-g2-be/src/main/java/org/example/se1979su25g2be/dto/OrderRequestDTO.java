@@ -15,4 +15,8 @@ public class OrderRequestDTO {
     private Integer wardId;
     private String paymentMethod;
     private List<OrderItemDTO> items;
+    // Thêm các field để nhận discount info từ frontend
+    private Double discountAmount; // Đổi từ BigDecimal sang Double để tương thích
+    private Double finalTotal;     // Đổi từ BigDecimal sang Double để tương thích
 }
+

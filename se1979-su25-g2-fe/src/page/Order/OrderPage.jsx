@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getCart } from "../../service/cartService";
-import { createOrder } from "../../service/orderService";
+import { createOrder, createVNPayPayment } from "../../service/orderService";
 import { getProvinces, getDistricts, getWards } from "../../service/addressService";
 import { getSessionId } from "../../service/cartService";
 import Header from "../../ui/Header";
@@ -36,6 +36,16 @@ export default function OrderPage() {
         const data = await getCart();
         setCart(data);
         setLoadingCart(false);
+    };
+
+    // Lấy discount info từ localStorage
+    const getDiscountInfo = () => {
+        try {
+            const saved = localStorage.getItem("cartDiscount");
+            return saved ? JSON.parse(saved) : { discount: 0, finalTotal: cart?.totalPrice || 0 };
+        } catch {
+            return { discount: 0, finalTotal: cart?.totalPrice || 0 };
+        }
     };
 
     const loadProvinces = async () => {
@@ -116,17 +126,47 @@ export default function OrderPage() {
         setError("");
 
         try {
-            await createOrder({
+            const discountInfo = getDiscountInfo();
+            const sessionId = getSessionId();
+
+            console.log("Session ID:", sessionId);
+            console.log("Discount Info:", discountInfo);
+            console.log("Cart:", cart);
+
+            // Kiểm tra cart có items không
+            if (!cart || !cart.items || cart.items.length === 0) {
+                throw new Error("Cart is empty. Please add items to cart before checkout.");
+            }
+
+            const orderData = {
                 ...form,
                 provinceId: form.provinceId ? parseInt(form.provinceId, 10) : null,
                 districtId: form.districtId ? parseInt(form.districtId, 10) : null,
                 wardId: form.wardId ? parseInt(form.wardId, 10) : null,
-                sessionId: getSessionId(),
-            });
-            setSuccess(true);
+                sessionId: sessionId,
+                // Thêm thông tin discount
+                discountAmount: discountInfo.discount || 0,
+                finalTotal: discountInfo.finalTotal || (cart?.totalPrice || 0) + 15000
+            };
+
+            console.log("Order data being sent:", orderData);
+
+            if (form.paymentMethod === "CARD") {
+                // Sử dụng VNPay cho thanh toán CARD
+                console.log("Creating VNPay payment...");
+                const vnpayResponse = await createVNPayPayment(orderData);
+                console.log("VNPay response:", vnpayResponse);
+                // Chuyển hướng đến VNPay
+                window.location.href = vnpayResponse.paymentUrl;
+            } else {
+                // Thanh toán COD thông thường
+                console.log("Creating COD order...");
+                await createOrder(orderData);
+                setSuccess(true);
+            }
         } catch (err) {
             console.error("Order error:", err);
-            setError("Order failed. Please check your info.");
+            setError(err.response?.data?.error || err.message || "Order failed. Please check your info.");
         }
 
         setLoadingOrder(false);
@@ -147,10 +187,11 @@ export default function OrderPage() {
             </div>
         );
 
+    const discountInfo = getDiscountInfo();
     const totalPrice = cart?.totalPrice || 0;
-    const discount = totalPrice * 0.2;
+    const discount = discountInfo.discount;
     const shipping = 15000;
-    const finalTotal = totalPrice - discount + shipping;
+    const finalTotal = discountInfo.finalTotal; // Không cộng thêm shipping vì đã có trong discountInfo.finalTotal
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -189,12 +230,12 @@ export default function OrderPage() {
                     <div className="bg-gray-100 p-6 rounded-lg max-w-md ml-auto">
                         <h2 className="text-lg font-semibold mb-4">Order Details</h2>
                         <div className="flex justify-between mb-2">
-                            <span>Total</span>
-                            <span>{totalPrice.toLocaleString()} VND</span>
+                            <span>Total (after discount)</span>
+                            <span>{discountInfo.finalTotal.toLocaleString()} VND</span>
                         </div>
                         <div className="flex justify-between mb-2 text-red-500">
-                            <span>Discount (-20%)</span>
-                            <span>{discount.toLocaleString()} VND</span>
+                            <span>Discount</span>
+                            <span>{discount > 0 ? `-${discount.toLocaleString()} VND` : "0 VND"}</span>
                         </div>
                         <div className="flex justify-between mb-2">
                             <span>Shipping</span>
@@ -314,7 +355,7 @@ export default function OrderPage() {
                             className="w-full p-2 border rounded"
                         >
                             <option value="COD">Cash on Delivery</option>
-                            <option value="BANK">Bank Transfer</option>
+                            <option value="CARD">Bank Transfer</option>
                         </select>
                     </div>
                     <button
@@ -329,3 +370,4 @@ export default function OrderPage() {
         </div>
     );
 }
+

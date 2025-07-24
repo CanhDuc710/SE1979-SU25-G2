@@ -6,16 +6,22 @@ import {
     updateCartItem,
     removeFromCart,
 } from "../../service/cartService";
+import { fetchDiscounts } from "../../service/discountService";
 import { IMAGE_BASE_URL } from "../../utils/constants";
 
 
 export default function CartPage() {
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [discountCode, setDiscountCode] = useState("");
+    const [discounts, setDiscounts] = useState([]);
+    const [appliedDiscount, setAppliedDiscount] = useState(null);
+    const [discountError, setDiscountError] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
         loadCart();
+        loadDiscounts();
     }, []);
 
     const loadCart = async () => {
@@ -23,6 +29,15 @@ export default function CartPage() {
         const data = await getCart();
         setCart(data);
         setLoading(false);
+    };
+
+    const loadDiscounts = async () => {
+        try {
+            const data = await fetchDiscounts({ page: 0, size: 100 });
+            setDiscounts(data.content || []);
+        } catch (error) {
+            setDiscounts([]);
+        }
     };
 
     const handleQuantityChange = async (variantId, newQuantity) => {
@@ -36,12 +51,50 @@ export default function CartPage() {
         loadCart();
     };
 
+    const handleApplyDiscount = () => {
+        setDiscountError("");
+        setAppliedDiscount(null);
+        if (!discountCode) {
+            setDiscountError("Please enter a discount code.");
+            return;
+        }
+        const found = discounts.find(
+            d => d.code.toLowerCase() === discountCode.trim().toLowerCase() && d.isActive
+        );
+        if (!found) {
+            setDiscountError("Invalid or inactive discount code.");
+            return;
+        }
+        if (cart?.totalPrice < found.minOrderValue) {
+            setDiscountError(`Order must be at least ${found.minOrderValue.toLocaleString()} VND to use this code.`);
+            return;
+        }
+        setAppliedDiscount(found);
+
+        // Lưu discount info ngay khi apply thành công
+        const calculatedDiscount = Math.min(
+            Math.round((cart?.totalPrice || 0) * (found.discountPercent / 100)),
+            found.maxDiscountAmount
+        );
+        const calculatedFinalTotal = (cart?.totalPrice || 0) - calculatedDiscount + 15000; // Thêm shipping vào đây
+        localStorage.setItem("cartDiscount", JSON.stringify({
+            discount: calculatedDiscount,
+            finalTotal: calculatedFinalTotal
+        }));
+    };
+
     if (loading) return <div className="text-center p-10">Loading...</div>;
 
+    // Tính toán discount và finalTotal
     const totalPrice = cart?.totalPrice || 0;
-    const discount = totalPrice * 0.2;
+    const discount = appliedDiscount
+        ? Math.min(
+            Math.round(totalPrice * (appliedDiscount.discountPercent / 100)),
+            appliedDiscount.maxDiscountAmount
+        )
+        : 0;
     const shipping = 15000;
-    const finalTotal = totalPrice - discount + shipping;
+    const finalTotal = totalPrice - discount + shipping; // Thêm shipping vào finalTotal
 
     return (
         <>
@@ -111,7 +164,7 @@ export default function CartPage() {
                         <span>{totalPrice.toLocaleString()} VND</span>
                     </div>
                     <div className="flex justify-between mb-2 text-red-500">
-                        <span>Giảm giá (-20%)</span>
+                        <span>Giảm giá {appliedDiscount ? `(-${appliedDiscount.discountPercent}%)` : ""}</span>
                         <span>{discount.toLocaleString()} VND</span>
                     </div>
                     <div className="flex justify-between mb-2">
@@ -122,16 +175,31 @@ export default function CartPage() {
                         <span>Thành tiền</span>
                         <span>{finalTotal.toLocaleString()} VND</span>
                     </div>
-
+                    {/* Discount code input */}
                     <div className="mt-4">
-                        <input
-                            type="text"
-                            placeholder="Nhập mã giảm giá"
-                            className="w-full p-2 border rounded mb-2"
-                        />
-                        <button className="bg-black text-white w-full py-2 rounded hover:bg-gray-800 transition">
-                            Áp dụng
-                        </button>
+                        <label className="block mb-1 font-medium">Mã giảm giá</label>
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                value={discountCode}
+                                onChange={e => setDiscountCode(e.target.value)}
+                                className="flex-1 p-2 border rounded"
+                                placeholder="Nhập mã"
+                            />
+                            <button
+                                type="button"
+                                onClick={handleApplyDiscount}
+                                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                            >
+                                Áp dụng
+                            </button>
+                        </div>
+                        {discountError && <div className="text-red-500 text-xs mt-1">{discountError}</div>}
+                        {appliedDiscount && (
+                            <div className="text-green-600 text-xs mt-1">
+                                Mã <b>{appliedDiscount.code}</b> đã được áp dụng: {appliedDiscount.discountPercent}% giảm giá (tối đa {appliedDiscount.maxDiscountAmount.toLocaleString()} VND)
+                            </div>
+                        )}
                     </div>
                 </div>
 
