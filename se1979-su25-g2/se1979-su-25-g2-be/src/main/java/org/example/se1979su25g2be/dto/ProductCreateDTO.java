@@ -22,3 +22,4 @@ public class ProductCreateDTO {
     private BigDecimal price;
     private List<ProductVariantDTO> variants;
 }
+

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getProductById } from "../../../service/productService";
+import { getProductById, updateProduct, updateProductWithImages, getCategories } from "../../../service/productService";
 import axios from "axios";
 import { API_BASE_URL } from "../../../utils/constants";
 
@@ -13,6 +13,7 @@ const ProductEdit = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [imageFiles, setImageFiles] = useState([]);
+  const [categories, setCategories] = useState([]);
   const fileInputRef = useRef();
 
   useEffect(() => {
@@ -40,6 +41,19 @@ const ProductEdit = () => {
     fetchProduct();
   }, [productId]);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories();
+        setCategories(data);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+        setCategories([]);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({
@@ -62,12 +76,10 @@ const ProductEdit = () => {
         const formData = new FormData();
         formData.append("product", new Blob([JSON.stringify(form)], { type: "application/json" }));
         imageFiles.forEach((file) => formData.append("images", file));
-        await axios.put(`${API_BASE_URL}/admin/products/${productId}/with-images`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await updateProductWithImages(productId, formData);
       } else {
         // Use JSON
-        await axios.put(`${API_BASE_URL}/products/${productId}`, form);
+        await updateProduct(productId, form);
       }
       setSuccess("Product updated successfully!");
       setTimeout(() => navigate(`/admin/products/${productId}`), 1200);
@@ -98,8 +110,21 @@ const ProductEdit = () => {
             <textarea name="description" value={form.description || ''} onChange={handleChange} className="w-full border-2 border-blue-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 transition" rows={3} />
           </div>
           <div>
-            <label className="block font-semibold mb-1 text-blue-800">Category ID</label>
-            <input name="categoryId" value={form.categoryId || ''} onChange={handleChange} className="w-full border-2 border-blue-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 transition" required />
+            <label className="block font-semibold mb-1 text-blue-800">Category</label>
+            <select
+                name="categoryId"
+                value={form.categoryId || ''}
+                onChange={handleChange}
+                className="w-full border-2 border-blue-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 transition"
+                required
+            >
+              <option value="">Select category</option>
+              {categories.map((cat) => (
+                  <option key={cat.categoryId} value={cat.categoryId}>
+                    {cat.name}
+                  </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block font-semibold mb-1 text-blue-800">Brand</label>
@@ -143,4 +168,3 @@ const ProductEdit = () => {
 };
 
 export default ProductEdit;
-

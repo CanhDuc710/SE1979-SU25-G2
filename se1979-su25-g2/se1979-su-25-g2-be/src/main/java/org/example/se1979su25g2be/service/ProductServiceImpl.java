@@ -350,3 +350,4 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new EntityNotFoundException("Product not found with ID: " + id));
     }
 }
+
