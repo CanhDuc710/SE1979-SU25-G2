@@ -440,16 +440,18 @@ const OrderList = () => {
                   const isGuestOrder = !order.customerInfo;
                   return (
                     <tr key={order.orderId} className={`hover:bg-gray-50 dark:hover:bg-gray-50 ${isGuestOrder ? 'bg-yellow-50 dark:bg-yellow-50' : ''}`}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
+                      <td className="px-6 py-4">
+                        <div className="max-w-xs">
                           <div className="text-sm font-medium text-gray-900 dark:text-gray-900">
                             ORD-{order.orderId}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-500">
                             {order.numberOfProducts} items
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-500">
-                            Ship to: {order.shippingAddressFull}
+                          <div className="text-sm text-gray-500 dark:text-gray-500 truncate" title={order.shippingAddressFull}>
+                            Ship to: {order.shippingAddressFull?.length > 30 
+                              ? `${order.shippingAddressFull.substring(0, 30)}...` 
+                              : order.shippingAddressFull}
                           </div>
                         </div>
                       </td>
@@ -474,9 +476,10 @@ const OrderList = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4">
                         <div className="text-sm text-gray-900 dark:text-gray-900">
-                          {formatDate(order.orderDate)}
+                          <div>{new Date(order.orderDate).toLocaleDateString("vi-VN")}</div>
+                          <div className="text-xs text-gray-500">{new Date(order.orderDate).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

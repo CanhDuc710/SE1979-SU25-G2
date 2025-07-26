@@ -2,6 +2,7 @@ package org.example.se1979su25g2be.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.se1979su25g2be.dto.CollectionDTO;
+import org.example.se1979su25g2be.entity.Collection;
 import org.example.se1979su25g2be.service.CollectionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,27 @@ public class CollectionController {
                 CollectionDTO.fromEntity(collectionService.getById(id))
         );
     }
+    @PostMapping
+    public ResponseEntity<CollectionDTO> createCollection(@RequestBody CollectionDTO collectionDTO) {
+        Collection created = collectionService.createCollection(collectionDTO);
+        return ResponseEntity.ok(CollectionDTO.fromEntity(created));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CollectionDTO> updateCollection(
+            @PathVariable Integer id,
+            @RequestBody CollectionDTO collectionDTO
+    ) {
+        Collection updated = collectionService.updateCollection(id, collectionDTO);
+        return ResponseEntity.ok(CollectionDTO.fromEntity(updated));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCollection(@PathVariable Integer id) {
+        collectionService.deleteCollection(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping("/{id}/banner")
     public ResponseEntity<String> updateBanner(
             @PathVariable Integer id,
@@ -45,6 +67,24 @@ public class CollectionController {
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body("Không thể upload ảnh");
         }
+    }
+    
+    @PostMapping("/{id}/products")
+    public ResponseEntity<CollectionDTO> addProductToCollection(
+            @PathVariable Integer id,
+            @RequestBody Integer productId
+    ) {
+        Collection updated = collectionService.addProductToCollection(id, productId);
+        return ResponseEntity.ok(CollectionDTO.fromEntity(updated));
+    }
+    
+    @DeleteMapping("/{id}/products/{productId}")
+    public ResponseEntity<CollectionDTO> removeProductFromCollection(
+            @PathVariable Integer id,
+            @PathVariable Integer productId
+    ) {
+        Collection updated = collectionService.removeProductFromCollection(id, productId);
+        return ResponseEntity.ok(CollectionDTO.fromEntity(updated));
     }
 
 }

@@ -30,6 +30,8 @@ const StoreInformationLazy = lazy(() => import("../page/admin/setting/StoreInfor
 const ProductCreateLazy = lazy(() => import("../page/admin/product/ProductCreate.jsx"));
 const CollectionManagementLazy = lazy(() => import("../page/admin/collection/CollectionList.jsx"));
 const CollectionDetailLazy = lazy(() => import("../page/admin/collection/CollectionDetail.jsx"));
+const CollectionCreateLazy = lazy(() => import("../page/admin/collection/CollectionCreate.jsx"));
+const CollectionEditLazy = lazy(() => import("../page/admin/collection/CollectionEdit.jsx"));
 const OrderListLazy = lazy(() => import("../page/admin/order_management/OrderList.jsx"));
 const UserProfileLazy = lazy(() => import("../page/user/UserProfile.jsx"));
 const DashboardLazy = lazy(() => import("../page/admin/dashboard/Dashboard.jsx"));
@@ -87,6 +89,8 @@ const ChangePasswordLazy = lazy(() => import("../page/password/ChangePassword.js
             { path:"/admin/settings/storeInformation", element:<StoreInformationLazy />},
             { path: "products/create", element: <ProductCreateLazy /> },
             { path: "collections", element: <CollectionManagementLazy /> },
+            { path: "collections/create", element: <CollectionCreateLazy /> },
+            { path: "collections/:id/edit", element: <CollectionEditLazy /> },
             { path: "collections/:id", element: <CollectionDetailLazy /> },
             { path: "dashboard", element: <DashboardLazy /> },
             { path: "orders", element: <OrderListLazy /> },

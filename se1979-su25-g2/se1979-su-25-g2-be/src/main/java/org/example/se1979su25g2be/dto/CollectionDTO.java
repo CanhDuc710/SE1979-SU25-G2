@@ -19,7 +19,9 @@ public class CollectionDTO {
     private List<Integer> productIds;
 
     public static CollectionDTO fromEntity(Collection collection) {
-        List<Integer> ids = collection.getProducts().stream().map(Product::getProductId).toList();
+        List<Integer> ids = collection.getProducts() != null 
+            ? collection.getProducts().stream().map(Product::getProductId).toList() 
+            : List.of();
         return new CollectionDTO(
                 collection.getId(),
                 collection.getName(),
