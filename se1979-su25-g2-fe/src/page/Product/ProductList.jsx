@@ -57,7 +57,7 @@ export default function ProductList() {
                         >
                             <ProductCard
                                 name={item.name}
-                                price={item.price + " VND"}
+                                price={item.price.toLocaleString() + " VND"}
                                 image={
                                     item.imageUrls.length > 0
                                         ? `${IMAGE_BASE_URL}${item.imageUrls[0]}`

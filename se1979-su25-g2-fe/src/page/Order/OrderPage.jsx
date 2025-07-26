@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getCart } from "../../service/cartService";
 import { createOrder, createVNPayPayment } from "../../service/orderService";
 import { getProvinces, getDistricts, getWards, getDefaultAddress } from "../../service/addressService";
@@ -9,6 +10,7 @@ import { orderSchema } from "../../validation/orderSchema";
 import { IMAGE_BASE_URL } from "../../utils/constants";
 
 export default function OrderPage() {
+    const navigate = useNavigate();
     const [cart, setCart] = useState(null);
     const [loadingCart, setLoadingCart] = useState(true);
     const [form, setForm] = useState({
@@ -38,6 +40,18 @@ export default function OrderPage() {
         };
         initializePage();
     }, []);
+
+    // Thêm useEffect để kiểm tra cart trống và redirect về cart page
+    useEffect(() => {
+        if (!loadingCart && cart) {
+            // Kiểm tra cart có trống không
+            if (!cart.items || cart.items.length === 0) {
+                console.log("Cart is empty, redirecting to cart page");
+                navigate("/cart", { replace: true });
+                return;
+            }
+        }
+    }, [cart, loadingCart, navigate]);
 
     // Check if user is logged in and auto-fill information
     const checkUserAndAutoFill = async () => {

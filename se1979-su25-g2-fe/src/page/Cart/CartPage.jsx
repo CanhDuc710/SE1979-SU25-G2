@@ -120,6 +120,18 @@ export default function CartPage() {
         localStorage.removeItem("cartDiscount");
     };
 
+    // Thêm function để kiểm tra cart trước khi checkout
+    const handleCheckout = () => {
+        // Kiểm tra cart có trống không
+        if (!cart || !cart.items || cart.items.length === 0) {
+            alert("Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm trước khi thanh toán.");
+            return;
+        }
+
+        // Nếu cart có sản phẩm thì mới navigate
+        navigate("/order");
+    };
+
     // Separate useEffect để theo dõi thay đổi của cart và kiểm tra discount validity
     useEffect(() => {
         const checkDiscountValidity = () => {
@@ -297,7 +309,7 @@ export default function CartPage() {
                 <div className="mt-6 text-right">
                     <button
                         className="bg-black text-white px-6 py-3 rounded hover:bg-gray-800 transition"
-                        onClick={() => navigate("/order")}
+                        onClick={handleCheckout}
                     >
                         Thanh toán →
                     </button>

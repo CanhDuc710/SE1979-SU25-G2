@@ -69,8 +69,10 @@ public class StoreController {
                 return ResponseEntity.ok(Map.of("message", "Logo đã được tải lên và cập nhật thành công.", "logoUrl", imagePath));
             } else {
                 // Create new store with logo if none exists
-                Store newStore = new Store();
-                newStore.setLogo(imagePath);
+                Store newStore = Store.builder()
+                        .storeName("My Store") // Set tên mặc định để tránh validation error
+                        .logo(imagePath)
+                        .build();
                 storeService.saveStore(newStore);
                 return ResponseEntity.ok(Map.of("message", "Cửa hàng đã được tạo và logo đã được tải lên thành công.", "logoUrl", imagePath));
             }
@@ -81,3 +83,4 @@ public class StoreController {
         }
     }
 }
+

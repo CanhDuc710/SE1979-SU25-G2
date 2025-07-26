@@ -260,13 +260,38 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     throw new RuntimeException("Cannot change status of a " + order.getStatus() + " order.");
             }
 
-            if (newStatus == Status.DELIVERED) {
-            } else if (newStatus == Status.CANCELLED) {
+            // Trừ stock khi order được CONFIRMED (sản phẩm chính thức được bán)
+            if (newStatus == Status.CONFIRMED) {
                 for (OrderItem item : order.getItems()) {
                     ProductVariant pv = item.getProductVariant();
                     if (pv != null) {
-                        pv.setStockQuantity(pv.getStockQuantity() + item.getQuantity());
+                        // Kiểm tra stock có đủ không
+                        if (pv.getStockQuantity() < item.getQuantity()) {
+                            throw new RuntimeException("Insufficient stock for product variant ID: " + pv.getVariantId() +
+                                    ". Available: " + pv.getStockQuantity() + ", Required: " + item.getQuantity());
+                        }
+                        // Trừ stock
+                        pv.setStockQuantity(pv.getStockQuantity() - item.getQuantity());
                         productVariantRepository.save(pv);
+                        System.out.println("Stock reduced for variant ID: " + pv.getVariantId() +
+                                ", Quantity reduced: " + item.getQuantity() +
+                                ", Remaining stock: " + pv.getStockQuantity());
+                    }
+                }
+            } else if (newStatus == Status.DELIVERED) {
+                // Order hoàn thành - không cần làm gì thêm về stock
+            } else if (newStatus == Status.CANCELLED) {
+                // Chỉ hoàn trả stock nếu order đã từng được CONFIRMED trước đó
+                if (order.getStatus() == Status.CONFIRMED || order.getStatus() == Status.SHIPPED) {
+                    for (OrderItem item : order.getItems()) {
+                        ProductVariant pv = item.getProductVariant();
+                        if (pv != null) {
+                            pv.setStockQuantity(pv.getStockQuantity() + item.getQuantity());
+                            productVariantRepository.save(pv);
+                            System.out.println("Stock restored for variant ID: " + pv.getVariantId() +
+                                    ", Quantity restored: " + item.getQuantity() +
+                                    ", New stock: " + pv.getStockQuantity());
+                        }
                     }
                 }
             }
@@ -291,3 +316,4 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         orderRepository.delete(order);
     }
 }
+
