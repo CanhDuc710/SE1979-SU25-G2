@@ -33,7 +33,7 @@ const Dashboard = () => {
 
     return (
         <div className="p-6">
-            <h1 className="text-2xl font-bold mb-6">Shop Dashboard</h1>
+            <h1 className="text-2xl font-bold mb-6">Thống kê cửa hàng</h1>
 
             {/* Metric Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -66,8 +66,8 @@ const Dashboard = () => {
                     <div className="flex justify-between items-center mb-2">
                         <h2 className="font-semibold text-lg">Doanh thu theo {revenueType}</h2>
                         <select value={revenueType} onChange={(e) => setRevenueType(e.target.value)} className="border p-1 rounded">
-                            <option value="monthly">Monthly</option>
-                            <option value="yearly">Yearly</option>
+                            <option value="monthly">Theo tháng</option>
+                            <option value="yearly">Theo năm</option>
                         </select>
                     </div>
                     <RevenueChart data={revenueData} />
@@ -77,8 +77,8 @@ const Dashboard = () => {
                     <div className="flex justify-between items-center mb-2">
                         <h2 className="font-semibold text-lg">Đơn hàng hoàn thành theo {ordersType}</h2>
                         <select value={ordersType} onChange={(e) => setOrdersType(e.target.value)} className="border p-1 rounded">
-                            <option value="monthly">Monthly</option>
-                            <option value="yearly">Yearly</option>
+                            <option value="monthly">Theo tháng</option>
+                            <option value="yearly">Theo năm</option>
                         </select>
                     </div>
                     <OrdersChart data={ordersData} />

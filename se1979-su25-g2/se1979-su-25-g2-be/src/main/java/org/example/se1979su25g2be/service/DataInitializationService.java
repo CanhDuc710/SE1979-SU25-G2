@@ -35,5 +35,13 @@ public class DataInitializationService implements CommandLineRunner {
             roleRepository.save(adminRole);
             System.out.println("ADMIN role created successfully");
         }
+
+        if (roleRepository.findByRoleNameIgnoreCase("STAFF").isEmpty()) {
+            Role adminRole = Role.builder()
+                    .roleName("STAFF")
+                    .build();
+            roleRepository.save(adminRole);
+            System.out.println("STAFF role created successfully");
+        }
     }
 }

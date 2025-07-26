@@ -94,13 +94,13 @@ const ProductCreate = () => {
   return (
       <div className="max-w-2xl mx-auto p-8 bg-gradient-to-br from-blue-100 via-yellow-50 to-pink-100 rounded-2xl shadow-lg border border-blue-200">
         <h2 className="text-3xl font-extrabold mb-8 text-center text-pink-700 drop-shadow">
-          Add New Product
+          Thêm sản phẩm mới
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block font-semibold mb-1 text-blue-800">
-                Product Code
+                Mã sản phẩm
               </label>
               <input
                   name="productCode"
@@ -110,7 +110,7 @@ const ProductCreate = () => {
               />
             </div>
             <div>
-              <label className="block font-semibold mb-1 text-blue-800">Name</label>
+              <label className="block font-semibold mb-1 text-blue-800">Tên sản phẩm</label>
               <input
                   name="name"
                   value={form.name}
@@ -119,7 +119,7 @@ const ProductCreate = () => {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block font-semibold mb-1 text-blue-800">Description</label>
+              <label className="block font-semibold mb-1 text-blue-800">Mô tả</label>
               <textarea
                   name="description"
                   value={form.description}
@@ -129,14 +129,14 @@ const ProductCreate = () => {
               />
             </div>
             <div>
-              <label className="block font-semibold mb-1 text-blue-800">Category</label>
+              <label className="block font-semibold mb-1 text-blue-800">Danh mục</label>
               <select
                   name="categoryId"
                   value={form.categoryId}
                   onChange={handleChange}
                   className="w-full border-2 border-blue-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 transition"
               >
-                <option value="">Select category</option>
+                <option value="">Chọn danh mục</option>
                 {categories.map(cat => (
                     <option key={cat.categoryId} value={cat.categoryId}>
                       {cat.name}
@@ -145,7 +145,7 @@ const ProductCreate = () => {
               </select>
             </div>
             <div>
-              <label className="block font-semibold mb-1 text-blue-800">Brand</label>
+              <label className="block font-semibold mb-1 text-blue-800">Thương hiệu</label>
               <input
                   name="brand"
                   value={form.brand}
@@ -154,7 +154,7 @@ const ProductCreate = () => {
               />
             </div>
             <div>
-              <label className="block font-semibold mb-1 text-blue-800">Material</label>
+              <label className="block font-semibold mb-1 text-blue-800">Chất liệu</label>
               <input
                   name="material"
                   value={form.material}
@@ -163,21 +163,21 @@ const ProductCreate = () => {
               />
             </div>
             <div>
-              <label className="block font-semibold mb-1 text-blue-800">Gender</label>
+              <label className="block font-semibold mb-1 text-blue-800">Giới tính</label>
               <select
                   name="gender"
                   value={form.gender}
                   onChange={handleChange}
                   className="w-full border-2 border-blue-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 transition"
               >
-                <option value="">Select</option>
-                <option value="MALE">Male</option>
-                <option value="FEMALE">Female</option>
+                <option value="">Chọn giới tính</option>
+                <option value="MALE">Nam</option>
+                <option value="FEMALE">Nữ</option>
                 <option value="UNISEX">Unisex</option>
               </select>
             </div>
             <div>
-              <label className="block font-semibold mb-1 text-blue-800">Price</label>
+              <label className="block font-semibold mb-1 text-blue-800">Giá bán (VNĐ)</label>
               <input
                   name="price"
                   type="number"
@@ -194,11 +194,11 @@ const ProductCreate = () => {
                   onChange={handleChange}
                   className="accent-blue-500 w-5 h-5"
               />
-              <label className="font-semibold text-blue-800">Active</label>
+              <label className="font-semibold text-blue-800">Kích hoạt</label>
             </div>
           </div>
           <div>
-            <label className="block font-semibold mb-1 text-blue-800">Upload Image</label>
+            <label className="block font-semibold mb-1 text-blue-800">Tải ảnh lên</label>
             <input
                 type="file"
                 ref={fileInputRef}
@@ -210,7 +210,7 @@ const ProductCreate = () => {
               <div className="mt-2">
                 <img
                   src={URL.createObjectURL(imageFiles[0])}
-                  alt="Preview"
+                  alt="Xem trước"
                   className="h-32 rounded border"
                 />
               </div>
@@ -222,24 +222,24 @@ const ProductCreate = () => {
                 disabled={loading}
                 className="bg-gradient-to-r from-blue-400 to-pink-400 text-white px-8 py-2 rounded-full font-bold shadow hover:scale-105 hover:from-blue-500 hover:to-pink-500 transition-all duration-200 disabled:opacity-60"
             >
-              {loading ? "Saving..." : "Save"}
+              {loading ? "Đang lưu..." : "Lưu"}
             </button>
             <button
                 type="button"
                 className="bg-gray-200 text-gray-700 px-8 py-2 rounded-full font-bold shadow hover:bg-gray-300 transition-all duration-200"
                 onClick={() => navigate(-1)}
             >
-              Cancel
+              Hủy
             </button>
           </div>
           {success && (
               <div className="text-green-600 mt-4 text-center font-semibold animate-pulse">
-                {success}
+                {success === "Product created successfully!" ? "Tạo sản phẩm thành công!" : success}
               </div>
           )}
           {error && (
               <div className="text-red-600 mt-4 text-center font-semibold animate-pulse">
-                {error}
+                {error === "Create failed" ? "Tạo sản phẩm thất bại" : error}
               </div>
           )}
         </form>

@@ -49,7 +49,7 @@ export const registerSchema = yup.object({
         .string()
         .trim()
         .required("Vui lòng nhập số điện thoại")
-        .matches(/^[0-9]{9,11}$/, "Số điện thoại phải 9–11 chữ số"),
+        .matches(/^0[0-9]{9,11}$/, "Số điện thoại phải 9–11 chữ số"),
 
     password: yup
         .string()

@@ -170,6 +170,7 @@ export default function AddInternalAccount() {
                             className="w-full border px-3 py-2 rounded"
                         >
                             <option value="STAFF">Nhân viên</option>
+                            <option value="USER">Hội viên</option>
                             <option value="ADMIN">Quản trị viên</option>
                         </select>
                         {errors.role && (

@@ -15,7 +15,7 @@ export default function UserDetail() {
     const [userStatus, setUserStatus] = useState("");
 
     const sexLabel = { MALE: "Nam", FEMALE: "Nữ", OTHER: "Khác" };
-    const roleLabels = { ADMIN: "Quản trị viên", STAFF: "Nhân viên", CUSTOMER: "Người dùng" };
+    const roleLabels = { ADMIN: "Quản trị viên", STAFF: "Nhân viên", USER: "Hội viên" };
 
     // Đồng bộ activeTab với URL khi component mount hoặc URL thay đổi
     useEffect(() => {

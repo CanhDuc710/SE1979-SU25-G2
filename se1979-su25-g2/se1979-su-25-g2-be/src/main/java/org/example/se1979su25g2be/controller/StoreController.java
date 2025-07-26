@@ -31,6 +31,7 @@ public class StoreController {
         try {
             Store existingStore = storeService.getStore();
             if (existingStore != null) {
+                // Update existing store
                 existingStore.setStoreName(store.getStoreName());
                 existingStore.setEmail(store.getEmail());
                 existingStore.setPhone(store.getPhone());
@@ -40,7 +41,16 @@ public class StoreController {
                 storeService.saveStore(existingStore);
                 return ResponseEntity.ok(Map.of("message", "Thông tin cửa hàng đã được cập nhật thành công."));
             } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Không tìm thấy cửa hàng để cập nhật."));
+                // Create new store if none exists
+                Store newStore = new Store();
+                newStore.setStoreName(store.getStoreName());
+                newStore.setEmail(store.getEmail());
+                newStore.setPhone(store.getPhone());
+                newStore.setAddress(store.getAddress());
+                newStore.setDescription(store.getDescription());
+                newStore.setFanpage(store.getFanpage());
+                storeService.saveStore(newStore);
+                return ResponseEntity.ok(Map.of("message", "Thông tin cửa hàng đã được tạo thành công."));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -58,7 +68,11 @@ public class StoreController {
                 storeService.saveStore(store);
                 return ResponseEntity.ok(Map.of("message", "Logo đã được tải lên và cập nhật thành công.", "logoUrl", imagePath));
             } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Không tìm thấy cửa hàng để cập nhật logo."));
+                // Create new store with logo if none exists
+                Store newStore = new Store();
+                newStore.setLogo(imagePath);
+                storeService.saveStore(newStore);
+                return ResponseEntity.ok(Map.of("message", "Cửa hàng đã được tạo và logo đã được tải lên thành công.", "logoUrl", imagePath));
             }
         } catch (Exception e) {
             e.printStackTrace();

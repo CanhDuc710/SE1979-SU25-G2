@@ -17,7 +17,7 @@ export default function UserList() {
     const roleLabels = {
         ADMIN: "Quản trị viên",
         STAFF: "Nhân viên",
-        CUSTOMER: "Người dùng",
+        USER: "Hội viên",
     };
 
     const statusLabels = {
