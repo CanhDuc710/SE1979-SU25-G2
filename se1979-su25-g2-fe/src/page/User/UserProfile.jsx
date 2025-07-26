@@ -4,6 +4,7 @@ import { fetchProfile, updateProfile } from "../../service/profileService";
 import AddressManagement from "../../components/AddressManagement";
 import OrderHistory from "../../components/OrderHistory";
 import { profileSchema } from "../../validation/profileSchema";
+import ChangePassword from "../password/ChangePassword.jsx";
 
 const updateProfileSchema = profileSchema.omit(["username", "password", "role"]);
 
@@ -252,6 +253,16 @@ export default function UserProfile() {
                             >
                                 Lịch sử đơn hàng
                             </button>
+                            <button
+                                onClick={() => setActiveTab("changePassword")}
+                                className={`flex-1 sm:flex-none px-6 py-3 text-base font-medium border-b-2 transition-colors duration-200 ease-in-out
+                                    ${activeTab === "changePassword"
+                                    ? "border-blue-600 text-blue-700 bg-blue-50"
+                                    : "border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-300"
+                                } rounded-tr-lg`}
+                            >
+                                Đổi mật khẩu
+                            </button>
                         </nav>
                     </div>
 
@@ -364,6 +375,8 @@ export default function UserProfile() {
                                 <p className="text-gray-500">Vui lòng đăng nhập lại để xem lịch sử đơn hàng</p>
                             </div>
                         )}
+                        {activeTab === "changePassword" && <ChangePassword />}
+
                     </div>
                 </div>
             </div>
