@@ -262,15 +262,15 @@ const OrderDetail = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500">Tỉnh/Thành phố</label>
-                  <p className="text-lg text-gray-900">{order.province?.name || 'Không có'}</p>
+                  <p className="text-lg text-gray-900">{order.province?.provinceName || 'Không có'}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500">Quận/Huyện</label>
-                  <p className="text-lg text-gray-900">{order.district?.name || 'Không có'}</p>
+                  <p className="text-lg text-gray-900">{order.district?.districtName || 'Không có'}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500">Phường/Xã</label>
-                  <p className="text-lg text-gray-900">{order.ward?.name || 'Không có'}</p>
+                  <p className="text-lg text-gray-900">{order.ward?.wardName || 'Không có'}</p>
                 </div>
               </div>
             </div>
