@@ -1,13 +1,6 @@
 import axios from "axios";
 import { API_BASE_URL } from "../utils/constants";
 
-// Helper function to get token and create headers
-const getAuthHeaders = () => {
-    const token = localStorage.getItem("token");
-    return {
-        Authorization: token
-    };
-};
 
 // Helper to create headers with authorization token
 const createAuthHeaders = () => {

@@ -9,6 +9,7 @@ import {
     getDistricts,
     getWards
 } from '../service/addressService';
+import { addressSchema } from '../validation/addressSchema';
 
 export default function AddressManagement() {
     const [addresses, setAddresses] = useState([]);
@@ -17,6 +18,7 @@ export default function AddressManagement() {
     const [loading, setLoading] = useState(true);
     const [formLoading, setFormLoading] = useState(false);
     const [error, setError] = useState('');
+    const [formErrors, setFormErrors] = useState({});
 
     // Form data
     const [formData, setFormData] = useState({
@@ -158,8 +160,11 @@ export default function AddressManagement() {
         e.preventDefault();
         setFormLoading(true);
         setError('');
+        setFormErrors({});
 
         try {
+            await addressSchema.validate(formData, {abortEarly: false});
+
             const addressData = {
                 ...formData,
                 provinceId: parseInt(formData.provinceId),
@@ -176,12 +181,21 @@ export default function AddressManagement() {
             await loadAddresses();
             setShowForm(false);
             resetForm();
-        } catch (error) {
-            setError(error.message);
+        } catch (validationError) {
+            if (validationError.inner) {
+                const errors = {};
+                validationError.inner.forEach(err => {
+                    errors[err.path] = err.message;
+                });
+                setFormErrors(errors);
+            } else {
+                setError(validationError.message);
+            }
         } finally {
             setFormLoading(false);
         }
     };
+
 
     const handleDelete = async (addressId) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')) {
@@ -225,7 +239,6 @@ export default function AddressManagement() {
                 </div>
             )}
 
-            {/* Address List */}
             <div className="space-y-4 mb-6">
                 {addresses.length === 0 ? (
                     <p className="text-gray-500 text-center py-8">Chưa có địa chỉ nào</p>
@@ -243,8 +256,8 @@ export default function AddressManagement() {
                                         <span className="text-gray-600">{address.recipientPhone}</span>
                                         {address.isDefault && (
                                             <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded">
-                                                Mặc định
-                                            </span>
+                                            Mặc định
+                                        </span>
                                         )}
                                     </div>
                                     <p className="text-gray-700 mb-1">{address.addressLine}</p>
@@ -310,10 +323,15 @@ export default function AddressManagement() {
                                     <input
                                         type="text"
                                         value={formData.recipientName}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, recipientName: e.target.value }))}
-                                        required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        onChange={(e) => setFormData(prev => ({
+                                            ...prev,
+                                            recipientName: e.target.value
+                                        }))}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                     />
+                                    {formErrors.recipientName && (
+                                        <p className="text-red-500 text-sm">{formErrors.recipientName}</p>
+                                    )}
                                 </div>
 
                                 <div>
@@ -323,10 +341,15 @@ export default function AddressManagement() {
                                     <input
                                         type="tel"
                                         value={formData.recipientPhone}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, recipientPhone: e.target.value }))}
-                                        required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        onChange={(e) => setFormData(prev => ({
+                                            ...prev,
+                                            recipientPhone: e.target.value
+                                        }))}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                     />
+                                    {formErrors.recipientPhone && (
+                                        <p className="text-red-500 text-sm">{formErrors.recipientPhone}</p>
+                                    )}
                                 </div>
                             </div>
 
@@ -337,11 +360,12 @@ export default function AddressManagement() {
                                 <input
                                     type="text"
                                     value={formData.addressLine}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, addressLine: e.target.value }))}
-                                    placeholder="Số nhà, tên đường..."
-                                    required
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    onChange={(e) => setFormData(prev => ({...prev, addressLine: e.target.value}))}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                 />
+                                {formErrors.addressLine && (
+                                    <p className="text-red-500 text-sm">{formErrors.addressLine}</p>
+                                )}
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -352,8 +376,7 @@ export default function AddressManagement() {
                                     <select
                                         value={formData.provinceId}
                                         onChange={(e) => handleProvinceChange(e.target.value)}
-                                        required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                     >
                                         <option value="">Chọn tỉnh/thành</option>
                                         {provinces.map((province) => (
@@ -362,6 +385,9 @@ export default function AddressManagement() {
                                             </option>
                                         ))}
                                     </select>
+                                    {formErrors.provinceId && (
+                                        <p className="text-red-500 text-sm">{formErrors.provinceId}</p>
+                                    )}
                                 </div>
 
                                 <div>
@@ -371,9 +397,8 @@ export default function AddressManagement() {
                                     <select
                                         value={formData.districtId}
                                         onChange={(e) => handleDistrictChange(e.target.value)}
-                                        required
                                         disabled={!formData.provinceId}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100"
                                     >
                                         <option value="">Chọn quận/huyện</option>
                                         {districts.map((district) => (
@@ -382,6 +407,9 @@ export default function AddressManagement() {
                                             </option>
                                         ))}
                                     </select>
+                                    {formErrors.districtId && (
+                                        <p className="text-red-500 text-sm">{formErrors.districtId}</p>
+                                    )}
                                 </div>
 
                                 <div>
@@ -390,10 +418,9 @@ export default function AddressManagement() {
                                     </label>
                                     <select
                                         value={formData.wardId}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, wardId: e.target.value }))}
-                                        required
+                                        onChange={(e) => setFormData(prev => ({...prev, wardId: e.target.value}))}
                                         disabled={!formData.districtId}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100"
                                     >
                                         <option value="">Chọn phường/xã</option>
                                         {wards.map((ward) => (
@@ -402,6 +429,9 @@ export default function AddressManagement() {
                                             </option>
                                         ))}
                                     </select>
+                                    {formErrors.wardId && (
+                                        <p className="text-red-500 text-sm">{formErrors.wardId}</p>
+                                    )}
                                 </div>
                             </div>
 
@@ -412,9 +442,12 @@ export default function AddressManagement() {
                                 <input
                                     type="text"
                                     value={formData.postalCode}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, postalCode: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    onChange={(e) => setFormData(prev => ({...prev, postalCode: e.target.value}))}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                 />
+                                {formErrors.postalCode && (
+                                    <p className="text-red-500 text-sm">{formErrors.postalCode}</p>
+                                )}
                             </div>
 
                             <div className="flex items-center">
@@ -422,7 +455,7 @@ export default function AddressManagement() {
                                     type="checkbox"
                                     id="isDefault"
                                     checked={formData.isDefault}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, isDefault: e.target.checked }))}
+                                    onChange={(e) => setFormData(prev => ({...prev, isDefault: e.target.checked}))}
                                     className="mr-2"
                                 />
                                 <label htmlFor="isDefault" className="text-sm text-gray-700">
