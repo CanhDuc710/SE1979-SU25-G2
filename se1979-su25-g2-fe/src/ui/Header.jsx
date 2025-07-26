@@ -55,18 +55,15 @@ export default function Header({ onSearch }) {
                     <span className="text-xl font-bold text-gray-900">{store.storeName || "WE"}</span>
                 </Link>
                 <nav className="space-x-4 text-sm text-indigo-600">
-                    <a href="#">New In</a>
-                    <a href="#">Women</a>
-                    <a href="#">Men</a>
-                    <a href="#">Bags</a>
-                    <a href="#">Sale</a>
-                    <a href="#">Collections</a>
+                    <a href="/products">Sản phẩm</a>
+                    <a href="/faq">FAQ</a>
+                    <a href="/user">Cá nhân</a>
                 </nav>
                 {/* Search + Cart + User */}
                 <div className="flex items-center space-x-3">
                     <input
                         type="text"
-                        placeholder="Search…"
+                        placeholder="Tìm kiếm sản phẩm..."
                         className="border px-2 py-1 rounded"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}

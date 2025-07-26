@@ -25,7 +25,7 @@ const CollectionEdit = () => {
                     description: collection.description || ""
                 });
             } catch (err) {
-                setError("Failed to load collection data");
+                setError("Không thể tải dữ liệu bộ sưu tập");
             } finally {
                 setLoading(false);
             }
@@ -50,7 +50,7 @@ const CollectionEdit = () => {
         try {
             // Make sure we have at least a name
             if (!formData.name || formData.name.trim() === '') {
-                setError("Collection name is required");
+                setError("Tên bộ sưu tập là bắt buộc");
                 setSaving(false);
                 return;
             }
@@ -66,19 +66,19 @@ const CollectionEdit = () => {
             dataToSend.productIds = currentCollection.data.productIds || [];
             
             await axios.put(`${API_BASE_URL}/collections/${id}`, dataToSend);
-            setSuccess("Collection updated successfully!");
+            setSuccess("Cập nhật bộ sưu tập thành công!");
             setTimeout(() => {
                 navigate(`/admin/collections/${id}`);
             }, 1500);
         } catch (err) {
             console.error("Error updating collection:", err);
-            setError(err.response?.data?.message || "Failed to update collection");
+            setError(err.response?.data?.message || "Không thể cập nhật bộ sưu tập");
         } finally {
             setSaving(false);
         }
     };
 
-    if (loading) return <div className="p-8">Loading...</div>;
+    if (loading) return <div className="p-8">Đang tải...</div>;
     if (error && !formData.name) return <div className="p-8 text-red-500">{error}</div>;
 
     return (
@@ -87,16 +87,16 @@ const CollectionEdit = () => {
                 className="mb-4 text-blue-600 hover:underline" 
                 onClick={() => navigate(`/admin/collections/${id}`)}
             >
-                &larr; Back to Collection Detail
+                &larr; Quay lại chi tiết bộ sưu tập
             </button>
             
             <h2 className="text-3xl font-extrabold mb-8 text-center text-blue-700 drop-shadow">
-                Edit Collection Details
+                Chỉnh sửa bộ sưu tập
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                    <label className="block font-semibold mb-2 text-blue-800">Collection Name</label>
+                    <label className="block font-semibold mb-2 text-blue-800">Tên bộ sưu tập</label>
                     <input
                         type="text"
                         name="name"
@@ -104,19 +104,19 @@ const CollectionEdit = () => {
                         onChange={handleInputChange}
                         required
                         className="w-full border-2 border-blue-200 rounded-lg px-4 py-3 bg-white focus:border-blue-400 focus:outline-none transition"
-                        placeholder="Enter collection name"
+                        placeholder="Nhập tên bộ sưu tập"
                     />
                 </div>
 
                 <div>
-                    <label className="block font-semibold mb-2 text-blue-800">Description</label>
+                    <label className="block font-semibold mb-2 text-blue-800">Mô tả</label>
                     <textarea
                         name="description"
                         value={formData.description}
                         onChange={handleInputChange}
                         rows={4}
                         className="w-full border-2 border-blue-200 rounded-lg px-4 py-3 bg-white focus:border-blue-400 focus:outline-none transition resize-none"
-                        placeholder="Enter collection description"
+                        placeholder="Nhập mô tả bộ sưu tập"
                     />
                 </div>
 
@@ -126,7 +126,7 @@ const CollectionEdit = () => {
                         disabled={saving}
                         className="flex-1 bg-gradient-to-r from-blue-400 to-pink-400 text-white px-8 py-3 rounded-full font-bold shadow hover:scale-105 hover:from-blue-500 hover:to-pink-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {saving ? "Saving..." : "Save Changes"}
+                        {saving ? "Đang lưu..." : "Lưu thay đổi"}
                     </button>
                     
                     <button
@@ -134,7 +134,7 @@ const CollectionEdit = () => {
                         onClick={() => navigate(`/admin/collections/${id}`)}
                         className="px-8 py-3 border-2 border-blue-400 text-blue-600 rounded-full font-bold hover:bg-blue-50 transition"
                     >
-                        Cancel
+                        Hủy
                     </button>
                 </div>
 

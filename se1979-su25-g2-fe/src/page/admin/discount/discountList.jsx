@@ -102,7 +102,7 @@ export default function DiscountList() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
                 <div className="mb-6 flex justify-between items-center">
-                    <h2 className="text-2xl font-semibold">Discount Management</h2>
+                    <h2 className="text-2xl font-semibold">Quản lý mã giảm giá</h2>
                     <button
                         onClick={() => setShowAddModal(true)}
                         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
@@ -141,7 +141,7 @@ export default function DiscountList() {
                             className="bg-white text-black border p-2 rounded w-1/2"
                         >
                             <option value="discountId">Mặc định</option>
-                            <option value="code">Code</option>
+                            <option value="code">Mã code</option>
                             <option value="discountPercent">Phần trăm giảm</option>
                             <option value="maxDiscountAmount">Số tiền tối đa</option>
                         </select>
@@ -161,15 +161,15 @@ export default function DiscountList() {
                     <table className="min-w-full text-sm bg-white rounded">
                         <thead className="bg-gradient-to-r from-blue-100 to-yellow-100 text-gray-700 text-left">
                         <tr>
-                            <th className="px-4 py-3">Code</th>
-                            <th className="px-4 py-3">Description</th>
-                            <th className="px-4 py-3">% Off</th>
-                            <th className="px-4 py-3">Max Amount</th>
-                            <th className="px-4 py-3">Min Order</th>
-                            <th className="px-4 py-3">Start</th>
-                            <th className="px-4 py-3">End</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3">Action</th>
+                            <th className="px-4 py-3">Mã code</th>
+                            <th className="px-4 py-3">Mô tả</th>
+                            <th className="px-4 py-3">% Giảm</th>
+                            <th className="px-4 py-3">Giảm tối đa</th>
+                            <th className="px-4 py-3">Đơn tối thiểu</th>
+                            <th className="px-4 py-3">Bắt đầu</th>
+                            <th className="px-4 py-3">Kết thúc</th>
+                            <th className="px-4 py-3">Trạng thái</th>
+                            <th className="px-4 py-3">Thao tác</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -184,7 +184,7 @@ export default function DiscountList() {
                                 <td className="px-4 py-2">{d.endDate}</td>
                                 <td className="px-4 py-2">
                                         <span className={`font-medium ${d.isActive ? "text-green-600" : "text-red-500"}`}>
-                                            {d.isActive ? "Active" : "Inactive"}
+                                            {d.isActive ? "Đang áp dụng" : "Ngừng áp dụng"}
                                         </span>
                                 </td>
                                 <td className="px-4 py-2 space-x-2">

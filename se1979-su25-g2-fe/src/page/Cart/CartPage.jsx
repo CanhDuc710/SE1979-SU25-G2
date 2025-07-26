@@ -22,6 +22,29 @@ export default function CartPage() {
     useEffect(() => {
         loadCart();
         loadDiscounts();
+
+        // Kiểm tra xem có discount đã được áp dụng trước đó không
+        const checkExistingDiscount = () => {
+            try {
+                const saved = localStorage.getItem("cartDiscount");
+                if (saved) {
+                    const savedDiscount = JSON.parse(saved);
+                    if (savedDiscount.discountCode) {
+                        setDiscountCode(savedDiscount.discountCode);
+                        // Tìm discount object từ danh sách discounts
+                        const found = discounts.find(d => d.code === savedDiscount.discountCode);
+                        if (found) {
+                            setAppliedDiscount(found);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading existing discount:", error);
+            }
+        };
+
+        // Delay để đảm bảo discounts đã được load
+        setTimeout(checkExistingDiscount, 500);
     }, []);
 
     const loadCart = async () => {
@@ -71,7 +94,7 @@ export default function CartPage() {
         }
         setAppliedDiscount(found);
 
-        // Lưu discount info ngay khi apply thành công
+        // Lưu discount info ngay khi apply thành công - bao gồm TẤT CẢ thông tin cần thiết
         const calculatedDiscount = Math.min(
             Math.round((cart?.totalPrice || 0) * (found.discountPercent / 100)),
             found.maxDiscountAmount
@@ -79,9 +102,59 @@ export default function CartPage() {
         const calculatedFinalTotal = (cart?.totalPrice || 0) - calculatedDiscount + 15000; // Thêm shipping vào đây
         localStorage.setItem("cartDiscount", JSON.stringify({
             discount: calculatedDiscount,
-            finalTotal: calculatedFinalTotal
+            finalTotal: calculatedFinalTotal,
+            discountCode: found.code,
+            appliedCartTotal: cart?.totalPrice || 0,
+            // LƯU THÊM thông tin discount object để OrderPage có thể sử dụng
+            discountPercent: found.discountPercent,
+            maxDiscountAmount: found.maxDiscountAmount,
+            minOrderValue: found.minOrderValue,
+            isActive: found.isActive
         }));
     };
+
+    const handleRemoveDiscount = () => {
+        setAppliedDiscount(null);
+        setDiscountCode("");
+        setDiscountError("");
+        localStorage.removeItem("cartDiscount");
+    };
+
+    // Separate useEffect để theo dõi thay đổi của cart và kiểm tra discount validity
+    useEffect(() => {
+        const checkDiscountValidity = () => {
+            try {
+                const saved = localStorage.getItem("cartDiscount");
+                if (saved && cart) {
+                    const savedDiscount = JSON.parse(saved);
+                    const currentTotal = cart.totalPrice || 0;
+                    const hasItems = cart.items && cart.items.length > 0;
+
+                    // KIỂM TRA CART RỖNG TRƯỚC - nếu cart rỗng thì xóa discount luôn
+                    if (!hasItems || currentTotal === 0) {
+                        console.log("Cart is empty, removing discount");
+                        handleRemoveDiscount();
+                        return;
+                    }
+
+                    // Kiểm tra xem cart total có thay đổi đáng kể không
+                    const savedTotal = savedDiscount.appliedCartTotal || 0;
+
+                    // Nếu cart total thay đổi hơn 10%, xóa discount
+                    if (savedTotal > 0 && Math.abs(currentTotal - savedTotal) / savedTotal > 0.1) {
+                        console.log("Cart total changed significantly, removing discount");
+                        handleRemoveDiscount();
+                    }
+                }
+            } catch (error) {
+                console.error("Error checking discount validity:", error);
+            }
+        };
+
+        if (cart) {
+            checkDiscountValidity();
+        }
+    }, [cart]);
 
     if (loading) return <div className="text-center p-10">Loading...</div>;
 
@@ -178,22 +251,40 @@ export default function CartPage() {
                     {/* Discount code input */}
                     <div className="mt-4">
                         <label className="block mb-1 font-medium">Mã giảm giá</label>
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                value={discountCode}
-                                onChange={e => setDiscountCode(e.target.value)}
-                                className="flex-1 p-2 border rounded"
-                                placeholder="Nhập mã"
-                            />
-                            <button
-                                type="button"
-                                onClick={handleApplyDiscount}
-                                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                            >
-                                Áp dụng
-                            </button>
-                        </div>
+                        {!appliedDiscount ? (
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={discountCode}
+                                    onChange={e => setDiscountCode(e.target.value)}
+                                    className="flex-1 p-2 border rounded"
+                                    placeholder="Nhập mã"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleApplyDiscount}
+                                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                                >
+                                    Áp dụng
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex gap-2 items-center">
+                                <input
+                                    type="text"
+                                    value={discountCode}
+                                    disabled
+                                    className="flex-1 p-2 border rounded bg-gray-100"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleRemoveDiscount}
+                                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                                >
+                                    Xóa
+                                </button>
+                            </div>
+                        )}
                         {discountError && <div className="text-red-500 text-xs mt-1">{discountError}</div>}
                         {appliedDiscount && (
                             <div className="text-green-600 text-xs mt-1">

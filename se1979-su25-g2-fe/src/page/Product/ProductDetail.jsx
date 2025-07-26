@@ -103,8 +103,6 @@ export default function ProductDetail() {
                         <span className="text-2xl font-semibold text-black">
                             {product.price ? product.price.toLocaleString() + " VND" : "Liên hệ"}
                         </span>
-                        <span className="text-gray-400 line-through">300.000 VND</span>
-                        <span className="text-red-500 font-medium">-40%</span>
                     </div>
 
                     {/* Select Color */}

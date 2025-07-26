@@ -7,7 +7,7 @@ const ProductList = ({ items }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (!items || items.length === 0) {
-    return <div className="text-sm text-gray-500">No products</div>;
+    return <div className="text-sm text-gray-500">Không có sản phẩm</div>;
   }
 
   const firstItem = items[0];
@@ -37,12 +37,12 @@ const ProductList = ({ items }) => {
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-sm font-medium text-gray-900 truncate">
-            {firstItem.productVariant?.productName || 'Unknown Product'}
+            {firstItem.productVariant?.productName || 'Sản phẩm không xác định'}
           </div>
           <div className="text-xs text-gray-500">
             {firstItem.productVariant?.color && firstItem.productVariant?.size
               ? `${firstItem.productVariant.color} - ${firstItem.productVariant.size}`
-              : 'No variant info'} × {firstItem.quantity}
+              : 'Không có thông tin biến thể'} × {firstItem.quantity}
           </div>
         </div>
       </div>
@@ -59,7 +59,7 @@ const ProductList = ({ items }) => {
                     alt={item.productVariant.productName}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyNkM5IDI2IDkgMTQgMjAgMTRTMzEgMjYgMjAgMjZaIiBmaWxsPSIjRDFENUQ5Ii8+CjxjaXJjbGUgY3g9IjIwIiBjeT0iMTgiIHI9IjMiIGZpbGw9IiNEMUQ1RDkiLz4KPC9zdmc+';
+                      e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyNkM5IDI2IDkgMTQgMjAgMTRTMzEgMjYgMjAgMjZaIiBmaWxsPSIjRDFENUQ5Ii8+CjxjaXJjbGUgY3g9IjIwIiBjeT0iMTgiIHI9IjMiIGZpbGw9IiNEMUQ1RDkiLz4KPC9zdmc+';
                     }}
                   />
                 ) : (
@@ -72,12 +72,12 @@ const ProductList = ({ items }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium text-gray-900 truncate">
-                  {item.productVariant?.productName || 'Unknown Product'}
+                  {item.productVariant?.productName || 'Sản phẩm không xác định'}
                 </div>
                 <div className="text-xs text-gray-500">
                   {item.productVariant?.color && item.productVariant?.size
                     ? `${item.productVariant.color} - ${item.productVariant.size}`
-                    : 'No variant info'} × {item.quantity}
+                    : 'Không có thông tin biến thể'} × {item.quantity}
                 </div>
               </div>
             </div>
@@ -287,9 +287,9 @@ const OrderList = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-900 mb-2">
-            Order Management
+            Quản lý đơn hàng
           </h1>
-          <p className="text-gray-600 dark:text-gray-600">Manage and track all customer orders</p>
+          <p className="text-gray-600 dark:text-gray-600">Quản lý và theo dõi tất cả đơn hàng của khách hàng</p>
         </div>
 
         {/* Filters and Search */}
@@ -298,34 +298,34 @@ const OrderList = () => {
             {/* Filter by Status */}
             <div className="lg:col-span-1">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Filter by Status
+                Lọc theo trạng thái
               </label>
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
               >
-                <option value="all">All Orders</option>
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="all">Tất cả đơn hàng</option>
+                <option value="pending">Chờ xác nhận</option>
+                <option value="confirmed">Đã xác nhận</option>
+                <option value="shipped">Đã giao cho vận chuyển</option>
+                <option value="delivered">Đã giao hàng</option>
+                <option value="cancelled">Đã hủy</option>
               </select>
             </div>
 
             {/* Search Orders */}
             <div className="lg:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Search Orders
+                Tìm kiếm đơn hàng
               </label>
               <input
                 type="text"
                 placeholder={
-                  searchBy === "customer" ? "Search by customer name..." :
-                    searchBy === "phone" ? "Search by phone number..." :
-                      searchBy === "address" ? "Search by address..." :
-                        "Search orders..."
+                  searchBy === "customer" ? "Tìm theo tên khách hàng..." :
+                    searchBy === "phone" ? "Tìm theo số điện thoại..." :
+                      searchBy === "address" ? "Tìm theo địa chỉ..." :
+                        "Tìm kiếm đơn hàng..."
                 }
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -336,50 +336,50 @@ const OrderList = () => {
             {/* Search By */}
             <div className="lg:col-span-1">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Search By
+                Tìm kiếm theo
               </label>
               <select
                 value={searchBy}
                 onChange={(e) => setSearchBy(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
               >
-                <option value="all">All Fields</option>
-                <option value="customer">Customer Name</option>
-                <option value="phone">Phone Number</option>
-                <option value="address">Address</option>
+                <option value="all">Tất cả trường</option>
+                <option value="customer">Tên khách hàng</option>
+                <option value="phone">Số điện thoại</option>
+                <option value="address">Địa chỉ</option>
               </select>
             </div>
 
             {/* Sort By */}
             <div className="lg:col-span-1">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Sort By
+                Sắp xếp theo
               </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
               >
-                <option value="orderDate">Order Date</option>
-                <option value="orderId">Order ID</option>
-                <option value="totalAmount">Total Amount</option>
-                <option value="status">Status</option>
-                <option value="shippingName">Customer Name</option>
+                <option value="orderDate">Ngày đặt hàng</option>
+                <option value="orderId">Mã đơn hàng</option>
+                <option value="totalAmount">Tổng tiền</option>
+                <option value="status">Trạng thái</option>
+                <option value="shippingName">Tên khách hàng</option>
               </select>
             </div>
 
             {/* Direction */}
             <div className="lg:col-span-1">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Direction
+                Thứ tự
               </label>
               <select
                 value={direction}
                 onChange={(e) => setDirection(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
               >
-                <option value="desc">Descending</option>
-                <option value="asc">Ascending</option>
+                <option value="desc">Giảm dần</option>
+                <option value="asc">Tăng dần</option>
               </select>
             </div>
           </div>
@@ -388,17 +388,17 @@ const OrderList = () => {
           <div className="mt-4 pt-4 border-t border-gray-200">
             <div className="flex justify-between items-center">
               <div className="text-sm text-gray-600">
-                <span className="font-medium text-gray-900">Showing {orders.length}</span> of <span className="font-medium text-gray-900">{totalElements}</span> orders
+                <span className="font-medium text-gray-900">Hiển thị {orders.length}</span> trên tổng <span className="font-medium text-gray-900">{totalElements}</span> đơn hàng
               </div>
               <div className="text-xs text-gray-500">
                 {searchTerm && (
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2">
-                    Search: "{searchTerm}"
+                    Tìm kiếm: "{searchTerm}"
                   </span>
                 )}
                 {selectedStatus !== "all" && (
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Status: {selectedStatus}
+                    Trạng thái: {selectedStatus}
                   </span>
                 )}
               </div>
@@ -413,25 +413,25 @@ const OrderList = () => {
               <thead className="bg-gray-50 dark:bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
-                    Order Details
+                    Chi tiết đơn hàng
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
-                    Products
+                    Sản phẩm
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
-                    Customer
+                    Khách hàng
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
-                    Order Date
+                    Ngày đặt hàng
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
-                    Status
+                    Trạng thái
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
-                    Total Amount
+                    Tổng tiền
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider">
-                    Actions
+                    Thao tác
                   </th>
                 </tr>
               </thead>
@@ -443,13 +443,13 @@ const OrderList = () => {
                       <td className="px-6 py-4">
                         <div className="max-w-xs">
                           <div className="text-sm font-medium text-gray-900 dark:text-gray-900">
-                            ORD-{order.orderId}
+                            MĐH-{order.orderId}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-500">
-                            {order.numberOfProducts} items
+                            {order.numberOfProducts} sản phẩm
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-500 truncate" title={order.shippingAddressFull}>
-                            Ship to: {order.shippingAddressFull?.length > 30 
+                            Giao đến: {order.shippingAddressFull?.length > 30 
                               ? `${order.shippingAddressFull.substring(0, 30)}...` 
                               : order.shippingAddressFull}
                           </div>
@@ -464,12 +464,12 @@ const OrderList = () => {
                             {order.customerInfo?.fullName || order.shippingName}
                             {isGuestOrder && (
                               <span className="ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">
-                                Guest
+                                Khách lẻ
                               </span>
                             )}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-500">
-                            {order.customerInfo?.email || "N/A"}
+                            {order.customerInfo?.email || "Không có"}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-500">
                             {order.shippingPhone}
@@ -488,8 +488,13 @@ const OrderList = () => {
                             order.status
                           )}`}
                         >
-                          {order.status.charAt(0).toUpperCase() +
-                            order.status.slice(1).toLowerCase()}
+                          {order.status === "PENDING" && "Chờ xác nhận"}
+                          {order.status === "CONFIRMED" && "Đã xác nhận"}
+                          {order.status === "SHIPPED" && "Đã giao cho vận chuyển"}
+                          {order.status === "DELIVERED" && "Đã giao hàng"}
+                          {order.status === "CANCELLED" && "Đã hủy"}
+                          {["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"].indexOf(order.status) === -1 &&
+                            (order.status.charAt(0).toUpperCase() + order.status.slice(1).toLowerCase())}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-900">
@@ -501,7 +506,7 @@ const OrderList = () => {
                             onClick={() => window.location.href = `/admin/orders/${order.orderId}`}
                             className="text-blue-600 hover:text-blue-900 bg-transparent border-none shadow-none transition-colors"
                           >
-                            View
+                            Xem
                           </button>
                           <select
                             value={order.status}
@@ -513,7 +518,13 @@ const OrderList = () => {
                           >
                             {getAvailableStatusOptions(order.status).map(status => (
                               <option key={status.value} value={status.value}>
-                                {status.label}
+                                {status.value === "PENDING" && "Chờ xác nhận"}
+                                {status.value === "CONFIRMED" && "Đã xác nhận"}
+                                {status.value === "SHIPPED" && "Đã giao cho vận chuyển"}
+                                {status.value === "DELIVERED" && "Đã giao hàng"}
+                                {status.value === "CANCELLED" && "Đã hủy"}
+                                {["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"].indexOf(status.value) === -1 &&
+                                  (status.label)}
                               </option>
                             ))}
                           </select>
@@ -569,12 +580,12 @@ const OrderList = () => {
         {/* Error Message */}
         {error && (
           <div className="mt-4 p-4 bg-red-100 dark:bg-red-100 border border-red-400 text-red-700 dark:text-red-700 rounded">
-            Error loading orders: {error}
+            Lỗi tải đơn hàng: {error}
             <button
               onClick={() => loadOrders()}
               className="ml-2 text-red-800 dark:text-red-800 underline hover:no-underline"
             >
-              Retry
+              Thử lại
             </button>
           </div>
         )}
@@ -587,7 +598,7 @@ const OrderList = () => {
             onPageChange={handlePageChange}
           />
           <div className="text-gray-600 dark:text-gray-600">
-            Trang {currentPage + 1} / {totalPages} • Total: {totalElements} orders
+            Trang {currentPage + 1} / {totalPages} • Tổng: {totalElements} đơn hàng
           </div>
         </div>
       </div>

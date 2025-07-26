@@ -120,13 +120,83 @@ export default function OrderPage() {
         setLoadingCart(false);
     };
 
-    // Lấy discount info từ localStorage
+    // Lấy discount info từ localStorage và tính toán lại CHÍNH XÁC như CartPage
     const getDiscountInfo = () => {
         try {
             const saved = localStorage.getItem("cartDiscount");
-            return saved ? JSON.parse(saved) : { discount: 0, finalTotal: cart?.totalPrice || 0 };
-        } catch {
-            return { discount: 0, finalTotal: cart?.totalPrice || 0 };
+            const savedDiscount = saved ? JSON.parse(saved) : null;
+
+            console.log("Saved discount from localStorage:", savedDiscount);
+            console.log("Current cart:", cart);
+
+            // KIỂM TRA CART RỖNG TRƯỚC - nếu cart rỗng thì xóa discount luôn
+            const currentCartTotal = cart?.totalPrice || 0;
+            const hasItems = cart?.items && cart.items.length > 0;
+
+            if (!hasItems || currentCartTotal === 0) {
+                console.log("Cart is empty, removing any existing discount");
+                if (savedDiscount) {
+                    localStorage.removeItem("cartDiscount");
+                }
+                return {
+                    discount: 0,
+                    finalTotal: 15000 // chỉ có phí ship
+                };
+            }
+
+            // Nếu không có discount được lưu, trả về giá trị mặc định
+            if (!savedDiscount || !savedDiscount.discount) {
+                console.log("No discount found, returning default values");
+                return {
+                    discount: 0,
+                    finalTotal: currentCartTotal + 15000 // cart total + shipping
+                };
+            }
+
+            // CHỈ kiểm tra nếu cart thay đổi QUÁ NHIỀU (hơn 50%) thì mới xóa discount
+            if (savedDiscount.appliedCartTotal && currentCartTotal > 0) {
+                const changePercentage = Math.abs(currentCartTotal - savedDiscount.appliedCartTotal) / savedDiscount.appliedCartTotal;
+                console.log("Cart change percentage:", changePercentage);
+
+                if (changePercentage > 0.5) { // Tăng từ 0.1 lên 0.5 (50%)
+                    console.log("Cart changed significantly (>50%), removing discount");
+                    localStorage.removeItem("cartDiscount");
+                    return {
+                        discount: 0,
+                        finalTotal: currentCartTotal + 15000
+                    };
+                }
+            }
+
+            // Tính discount dựa trên thông tin đã lưu
+            let discountAmount;
+            if (savedDiscount.discountPercent && savedDiscount.maxDiscountAmount) {
+                // Tính lại discount dựa trên cart hiện tại
+                discountAmount = Math.min(
+                    Math.round(currentCartTotal * (savedDiscount.discountPercent / 100)),
+                    savedDiscount.maxDiscountAmount
+                );
+            } else {
+                // Fallback: sử dụng discount đã tính sẵn
+                discountAmount = savedDiscount.discount;
+            }
+
+            const shipping = 15000;
+            const calculatedFinalTotal = currentCartTotal - discountAmount + shipping;
+
+            console.log("Calculated discount:", discountAmount);
+            console.log("Calculated final total:", calculatedFinalTotal);
+
+            return {
+                discount: discountAmount,
+                finalTotal: calculatedFinalTotal
+            };
+        } catch (error) {
+            console.error("Error calculating discount:", error);
+            return {
+                discount: 0,
+                finalTotal: (cart?.totalPrice || 0) + 15000
+            };
         }
     };
 
@@ -255,12 +325,20 @@ export default function OrderPage() {
                 console.log("Creating VNPay payment...");
                 const vnpayResponse = await createVNPayPayment(orderData);
                 console.log("VNPay response:", vnpayResponse);
+
+                // XÓA DISCOUNT sau khi tạo order thành công
+                localStorage.removeItem("cartDiscount");
+
                 // Chuyển hướng đến VNPay
                 window.location.href = vnpayResponse.paymentUrl;
             } else {
                 // Thanh toán COD thông thường
                 console.log("Creating COD order...");
                 await createOrder(orderData);
+
+                // XÓA DISCOUNT sau khi đặt hàng thành công
+                localStorage.removeItem("cartDiscount");
+
                 setSuccess(true);
             }
         } catch (err) {
@@ -279,8 +357,8 @@ export default function OrderPage() {
                 <main className="flex-1 flex items-center justify-center bg-green-50">
                     <div className="bg-white p-8 rounded shadow text-center">
                         <div className="text-3xl mb-4 text-green-600">✔️</div>
-                        <div className="text-xl font-semibold mb-2">Order placed successfully!</div>
-                        <div className="text-gray-600">Thank you for your purchase.</div>
+                        <div className="text-xl font-semibold mb-2">Mua hàng thành công!</div>
+                        <div className="text-gray-600">Cảm ơn bạn đã mua hàng</div>
                     </div>
                 </main>
             </div>
@@ -296,7 +374,7 @@ export default function OrderPage() {
         <div className="min-h-screen flex flex-col">
             <main className="max-w-5xl mx-auto py-10 px-4 flex flex-col md:flex-row gap-10">
                 <div className="md:w-2/3">
-                    <h1 className="text-2xl font-semibold mb-8">Order Review</h1>
+                    <h1 className="text-2xl font-semibold mb-8">Tổng quan đơn hàng</h1>
 
                     {/* Show auto-fill notification for logged in users */}
                     {isLoggedIn && (
@@ -341,21 +419,21 @@ export default function OrderPage() {
                         ))}
                     </div>
                     <div className="bg-gray-100 p-6 rounded-lg max-w-md ml-auto">
-                        <h2 className="text-lg font-semibold mb-4">Order Details</h2>
+                        <h2 className="text-lg font-semibold mb-4">Chi tiết đơn hàng</h2>
                         <div className="flex justify-between mb-2">
-                            <span>Total (after discount)</span>
-                            <span>{discountInfo.finalTotal.toLocaleString()} VND</span>
+                            <span>Tổng cộng</span>
+                            <span>{totalPrice.toLocaleString()} VND</span>
                         </div>
                         <div className="flex justify-between mb-2 text-red-500">
-                            <span>Discount</span>
-                            <span>{discount > 0 ? `-${discount.toLocaleString()} VND` : "0 VND"}</span>
+                            <span>Giảm giá</span>
+                            <span>-{discount.toLocaleString()} VND</span>
                         </div>
                         <div className="flex justify-between mb-2">
-                            <span>Shipping</span>
+                            <span>Phí vận chuyển</span>
                             <span>{shipping.toLocaleString()} VND</span>
                         </div>
                         <div className="flex justify-between mt-4 font-bold text-lg">
-                            <span>Final Total</span>
+                            <span>Thành tiền</span>
                             <span>{finalTotal.toLocaleString()} VND</span>
                         </div>
                     </div>
@@ -414,7 +492,7 @@ export default function OrderPage() {
                     </div>
                     <div className="flex gap-2">
                         <div className="flex-1">
-                            <label className="block mb-1 font-medium">Province</label>
+                            <label className="block mb-1 font-medium">Tỉnh</label>
                             <select
                                 name="provinceId"
                                 value={form.provinceId}
@@ -431,7 +509,7 @@ export default function OrderPage() {
                             </select>
                         </div>
                         <div className="flex-1">
-                            <label className="block mb-1 font-medium">District</label>
+                            <label className="block mb-1 font-medium">Quận</label>
                             <select
                                 name="districtId"
                                 value={form.districtId}
@@ -449,7 +527,7 @@ export default function OrderPage() {
                             </select>
                         </div>
                         <div className="flex-1">
-                            <label className="block mb-1 font-medium">Ward</label>
+                            <label className="block mb-1 font-medium">Phường</label>
                             <select
                                 name="wardId"
                                 value={form.wardId}
@@ -468,15 +546,15 @@ export default function OrderPage() {
                         </div>
                     </div>
                     <div>
-                        <label className="block mb-1 font-medium">Payment Method</label>
+                        <label className="block mb-1 font-medium">Phương thức thanh toán</label>
                         <select
                             name="paymentMethod"
                             value={form.paymentMethod}
                             onChange={handleChange}
                             className="w-full p-2 border rounded"
                         >
-                            <option value="COD">Cash on Delivery</option>
-                            <option value="CARD">Bank Transfer</option>
+                            <option value="COD">Thanh toán khi nhận hàng</option>
+                            <option value="CARD">VNPay</option>
                         </select>
                     </div>
                     <button

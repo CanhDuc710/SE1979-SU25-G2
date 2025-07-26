@@ -35,7 +35,8 @@ const ProductCreate = () => {
   };
 
   const handleFileChange = (e) => {
-    setImageFiles(Array.from(e.target.files));
+    // Chỉ lấy ảnh đầu tiên, nếu chọn ảnh khác sẽ thay thế
+    setImageFiles(e.target.files && e.target.files[0] ? [e.target.files[0]] : []);
   };
 
   const handleSubmit = async (e) => {
@@ -197,14 +198,23 @@ const ProductCreate = () => {
             </div>
           </div>
           <div>
-            <label className="block font-semibold mb-1 text-blue-800">Upload Images</label>
+            <label className="block font-semibold mb-1 text-blue-800">Upload Image</label>
             <input
                 type="file"
-                multiple
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 className="w-full border-2 border-blue-200 rounded-lg px-3 py-2 bg-white"
+                accept="image/*"
             />
+            {imageFiles.length > 0 && (
+              <div className="mt-2">
+                <img
+                  src={URL.createObjectURL(imageFiles[0])}
+                  alt="Preview"
+                  className="h-32 rounded border"
+                />
+              </div>
+            )}
           </div>
           <div className="flex gap-4 mt-6 justify-center">
             <button

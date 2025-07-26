@@ -32,7 +32,7 @@ export default function SidebarFilter({ onFilterChange }) {
                     onChange={(e) => setBrand(e.target.value)}
                     className="w-full border rounded px-2 py-1"
                 >
-                    <option value="">All</option>
+                    <option value="">Toàn bộ</option>
                     {brands.map((b) => (
                         <option key={b.value} value={b.value}>{b.label}</option>
                     ))}
@@ -47,9 +47,9 @@ export default function SidebarFilter({ onFilterChange }) {
                     onChange={(e) => setGender(e.target.value)}
                     className="w-full border rounded px-2 py-1"
                 >
-                    <option value="">All</option>
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
+                    <option value="">Toàn bộ</option>
+                    <option value="MALE">Nam</option>
+                    <option value="FEMALE">Nữ</option>
                     <option value="UNISEX">Unisex</option>
                 </select>
             </div>
@@ -62,7 +62,7 @@ export default function SidebarFilter({ onFilterChange }) {
                     onChange={(e) => setMaterial(e.target.value)}
                     className="w-full border rounded px-2 py-1"
                 >
-                    <option value="">All</option>
+                    <option value="">Toàn bộ</option>
                     {materials.map((m) => (
                         <option key={m.value} value={m.value}>{m.label}</option>
                     ))}

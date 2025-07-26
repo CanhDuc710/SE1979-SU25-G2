@@ -24,7 +24,7 @@ const OrderDetail = () => {
       const data = await getOrderById(orderId);
       setOrder(data);
     } catch (err) {
-      setError("Failed to load order details");
+      setError("Không thể tải chi tiết đơn hàng");
     } finally {
       setLoading(false);
     }
@@ -40,9 +40,9 @@ const OrderDetail = () => {
     try {
       await updateOrderStatus(orderId, newStatus);
       setOrder(prev => ({ ...prev, status: newStatus }));
-      showNotification(`Order status updated to ${newStatus.toLowerCase()} successfully!`, 'success');
+      showNotification(`Cập nhật trạng thái đơn hàng sang ${newStatus.toLowerCase()} thành công!`, 'success');
     } catch (error) {
-      showNotification(`Failed to update order status: ${error.message}`, 'error');
+      showNotification(`Cập nhật trạng thái đơn hàng thất bại: ${error.message}`, 'error');
     }
   };
 
@@ -98,12 +98,12 @@ const OrderDetail = () => {
       <div className="p-6 bg-gray-50 min-h-screen">
         <div className="max-w-4xl mx-auto">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error || "Order not found"}
+            {error || "Không tìm thấy đơn hàng"}
             <button
               onClick={() => navigate('/admin/orders')}
               className="ml-4 text-red-800 underline hover:no-underline"
             >
-              Back to Orders
+              Quay lại danh sách đơn hàng
             </button>
           </div>
         </div>
@@ -168,16 +168,22 @@ const OrderDetail = () => {
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Back to Orders
+              Quay lại danh sách đơn hàng
             </button>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Order Details - ORD-{order.orderId}
+              Chi tiết đơn hàng - MĐH-{order.orderId}
             </h1>
-            <p className="text-gray-600">Complete order information and items</p>
+            <p className="text-gray-600">Thông tin và sản phẩm trong đơn hàng</p>
           </div>
           <div className="text-right">
             <div className={`inline-flex px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(order.status)}`}>
-              {order.status.charAt(0).toUpperCase() + order.status.slice(1).toLowerCase()}
+              {order.status === "PENDING" && "Chờ xác nhận"}
+              {order.status === "CONFIRMED" && "Đã xác nhận"}
+              {order.status === "SHIPPED" && "Đã giao cho vận chuyển"}
+              {order.status === "DELIVERED" && "Đã giao hàng"}
+              {order.status === "CANCELLED" && "Đã hủy"}
+              {["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"].indexOf(order.status) === -1 &&
+                (order.status.charAt(0).toUpperCase() + order.status.slice(1).toLowerCase())}
             </div>
           </div>
         </div>
@@ -187,22 +193,22 @@ const OrderDetail = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Order Summary */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Tóm tắt đơn hàng</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Order ID</label>
-                  <p className="text-lg font-semibold text-gray-900">ORD-{order.orderId}</p>
+                  <label className="block text-sm font-medium text-gray-500">Mã đơn hàng</label>
+                  <p className="text-lg font-semibold text-gray-900">MĐH-{order.orderId}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Order Date</label>
+                  <label className="block text-sm font-medium text-gray-500">Ngày đặt hàng</label>
                   <p className="text-lg text-gray-900">{formatDate(order.orderDate)}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Payment Method</label>
-                  <p className="text-lg text-gray-900">{order.paymentMethod || 'Cash on Delivery'}</p>
+                  <label className="block text-sm font-medium text-gray-500">Phương thức thanh toán</label>
+                  <p className="text-lg text-gray-900">{order.paymentMethod || 'Thanh toán khi nhận hàng'}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Total Amount</label>
+                  <label className="block text-sm font-medium text-gray-500">Tổng tiền</label>
                   <p className="text-xl font-bold text-green-600">{formatCurrency(order.totalAmount)}</p>
                 </div>
               </div>
@@ -211,67 +217,67 @@ const OrderDetail = () => {
             {/* Customer Information */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Customer Information
+                Thông tin khách hàng
                 {isGuestOrder && (
                   <span className="ml-3 inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-orange-100 text-orange-800">
-                    Guest Order
+                    Khách lẻ
                   </span>
                 )}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Full Name</label>
-                  <p className="text-lg text-gray-900">{order.user?.fullName || 'Guest Customer'}</p>
+                  <label className="block text-sm font-medium text-gray-500">Họ và tên</label>
+                  <p className="text-lg text-gray-900">{order.user?.fullName || 'Khách lẻ'}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500">Email</label>
-                  <p className="text-lg text-gray-900">{order.user?.email || 'N/A'}</p>
+                  <p className="text-lg text-gray-900">{order.user?.email || 'Không có'}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Phone</label>
-                  <p className="text-lg text-gray-900">{order.user?.phone || 'N/A'}</p>
+                  <label className="block text-sm font-medium text-gray-500">Số điện thoại</label>
+                  <p className="text-lg text-gray-900">{order.user?.phone || 'Không có'}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Username</label>
-                  <p className="text-lg text-gray-900">{order.user?.username || 'N/A'}</p>
+                  <label className="block text-sm font-medium text-gray-500">Tên đăng nhập</label>
+                  <p className="text-lg text-gray-900">{order.user?.username || 'Không có'}</p>
                 </div>
               </div>
             </div>
 
             {/* Shipping Information */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Shipping Information</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Thông tin giao hàng</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Recipient Name</label>
+                  <label className="block text-sm font-medium text-gray-500">Tên người nhận</label>
                   <p className="text-lg text-gray-900">{order.shippingName}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Phone Number</label>
+                  <label className="block text-sm font-medium text-gray-500">Số điện thoại</label>
                   <p className="text-lg text-gray-900">{order.shippingPhone}</p>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-500">Shipping Address</label>
+                  <label className="block text-sm font-medium text-gray-500">Địa chỉ giao hàng</label>
                   <p className="text-lg text-gray-900">{order.shippingAddress}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Province</label>
-                  <p className="text-lg text-gray-900">{order.province?.name || 'N/A'}</p>
+                  <label className="block text-sm font-medium text-gray-500">Tỉnh/Thành phố</label>
+                  <p className="text-lg text-gray-900">{order.province?.name || 'Không có'}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">District</label>
-                  <p className="text-lg text-gray-900">{order.district?.name || 'N/A'}</p>
+                  <label className="block text-sm font-medium text-gray-500">Quận/Huyện</label>
+                  <p className="text-lg text-gray-900">{order.district?.name || 'Không có'}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Ward</label>
-                  <p className="text-lg text-gray-900">{order.ward?.name || 'N/A'}</p>
+                  <label className="block text-sm font-medium text-gray-500">Phường/Xã</label>
+                  <p className="text-lg text-gray-900">{order.ward?.name || 'Không có'}</p>
                 </div>
               </div>
             </div>
 
             {/* Order Items */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Items</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Sản phẩm trong đơn hàng</h2>
               <div className="space-y-4">
                 {order.items && order.items.map((item, index) => (
                   <div key={item.orderItemId || index} className="border border-gray-200 rounded-lg p-4">
@@ -299,29 +305,29 @@ const OrderDetail = () => {
                       {/* Product Details */}
                       <div className="flex-1">
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                          {item.productVariant?.productName || 'Unknown Product'}
+                          {item.productVariant?.productName || 'Không xác định'}
                         </h3>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                           <div>
-                            <span className="font-medium text-gray-500">Color:</span>
-                            <p className="text-gray-900">{item.productVariant?.color || 'N/A'}</p>
+                            <span className="font-medium text-gray-500">Màu sắc:</span>
+                            <p className="text-gray-900">{item.productVariant?.color || 'Không có'}</p>
                           </div>
                           <div>
-                            <span className="font-medium text-gray-500">Size:</span>
-                            <p className="text-gray-900">{item.productVariant?.size || 'N/A'}</p>
+                            <span className="font-medium text-gray-500">Kích cỡ:</span>
+                            <p className="text-gray-900">{item.productVariant?.size || 'Không có'}</p>
                           </div>
                           <div>
-                            <span className="font-medium text-gray-500">Quantity:</span>
+                            <span className="font-medium text-gray-500">Số lượng:</span>
                             <p className="text-gray-900">{item.quantity}</p>
                           </div>
                           <div>
-                            <span className="font-medium text-gray-500">Unit Price:</span>
+                            <span className="font-medium text-gray-500">Đơn giá:</span>
                             <p className="text-gray-900">{formatCurrency(item.productVariant?.unitPrice || 0)}</p>
                           </div>
                         </div>
                         <div className="mt-3 pt-3 border-t border-gray-200">
                           <div className="flex justify-between items-center">
-                            <span className="font-medium text-gray-500">Item Total:</span>
+                            <span className="font-medium text-gray-500">Thành tiền:</span>
                             <span className="text-lg font-bold text-gray-900">{formatCurrency(item.price)}</span>
                           </div>
                         </div>
@@ -337,13 +343,19 @@ const OrderDetail = () => {
           <div className="space-y-6">
             {/* Status Management */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Status</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Trạng thái đơn hàng</h3>
               <div className="space-y-4">
                 <div className={`p-3 rounded-lg border ${getStatusColor(order.status)}`}>
                   <div className="text-center">
-                    <div className="text-sm font-medium">Current Status</div>
+                    <div className="text-sm font-medium">Trạng thái hiện tại</div>
                     <div className="text-lg font-bold">
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1).toLowerCase()}
+                      {order.status === "PENDING" && "Chờ xác nhận"}
+                      {order.status === "CONFIRMED" && "Đã xác nhận"}
+                      {order.status === "SHIPPED" && "Đã giao cho vận chuyển"}
+                      {order.status === "DELIVERED" && "Đã giao hàng"}
+                      {order.status === "CANCELLED" && "Đã hủy"}
+                      {["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"].indexOf(order.status) === -1 &&
+                        (order.status.charAt(0).toUpperCase() + order.status.slice(1).toLowerCase())}
                     </div>
                   </div>
                 </div>
@@ -351,7 +363,7 @@ const OrderDetail = () => {
                 {(order.status !== 'DELIVERED' && order.status !== 'CANCELLED') && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Update Status
+                      Cập nhật trạng thái
                     </label>
                     <select
                       value={order.status}
@@ -360,7 +372,13 @@ const OrderDetail = () => {
                     >
                       {getAvailableStatusOptions(order.status).map(status => (
                         <option key={status} value={status}>
-                          {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
+                          {status === "PENDING" && "Chờ xác nhận"}
+                          {status === "CONFIRMED" && "Đã xác nhận"}
+                          {status === "SHIPPED" && "Đã giao cho vận chuyển"}
+                          {status === "DELIVERED" && "Đã giao hàng"}
+                          {status === "CANCELLED" && "Đã hủy"}
+                          {["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"].indexOf(status) === -1 &&
+                            (status.charAt(0).toUpperCase() + status.slice(1).toLowerCase())}
                         </option>
                       ))}
                     </select>
@@ -371,21 +389,21 @@ const OrderDetail = () => {
 
             {/* Order Summary */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Tóm tắt đơn hàng</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Items:</span>
+                  <span className="text-gray-600">Số sản phẩm:</span>
                   <span className="font-medium">{order.items?.length || 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Total Quantity:</span>
+                  <span className="text-gray-600">Tổng số lượng:</span>
                   <span className="font-medium">
                     {order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0}
                   </span>
                 </div>
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between">
-                    <span className="text-lg font-semibold text-gray-900">Total Amount:</span>
+                    <span className="text-lg font-semibold text-gray-900">Tổng tiền:</span>
                     <span className="text-xl font-bold text-green-600">{formatCurrency(order.totalAmount)}</span>
                   </div>
                 </div>
@@ -394,7 +412,7 @@ const OrderDetail = () => {
 
             {/* Quick Actions */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Thao tác nhanh</h3>
               <div className="space-y-3">
                 <button
                   onClick={() => window.print()}
@@ -403,7 +421,7 @@ const OrderDetail = () => {
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                   </svg>
-                  Print Order
+                  In đơn hàng
                 </button>
                 <button
                   onClick={() => navigate('/admin/orders')}
@@ -412,7 +430,7 @@ const OrderDetail = () => {
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
-                  Back to Orders
+                  Quay lại danh sách đơn hàng
                 </button>
               </div>
             </div>

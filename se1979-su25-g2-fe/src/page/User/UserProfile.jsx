@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchProfile, updateProfile } from "../../service/profileService";
 import AddressManagement from "../../components/AddressManagement";
 import OrderHistory from "../../components/OrderHistory";
 
 export default function UserProfile() {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         lastName: "",
         firstName: "",
@@ -19,6 +21,7 @@ export default function UserProfile() {
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState("profile");
     const [userId, setUserId] = useState(null);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     // Helper function to get user ID from token
     const getUserIdFromToken = () => {
@@ -31,6 +34,39 @@ export default function UserProfile() {
         } catch (e) {
             console.error("Error parsing JWT token:", e);
             return null;
+        }
+    };
+
+    // Check authentication function
+    const checkAuthentication = () => {
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            console.log("No token found, redirecting to homepage");
+            navigate('/login', { replace: true });
+            return false;
+        }
+
+        try {
+            const payloadBase64 = token.split('.')[1];
+            const payload = JSON.parse(atob(payloadBase64));
+            const currentTime = Date.now() / 1000;
+
+            if (payload.exp && payload.exp < currentTime) {
+                console.log("Token expired, redirecting to homepage");
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                navigate('/', { replace: true });
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            console.error("Invalid token:", error);
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            navigate('/', { replace: true });
+            return false;
         }
     };
 
@@ -50,6 +86,14 @@ export default function UserProfile() {
     };
 
     useEffect(() => {
+        // Check authentication first
+        const isAuth = checkAuthentication();
+        if (!isAuth) {
+            return; // Component will be unmounted due to navigation
+        }
+
+        setIsAuthenticated(true);
+
         // Get user ID from token
         const userIdFromToken = getUserIdFromToken();
         setUserId(userIdFromToken);
@@ -68,11 +112,17 @@ export default function UserProfile() {
                 });
             } catch (e) {
                 setError(e.message);
+                // If profile fetch fails due to auth issues, redirect
+                if (e.message.includes('401') || e.message.includes('unauthorized')) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    navigate('/', { replace: true });
+                }
             } finally {
                 setLoading(false);
             }
         })();
-    }, []);
+    }, [navigate]);
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));

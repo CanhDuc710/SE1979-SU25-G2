@@ -66,7 +66,8 @@ const ProductEdit = () => {
   };
 
   const handleFileChange = (e) => {
-    setImageFiles(Array.from(e.target.files));
+    // Chỉ lấy ảnh đầu tiên, nếu chọn ảnh khác sẽ thay thế
+    setImageFiles(e.target.files && e.target.files[0] ? [e.target.files[0]] : []);
   };
 
   const handleSubmit = async (e) => {
@@ -114,7 +115,7 @@ const ProductEdit = () => {
   return (
       <div className="max-w-2xl mx-auto p-8 bg-gradient-to-br from-blue-100 via-yellow-50 to-pink-100 rounded-2xl shadow-lg border border-blue-200">
         <h2 className="text-3xl font-extrabold mb-8 text-center text-blue-700 drop-shadow">
-          Edit Product
+          Chỉnh sửa sản phẩm
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -128,8 +129,7 @@ const ProductEdit = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block font-semibold mb-1 text-blue-800">
-                Product Code
-              </label>
+                Mã sản phẩm              </label>
               <input
                   name="productCode"
                   value={form.productCode || ""}
@@ -168,7 +168,7 @@ const ProductEdit = () => {
 
             <div className="md:col-span-2">
               <label className="block font-semibold mb-1 text-blue-800">
-                Description
+                Mô tả
               </label>
               <textarea
                   name="description"
@@ -189,7 +189,7 @@ const ProductEdit = () => {
             </div>
 
             <div>
-              <label className="block font-semibold mb-1 text-blue-800">Category</label>
+              <label className="block font-semibold mb-1 text-blue-800">Kiểu dáng</label>
               <select
                   name="categoryId"
                   value={form.categoryId || ""}
@@ -214,7 +214,7 @@ const ProductEdit = () => {
             </div>
 
             <div>
-              <label className="block font-semibold mb-1 text-blue-800">Brand</label>
+              <label className="block font-semibold mb-1 text-blue-800">Thương Hiệu</label>
               <input
                   name="brand"
                   value={form.brand || ""}
@@ -231,7 +231,7 @@ const ProductEdit = () => {
             </div>
 
             <div>
-              <label className="block font-semibold mb-1 text-blue-800">Material</label>
+              <label className="block font-semibold mb-1 text-blue-800">Chất liệu</label>
               <input
                   name="material"
                   value={form.material || ""}
@@ -248,7 +248,7 @@ const ProductEdit = () => {
             </div>
 
             <div>
-              <label className="block font-semibold mb-1 text-blue-800">Gender</label>
+              <label className="block font-semibold mb-1 text-blue-800">Giới tính</label>
               <select
                   name="gender"
                   value={form.gender || ""}
@@ -270,7 +270,7 @@ const ProductEdit = () => {
             </div>
 
             <div>
-              <label className="block font-semibold mb-1 text-blue-800">Price</label>
+              <label className="block font-semibold mb-1 text-blue-800">Giá</label>
               <input
                   name="price"
                   type="number"
@@ -301,14 +301,23 @@ const ProductEdit = () => {
           </div>
 
           <div>
-            <label className="block font-semibold mb-1 text-blue-800">Upload Images</label>
+            <label className="block font-semibold mb-1 text-blue-800">Ảnh</label>
             <input
                 type="file"
-                multiple
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 className="w-full border-2 rounded-lg px-3 py-2 bg-white"
+                accept="image/*"
             />
+            {imageFiles.length > 0 && (
+              <div className="mt-2">
+                <img
+                  src={URL.createObjectURL(imageFiles[0])}
+                  alt="Preview"
+                  className="h-32 rounded border"
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex gap-4 mt-6 justify-center">
@@ -316,14 +325,13 @@ const ProductEdit = () => {
                 type="submit"
                 className="bg-gradient-to-r from-blue-400 to-pink-400 text-white px-8 py-2 rounded-full font-bold shadow hover:scale-105 transition-all duration-200"
             >
-              Save
-            </button>
+Lưu            </button>
             <button
                 type="button"
                 className="bg-gray-200 text-gray-700 px-8 py-2 rounded-full font-bold shadow hover:bg-gray-300 transition-all duration-200"
                 onClick={() => navigate(-1)}
             >
-              Cancel
+              Hủy
             </button>
           </div>
         </form>

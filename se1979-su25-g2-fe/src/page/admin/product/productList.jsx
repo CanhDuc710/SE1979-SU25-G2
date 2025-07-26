@@ -76,29 +76,23 @@ export default function ProductManagement() {
             {/* Main content */}
             <div className="flex-1 flex flex-col p-6" style={{ minHeight: '100vh' }}>
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-semibold">Product Management</h2>
+                    <h2 className="text-2xl font-semibold">Quản lý sản phẩm</h2>
                     <button
                         className="bg-gradient-to-r from-blue-400 to-pink-400 text-white px-6 py-2 rounded-full font-bold shadow hover:scale-105 hover:from-blue-500 hover:to-pink-500 transition-all duration-200"
                         onClick={() => navigate('/admin/products/create')}
                     >
-                        + Add Product
+                        + Thêm sản phẩm mới
                     </button>
                 </div>
 
                 {/* Filters */}
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
-                    <input
-                        type="text"
-                        placeholder="Search by name (not functional)"
-                        className="flex-1 px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300 bg-white text-black"
-                        // (Optional) future implementation
-                    />
                     <select
                         value={filterCategory}
                         onChange={(e) => setFilterCategory(e.target.value)}
                         className="px-4 py-2 border rounded bg-white text-black"
                     >
-                        <option value="">All Categories</option>
+                        <option value="">Toàn bộ kiểu dáng</option>
                         {categories.map((cat) => (
                             <option key={cat} value={cat}>
                                 {cat}
@@ -110,7 +104,7 @@ export default function ProductManagement() {
                         onChange={(e) => setFilterStatus(e.target.value)}
                         className="px-4 py-2 border rounded bg-white text-black"
                     >
-                        <option value="">All Status</option>
+                        <option value="">Trạng thái</option>
                         <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
                     </select>
@@ -161,7 +155,7 @@ export default function ProductManagement() {
                                     <td className="px-4 py-2 font-bold">{displayId}</td>
                                     <td className="px-4 py-2">
                                         <img
-                                            src={imageUrls?.[0] ? IMAGE_BASE_URL + imageUrls[0] : undefined}
+                                            src={imageUrls?.[0] ? IMAGE_BASE_URL + imageUrls[0] : "/default-image.jpg"}
                                             alt={name}
                                             className="rounded w-12 h-12 object-cover border cursor-pointer"
                                             onClick={() => navigate(`/admin/products/${productId}`)}

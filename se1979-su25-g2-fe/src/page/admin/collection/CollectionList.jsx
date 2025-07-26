@@ -17,7 +17,7 @@ const CollectionList = () => {
                 const res = await axios.get(API_BASE_URL + "/collections");
                 setCollections(res.data);
             } catch (err) {
-                setError("Failed to load collections");
+                setError("Không thể tải danh sách bộ sưu tập");
             } finally {
                 setLoading(false);
             }
@@ -26,7 +26,7 @@ const CollectionList = () => {
     }, []);
 
     const handleDelete = async (collectionId, collectionName) => {
-        if (window.confirm(`Are you sure you want to delete "${collectionName}"? This action cannot be undone.`)) {
+        if (window.confirm(`Bạn có chắc chắn muốn xóa "${collectionName}"? Hành động này không thể hoàn tác.`)) {
             // Clear previous notifications
             setSuccess(null);
             setDeleteError(null);
@@ -34,13 +34,13 @@ const CollectionList = () => {
             try {
                 await axios.delete(`${API_BASE_URL}/collections/${collectionId}`);
                 setCollections(collections.filter(col => col.id !== collectionId));
-                setSuccess(`Collection "${collectionName}" deleted successfully!`);
+                setSuccess(`Đã xóa bộ sưu tập "${collectionName}" thành công!`);
 
                 // Auto-hide success message after 3 seconds
                 setTimeout(() => setSuccess(null), 3000);
             } catch (err) {
                 console.error("Delete error:", err);
-                setDeleteError(`Failed to delete collection "${collectionName}". Please try again.`);
+                setDeleteError(`Xóa bộ sưu tập "${collectionName}" thất bại. Vui lòng thử lại.`);
 
                 // Auto-hide error message after 5 seconds
                 setTimeout(() => setDeleteError(null), 5000);
@@ -48,18 +48,18 @@ const CollectionList = () => {
         }
     };
 
-    if (loading) return <div className="p-8">Loading...</div>;
+    if (loading) return <div className="p-8">Đang tải...</div>;
     if (error) return <div className="p-8 text-red-500">{error}</div>;
 
     return (
         <div className="max-w-5xl mx-auto p-8">
             <div className="flex justify-between items-center mb-8">
-                <h2 className="text-3xl font-extrabold text-blue-700 drop-shadow">Collections</h2>
+                <h2 className="text-3xl font-extrabold text-blue-700 drop-shadow">Bộ sưu tập</h2>
                 <button
                     className="bg-gradient-to-r from-green-400 to-blue-400 text-white px-6 py-3 rounded-full font-bold shadow hover:scale-105 hover:from-green-500 hover:to-blue-500 transition-all duration-200"
                     onClick={() => navigate("/admin/collections/create")}
                 >
-                    + Create New Collection
+                    + Tạo bộ sưu tập mới
                 </button>
             </div>
 
@@ -103,13 +103,13 @@ const CollectionList = () => {
                                 className="flex-1 bg-gradient-to-r from-blue-400 to-pink-400 text-white px-6 py-2 rounded-full font-bold shadow hover:scale-105 hover:from-blue-500 hover:to-pink-500 transition-all duration-200"
                                 onClick={() => navigate(`/admin/collections/${col.id}`)}
                             >
-                                View / Edit
+                                Xem / Sửa
                             </button>
                             <button
                                 className="bg-gradient-to-r from-red-400 to-pink-500 text-white px-4 py-2 rounded-full font-bold shadow hover:scale-105 hover:from-red-500 hover:to-pink-600 transition-all duration-200 text-sm"
                                 onClick={() => handleDelete(col.id, col.name)}
                             >
-                                Delete
+                                Xóa
                             </button>
                         </div>
                     </div>

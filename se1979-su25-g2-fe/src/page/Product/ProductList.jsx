@@ -46,7 +46,7 @@ export default function ProductList() {
             <SidebarFilter onFilterChange={setFilters} />
             <section className="flex-1 px-6">
                 <h2 className="text-xl font-semibold mb-4">
-                    {searchKeyword ? `Results for "${searchKeyword}"` : "Suggest for you"}
+                    {searchKeyword ? `Kết quả cho "${searchKeyword}"` : "Gợi ý cho bạn"}
                 </h2>
                 <div className="grid grid-cols-4 gap-4">
                     {products.map((item) => (

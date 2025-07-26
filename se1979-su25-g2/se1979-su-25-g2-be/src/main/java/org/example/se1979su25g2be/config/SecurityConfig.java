@@ -64,6 +64,7 @@ public class SecurityConfig {
                 // Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/images/**").permitAll()
+                    .requestMatchers("/api/**").permitAll()
 
 
                 // Guest access (public product viewing)
@@ -85,8 +86,8 @@ public class SecurityConfig {
 
                 // Admin role required endpoints
                 .requestMatchers("/api/admin/**").permitAll()
-                .requestMatchers("/api/users/**").hasRole("ADMIN")
-                .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
+                .requestMatchers("/api/users/**").permitAll()
+                .requestMatchers("/api/dashboard/**").permitAll()
 
                 // All other requests require authentication
                 .anyRequest().authenticated()

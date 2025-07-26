@@ -1,7 +1,7 @@
 import {
     FaHome, FaUser, FaBoxOpen, FaClipboardList, FaCogs,
     FaChevronLeft, FaChevronRight, FaChevronDown, FaChevronUp,
-    FaInfoCircle, FaImage, FaThList
+    FaInfoCircle, FaImage, FaThList, FaApple
 } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -75,6 +75,7 @@ export default function Sidebar({ sidebarCollapsed, setSidebarCollapsed }) {
                     <SidebarItem to="/admin/products" icon={<FaBoxOpen />} label="Sản phẩm" collapsed={sidebarCollapsed} />
                     <SidebarItem to="/admin/discounts" icon={<FaBoxOpen />} label="Giảm giá" collapsed={sidebarCollapsed} />
                     <SidebarItem to="/admin/accounts" icon={<FaUser />} label="Tài khoản" collapsed={sidebarCollapsed} />
+                    <SidebarItem to="/admin/collections" icon={<FaApple />} label="BST" collapsed={sidebarCollapsed} />
 
                     {/* Mục Cài đặt với các submenu */}
                     <li>
