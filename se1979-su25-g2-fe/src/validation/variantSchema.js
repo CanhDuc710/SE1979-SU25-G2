@@ -18,8 +18,7 @@ export const variantSchema = yup.object({
         .number()
         .typeError("Số lượng phải là số")
         .required("Vui lòng nhập số lượng tồn kho")
-        .integer("Số lượng phải là số nguyên")
-        .min(0, "Số lượng không được nhỏ hơn 0"),
+        .integer("Số lượng phải là số nguyên"),
     isActive: yup
         .boolean()
         .required()

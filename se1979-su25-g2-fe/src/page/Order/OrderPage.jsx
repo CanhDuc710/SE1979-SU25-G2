@@ -4,8 +4,8 @@ import { createOrder, createVNPayPayment } from "../../service/orderService";
 import { getProvinces, getDistricts, getWards, getDefaultAddress } from "../../service/addressService";
 import { fetchProfile } from "../../service/profileService";
 import { getSessionId } from "../../service/cartService";
-import Header from "../../ui/Header";
-import Footer from "../../ui/Footer";
+import { orderSchema } from "../../validation/orderSchema";
+
 import { IMAGE_BASE_URL } from "../../utils/constants";
 
 export default function OrderPage() {
@@ -28,6 +28,7 @@ export default function OrderPage() {
     const [error, setError] = useState("");
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [loadingUserData, setLoadingUserData] = useState(false);
+    const [formErrors, setFormErrors] = useState({});
 
     useEffect(() => {
         const initializePage = async () => {
@@ -276,21 +277,19 @@ export default function OrderPage() {
         e.preventDefault();
         setLoadingOrder(true);
         setError("");
+        setFormErrors({});
 
         try {
+            // validate bằng yup
+            await orderSchema.validate(form, { abortEarly: false });
+
             const discountInfo = getDiscountInfo();
             const sessionId = getSessionId();
 
-            console.log("Session ID:", sessionId);
-            console.log("Discount Info:", discountInfo);
-            console.log("Cart:", cart);
-
-            // Kiểm tra cart có items không
             if (!cart || !cart.items || cart.items.length === 0) {
                 throw new Error("Cart is empty. Please add items to cart before checkout.");
             }
 
-            // Get user ID from token if logged in
             const getUserIdFromToken = () => {
                 const token = localStorage.getItem('token');
                 if (!token) return null;
@@ -308,46 +307,40 @@ export default function OrderPage() {
 
             const orderData = {
                 ...form,
-                userId: userId, // Thêm userId nếu user đăng nhập
-                provinceId: form.provinceId ? parseInt(form.provinceId, 10) : null,
-                districtId: form.districtId ? parseInt(form.districtId, 10) : null,
-                wardId: form.wardId ? parseInt(form.wardId, 10) : null,
-                sessionId: sessionId,
-                // Thêm thông tin discount
+                userId: userId,
+                provinceId: parseInt(form.provinceId, 10),
+                districtId: parseInt(form.districtId, 10),
+                wardId: parseInt(form.wardId, 10),
+                sessionId,
                 discountAmount: discountInfo.discount || 0,
                 finalTotal: discountInfo.finalTotal || (cart?.totalPrice || 0) + 15000
             };
 
-            console.log("Order data being sent:", orderData);
-
             if (form.paymentMethod === "CARD") {
-                // Sử dụng VNPay cho thanh toán CARD
-                console.log("Creating VNPay payment...");
                 const vnpayResponse = await createVNPayPayment(orderData);
-                console.log("VNPay response:", vnpayResponse);
-
-                // XÓA DISCOUNT sau khi tạo order thành công
                 localStorage.removeItem("cartDiscount");
-
-                // Chuyển hướng đến VNPay
                 window.location.href = vnpayResponse.paymentUrl;
             } else {
-                // Thanh toán COD thông thường
-                console.log("Creating COD order...");
                 await createOrder(orderData);
-
-                // XÓA DISCOUNT sau khi đặt hàng thành công
                 localStorage.removeItem("cartDiscount");
-
                 setSuccess(true);
             }
+
         } catch (err) {
-            console.error("Order error:", err);
-            setError(err.response?.data?.error || err.message || "Order failed. Please check your info.");
+            if (err.name === "ValidationError") {
+                const fieldErrors = {};
+                err.inner.forEach((e) => {
+                    fieldErrors[e.path] = e.message;
+                });
+                setFormErrors(fieldErrors);
+            } else {
+                setError(err.response?.data?.error || err.message || "Đặt hàng thất bại.");
+            }
         }
 
         setLoadingOrder(false);
     };
+
 
     if (loadingCart || loadingUserData) return <div className="text-center p-10">Loading...</div>;
 
@@ -376,7 +369,6 @@ export default function OrderPage() {
                 <div className="md:w-2/3">
                     <h1 className="text-2xl font-semibold mb-8">Tổng quan đơn hàng</h1>
 
-                    {/* Show auto-fill notification for logged in users */}
                     {isLoggedIn && (
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                             <div className="flex items-center">
@@ -389,6 +381,7 @@ export default function OrderPage() {
                         </div>
                     )}
 
+                    {/* Cart Items */}
                     <div className="space-y-6 mb-10">
                         {cart?.items?.map((item) => (
                             <div key={item.variantId} className="flex items-center justify-between border-b pb-4">
@@ -418,6 +411,7 @@ export default function OrderPage() {
                             </div>
                         ))}
                     </div>
+
                     <div className="bg-gray-100 p-6 rounded-lg max-w-md ml-auto">
                         <h2 className="text-lg font-semibold mb-4">Chi tiết đơn hàng</h2>
                         <div className="flex justify-between mb-2">
@@ -439,21 +433,13 @@ export default function OrderPage() {
                     </div>
                 </div>
 
-                <form
-                    onSubmit={handleSubmit}
-                    className="md:w-1/3 bg-white p-8 rounded-lg shadow space-y-5 h-fit"
-                >
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="md:w-1/3 bg-white p-8 rounded-lg shadow space-y-5 h-fit">
                     <h2 className="text-2xl font-bold mb-4 text-center">Shipping Info</h2>
+
                     {error && (
                         <div className="bg-red-100 text-red-700 p-2 rounded text-center">
                             {error}
-                        </div>
-                    )}
-
-                    {/* Add link to profile for logged in users */}
-                    {isLoggedIn && (
-                        <div className="bg-gray-50 p-3 rounded text-sm text-gray-600">
-                            <p>Muốn thay đổi địa chỉ mặc định? <a href="/user" className="text-blue-600 hover:underline">Đi tới trang profile</a></p>
                         </div>
                     )}
 
@@ -463,33 +449,33 @@ export default function OrderPage() {
                             name="shippingName"
                             value={form.shippingName}
                             onChange={handleChange}
-                            required
-                            className={`w-full p-2 border rounded focus:outline-none focus:ring ${form.shippingName ? '' : 'border-red-500'}`}
+                            className="w-full p-2 border rounded"
                         />
-                        {!form.shippingName && <div className="text-red-500 text-xs mt-1">Name is required</div>}
+                        {formErrors.shippingName && <p className="text-red-500 text-sm">{formErrors.shippingName}</p>}
                     </div>
+
                     <div>
                         <label className="block mb-1 font-medium">Phone</label>
                         <input
                             name="shippingPhone"
                             value={form.shippingPhone}
                             onChange={handleChange}
-                            required
-                            className={`w-full p-2 border rounded focus:outline-none focus:ring ${form.shippingPhone ? '' : 'border-red-500'}`}
+                            className="w-full p-2 border rounded"
                         />
-                        {!form.shippingPhone && <div className="text-red-500 text-xs mt-1">Phone is required</div>}
+                        {formErrors.shippingPhone && <p className="text-red-500 text-sm">{formErrors.shippingPhone}</p>}
                     </div>
+
                     <div>
                         <label className="block mb-1 font-medium">Address</label>
                         <input
                             name="shippingAddress"
                             value={form.shippingAddress}
                             onChange={handleChange}
-                            required
-                            className={`w-full p-2 border rounded focus:outline-none focus:ring ${form.shippingAddress ? '' : 'border-red-500'}`}
+                            className="w-full p-2 border rounded"
                         />
-                        {!form.shippingAddress && <div className="text-red-500 text-xs mt-1">Address is required</div>}
+                        {formErrors.shippingAddress && <p className="text-red-500 text-sm">{formErrors.shippingAddress}</p>}
                     </div>
+
                     <div className="flex gap-2">
                         <div className="flex-1">
                             <label className="block mb-1 font-medium">Tỉnh</label>
@@ -497,54 +483,51 @@ export default function OrderPage() {
                                 name="provinceId"
                                 value={form.provinceId}
                                 onChange={handleChange}
-                                required
                                 className="w-full p-2 border rounded"
                             >
                                 <option value="">Select</option>
                                 {provinces.map((p) => (
-                                    <option key={p.provinceId} value={String(p.provinceId)}>
-                                        {p.name}
-                                    </option>
+                                    <option key={p.provinceId} value={String(p.provinceId)}>{p.name}</option>
                                 ))}
                             </select>
+                            {formErrors.provinceId && <p className="text-red-500 text-sm">{formErrors.provinceId}</p>}
                         </div>
+
                         <div className="flex-1">
                             <label className="block mb-1 font-medium">Quận</label>
                             <select
                                 name="districtId"
                                 value={form.districtId}
                                 onChange={handleChange}
-                                required
                                 className="w-full p-2 border rounded"
                                 disabled={!form.provinceId}
                             >
                                 <option value="">Select</option>
                                 {districts.map((d) => (
-                                    <option key={d.districtId} value={String(d.districtId)}>
-                                        {d.name}
-                                    </option>
+                                    <option key={d.districtId} value={String(d.districtId)}>{d.name}</option>
                                 ))}
                             </select>
+                            {formErrors.districtId && <p className="text-red-500 text-sm">{formErrors.districtId}</p>}
                         </div>
+
                         <div className="flex-1">
                             <label className="block mb-1 font-medium">Phường</label>
                             <select
                                 name="wardId"
                                 value={form.wardId}
                                 onChange={handleChange}
-                                required
                                 className="w-full p-2 border rounded"
                                 disabled={!form.districtId}
                             >
                                 <option value="">Select</option>
                                 {wards.map((w) => (
-                                    <option key={w.wardId} value={String(w.wardId)}>
-                                        {w.name}
-                                    </option>
+                                    <option key={w.wardId} value={String(w.wardId)}>{w.name}</option>
                                 ))}
                             </select>
+                            {formErrors.wardId && <p className="text-red-500 text-sm">{formErrors.wardId}</p>}
                         </div>
                     </div>
+
                     <div>
                         <label className="block mb-1 font-medium">Phương thức thanh toán</label>
                         <select
@@ -556,7 +539,9 @@ export default function OrderPage() {
                             <option value="COD">Thanh toán khi nhận hàng</option>
                             <option value="CARD">VNPay</option>
                         </select>
+                        {formErrors.paymentMethod && <p className="text-red-500 text-sm">{formErrors.paymentMethod}</p>}
                     </div>
+
                     <button
                         type="submit"
                         disabled={loadingOrder}
