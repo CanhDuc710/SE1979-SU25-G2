@@ -107,9 +107,23 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 .map(this::mapOrderItemToOrderItemResponse)
                 .collect(Collectors.toList());
 
-        AddressDTO provinceDTO = order.getProvince() != null ? new AddressDTO(order.getProvince().getProvinceId(), order.getProvince().getName()) : null;
-        AddressDTO districtDTO = order.getDistrict() != null ? new AddressDTO(order.getDistrict().getDistrictId(), order.getDistrict().getName()) : null;
-        AddressDTO wardDTO = order.getWard() != null ? new AddressDTO(order.getWard().getWardId(), order.getWard().getName()) : null;
+        AddressDTO provinceDTO = order.getProvince() != null ?
+            AddressDTO.builder()
+                .provinceId(order.getProvince().getProvinceId())
+                .provinceName(order.getProvince().getName())
+                .build() : null;
+
+        AddressDTO districtDTO = order.getDistrict() != null ?
+            AddressDTO.builder()
+                .districtId(order.getDistrict().getDistrictId())
+                .districtName(order.getDistrict().getName())
+                .build() : null;
+
+        AddressDTO wardDTO = order.getWard() != null ?
+            AddressDTO.builder()
+                .wardId(order.getWard().getWardId())
+                .wardName(order.getWard().getName())
+                .build() : null;
         return new OrderResponse(
                 order.getOrderId(),
                 userDTO,

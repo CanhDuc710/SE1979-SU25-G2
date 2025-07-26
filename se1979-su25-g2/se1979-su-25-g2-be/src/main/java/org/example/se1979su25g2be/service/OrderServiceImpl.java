@@ -54,17 +54,38 @@ public class OrderServiceImpl implements OrderService {
         List<CartItem> cartItems;
         User user = null;
 
+        // Add detailed logging for debugging
+        System.out.println("=== ORDER CREATION DEBUG ===");
+        System.out.println("User ID: " + orderRequest.getUserId());
+        System.out.println("Session ID: " + orderRequest.getSessionId());
+
+        // Get user if logged in
         if (orderRequest.getUserId() != null) {
-            user = userRepository.findById((int) orderRequest.getUserId().longValue())
+            user = userRepository.findById(orderRequest.getUserId())
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
-            cartItems = cartItemRepository.findByUser(user);
-        } else if (orderRequest.getSessionId() != null && !orderRequest.getSessionId().isEmpty()) {
-            cartItems = cartItemRepository.findBySessionId(orderRequest.getSessionId());
+            System.out.println("Creating order for logged-in user: " + user.getUserId());
         } else {
-            throw new IllegalArgumentException("User ID or Session ID is required for order creation from cart.");
+            System.out.println("Creating order for guest user");
+        }
+
+        // Always use session ID to find cart items since frontend uses session-based cart
+        if (orderRequest.getSessionId() != null && !orderRequest.getSessionId().isEmpty()) {
+            cartItems = cartItemRepository.findBySessionId(orderRequest.getSessionId());
+            System.out.println("Cart items found for sessionId " + orderRequest.getSessionId() + ": " + cartItems.size());
+
+            // Log each cart item
+            for (CartItem item : cartItems) {
+                System.out.println("Cart item - Variant ID: " + item.getVariant().getVariantId() +
+                        ", Quantity: " + item.getQuantity() +
+                        ", Product: " + item.getVariant().getProduct().getName() +
+                        ", Session ID: " + item.getSessionId());
+            }
+        } else {
+            throw new IllegalArgumentException("Session ID is required for order creation from cart.");
         }
 
         if (cartItems.isEmpty()) {
+            System.out.println("ERROR: Cart is empty! No items found for session ID: " + orderRequest.getSessionId());
             throw new IllegalStateException("Cart is empty");
         }
 
@@ -76,7 +97,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new EntityNotFoundException("Ward not found"));
 
         Order order = Order.builder()
-                .user(user)
+                .user(user) // Sẽ là null nếu guest, có giá trị nếu user đăng nhập
                 .shippingName(orderRequest.getShippingName())
                 .shippingPhone(orderRequest.getShippingPhone())
                 .shippingAddress(orderRequest.getShippingAddress())
@@ -115,12 +136,15 @@ public class OrderServiceImpl implements OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        // Clear cart sau khi tạo order thành công
+        // Log thông tin order đã tạo
         if (user != null) {
-            cartItemRepository.deleteByUser(user);
+            System.out.println("Order created successfully for user: " + user.getUserId() + ", Order ID: " + savedOrder.getOrderId());
         } else {
-            cartItemRepository.deleteBySessionId(orderRequest.getSessionId());
+            System.out.println("Order created successfully for guest, Order ID: " + savedOrder.getOrderId());
         }
+
+        // Clear cart using session ID since that's how items are stored
+        cartItemRepository.deleteBySessionId(orderRequest.getSessionId());
 
         return savedOrder;
     }
@@ -152,5 +176,45 @@ public class OrderServiceImpl implements OrderService {
                             .build();
                 });
     }
-}
 
+    @Override
+    public Order getUserOrderDetail(Integer userId, Integer orderId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        // Verify that this order belongs to this user
+        if (!order.getUser().getUserId().equals(userId)) {
+            throw new EntityNotFoundException("Order not found for this user");
+        }
+
+        return order;
+    }
+
+    @Override
+    public void cancelUserOrder(Integer userId, Integer orderId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        // Verify that this order belongs to this user
+        if (!order.getUser().getUserId().equals(userId)) {
+            throw new EntityNotFoundException("Order not found for this user");
+        }
+
+        // Check if order can be cancelled (only PENDING orders can be cancelled)
+        if (order.getStatus() != Order.Status.PENDING) {
+            throw new IllegalStateException("Only pending orders can be cancelled");
+        }
+
+        // Update order status to CANCELLED
+        order.setStatus(Order.Status.CANCELLED);
+        orderRepository.save(order);
+
+        System.out.println("Order " + orderId + " cancelled by user " + userId);
+    }
+}

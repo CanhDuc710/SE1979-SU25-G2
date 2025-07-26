@@ -1,14 +1,12 @@
-package org.example.se1979su25g2be.dto;
+package org.example.se1979su25g2be.dto.Address;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class AddressDTO {
     private Integer addressId;
     private String addressLine;
@@ -20,6 +18,4 @@ public class AddressDTO {
     private String wardName;
     private String postalCode;
     private Boolean isDefault;
-    private String recipientName;
-    private String recipientPhone;
 }

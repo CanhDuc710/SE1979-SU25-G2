@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getProductById, createVariant, updateVariant, deleteVariant } from "../../../service/productService";
+import { getProductById } from "../../../service/productService";
 import { IMAGE_BASE_URL } from "../../../utils/constants";
+import { API_BASE_URL } from "../../../utils/constants";
+import axios from "axios";
 
 const ProductDetail = () => {
   const { productId } = useParams();
@@ -65,11 +67,11 @@ const ProductDetail = () => {
     try {
       if (editingVariant) {
         // Update variant
-        await updateVariant(productId, editingVariant.variantId, variantForm);
+        await axios.put(`${API_BASE_URL}/admin/products/${productId}/variants/${editingVariant.variantId}`, variantForm);
         setVariantSuccess("Variant updated!");
       } else {
         // Add variant
-        await createVariant(productId, variantForm);
+        await axios.post(`${API_BASE_URL}/admin/products/${productId}/variants`, variantForm);
         setVariantSuccess("Variant added!");
       }
       setShowVariantForm(false);
@@ -84,7 +86,7 @@ const ProductDetail = () => {
   const handleDeleteVariant = async (variantId) => {
     if (!window.confirm("Delete this variant?")) return;
     try {
-      await deleteVariant(productId, variantId);
+      await axios.delete(`${API_BASE_URL}/admin/products/${productId}/variants/${variantId}`);
       // Refresh product data
       const data = await getProductById(productId);
       setProduct(data);

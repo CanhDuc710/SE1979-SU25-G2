@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { getCart } from "../../service/cartService";
 import { createOrder, createVNPayPayment } from "../../service/orderService";
-import { getProvinces, getDistricts, getWards } from "../../service/addressService";
+import { getProvinces, getDistricts, getWards, getDefaultAddress } from "../../service/addressService";
+import { fetchProfile } from "../../service/profileService";
 import { getSessionId } from "../../service/cartService";
 import Header from "../../ui/Header";
 import Footer from "../../ui/Footer";
@@ -25,11 +26,92 @@ export default function OrderPage() {
     const [loadingOrder, setLoadingOrder] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState("");
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [loadingUserData, setLoadingUserData] = useState(false);
 
     useEffect(() => {
-        loadCart();
-        loadProvinces();
+        const initializePage = async () => {
+            await loadCart();
+            await loadProvinces();
+            await checkUserAndAutoFill();
+        };
+        initializePage();
     }, []);
+
+    // Check if user is logged in and auto-fill information
+    const checkUserAndAutoFill = async () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            setIsLoggedIn(true);
+            setLoadingUserData(true);
+            try {
+                // Load user profile
+                const profile = await fetchProfile();
+
+                // Load default address
+                const defaultAddress = await getDefaultAddress();
+
+                if (defaultAddress) {
+                    // Set basic form data first
+                    setForm(prev => ({
+                        ...prev,
+                        shippingName: defaultAddress.recipientName || `${profile.firstName} ${profile.lastName}`,
+                        shippingPhone: defaultAddress.recipientPhone || profile.phoneNumber,
+                        shippingAddress: defaultAddress.addressLine || "",
+                    }));
+
+                    // Load districts and wards for the default address
+                    if (defaultAddress.provinceId) {
+                        try {
+                            // Set province first
+                            setForm(prev => ({
+                                ...prev,
+                                provinceId: defaultAddress.provinceId?.toString() || "",
+                            }));
+
+                            // Load districts for the province
+                            const districtsData = await getDistricts(defaultAddress.provinceId);
+                            setDistricts(districtsData);
+
+                            if (defaultAddress.districtId) {
+                                // Set district
+                                setForm(prev => ({
+                                    ...prev,
+                                    districtId: defaultAddress.districtId?.toString() || "",
+                                }));
+
+                                // Load wards for the district
+                                const wardsData = await getWards(defaultAddress.districtId);
+                                setWards(wardsData);
+
+                                if (defaultAddress.wardId) {
+                                    // Set ward
+                                    setForm(prev => ({
+                                        ...prev,
+                                        wardId: defaultAddress.wardId?.toString() || "",
+                                    }));
+                                }
+                            }
+                        } catch (error) {
+                            console.error("Error loading location data:", error);
+                        }
+                    }
+                } else {
+                    // No default address, just fill name and phone from profile
+                    setForm(prev => ({
+                        ...prev,
+                        shippingName: `${profile.firstName} ${profile.lastName}`,
+                        shippingPhone: profile.phoneNumber || "",
+                    }));
+                }
+            } catch (error) {
+                console.error("Error loading user data for auto-fill:", error);
+                // Continue without auto-fill if there's an error
+            } finally {
+                setLoadingUserData(false);
+            }
+        }
+    };
 
     const loadCart = async () => {
         setLoadingCart(true);
@@ -138,8 +220,25 @@ export default function OrderPage() {
                 throw new Error("Cart is empty. Please add items to cart before checkout.");
             }
 
+            // Get user ID from token if logged in
+            const getUserIdFromToken = () => {
+                const token = localStorage.getItem('token');
+                if (!token) return null;
+                try {
+                    const payloadBase64 = token.split('.')[1];
+                    const payload = JSON.parse(atob(payloadBase64));
+                    return payload.id || payload.sub;
+                } catch (e) {
+                    console.error("Error parsing JWT token:", e);
+                    return null;
+                }
+            };
+
+            const userId = getUserIdFromToken();
+
             const orderData = {
                 ...form,
+                userId: userId, // Thêm userId nếu user đăng nhập
                 provinceId: form.provinceId ? parseInt(form.provinceId, 10) : null,
                 districtId: form.districtId ? parseInt(form.districtId, 10) : null,
                 wardId: form.wardId ? parseInt(form.wardId, 10) : null,
@@ -172,7 +271,7 @@ export default function OrderPage() {
         setLoadingOrder(false);
     };
 
-    if (loadingCart) return <div className="text-center p-10">Loading...</div>;
+    if (loadingCart || loadingUserData) return <div className="text-center p-10">Loading...</div>;
 
     if (success)
         return (
@@ -198,6 +297,20 @@ export default function OrderPage() {
             <main className="max-w-5xl mx-auto py-10 px-4 flex flex-col md:flex-row gap-10">
                 <div className="md:w-2/3">
                     <h1 className="text-2xl font-semibold mb-8">Order Review</h1>
+
+                    {/* Show auto-fill notification for logged in users */}
+                    {isLoggedIn && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                            <div className="flex items-center">
+                                <div className="text-blue-600 mr-2">ℹ️</div>
+                                <div className="text-blue-800">
+                                    <p className="font-medium">Thông tin đã được tự động điền</p>
+                                    <p className="text-sm">Thông tin giao hàng được lấy từ địa chỉ mặc định của bạn. Bạn có thể chỉnh sửa nếu cần.</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="space-y-6 mb-10">
                         {cart?.items?.map((item) => (
                             <div key={item.variantId} className="flex items-center justify-between border-b pb-4">
@@ -258,6 +371,14 @@ export default function OrderPage() {
                             {error}
                         </div>
                     )}
+
+                    {/* Add link to profile for logged in users */}
+                    {isLoggedIn && (
+                        <div className="bg-gray-50 p-3 rounded text-sm text-gray-600">
+                            <p>Muốn thay đổi địa chỉ mặc định? <a href="/user" className="text-blue-600 hover:underline">Đi tới trang profile</a></p>
+                        </div>
+                    )}
+
                     <div>
                         <label className="block mb-1 font-medium">Name</label>
                         <input
@@ -370,4 +491,3 @@ export default function OrderPage() {
         </div>
     );
 }
-

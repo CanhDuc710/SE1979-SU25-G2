@@ -9,5 +9,6 @@ import org.springframework.data.domain.Pageable;
 public interface OrderService {
     Order createOrder(OrderRequestDTO orderRequest);
     Page<OrderHistoryDTO> getOrdersByUser(Integer userId, String keyword, Pageable pageable);
-
+    Order getUserOrderDetail(Integer userId, Integer orderId);
+    void cancelUserOrder(Integer userId, Integer orderId);
 }

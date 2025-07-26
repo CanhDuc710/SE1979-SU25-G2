@@ -42,6 +42,11 @@ public class Address {
 
     private Boolean isDefault = false;
 
+    @Column(length = 100)
+    private String recipientName;
+
+    @Column(length = 20)
+    private String recipientPhone;
+
     // Constructors, Getters, Setters
 }
-

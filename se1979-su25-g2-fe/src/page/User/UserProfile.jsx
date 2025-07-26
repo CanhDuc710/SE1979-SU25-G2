@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { fetchProfile, updateProfile } from "../../service/profileService";
+import AddressManagement from "../../components/AddressManagement";
+import OrderHistory from "../../components/OrderHistory";
 
 export default function UserProfile() {
     const [formData, setFormData] = useState({
@@ -15,6 +17,22 @@ export default function UserProfile() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
+    const [activeTab, setActiveTab] = useState("profile");
+    const [userId, setUserId] = useState(null);
+
+    // Helper function to get user ID from token
+    const getUserIdFromToken = () => {
+        const token = localStorage.getItem('token');
+        if (!token) return null;
+        try {
+            const payloadBase64 = token.split('.')[1];
+            const payload = JSON.parse(atob(payloadBase64));
+            return payload.id || payload.sub;
+        } catch (e) {
+            console.error("Error parsing JWT token:", e);
+            return null;
+        }
+    };
 
     // Helper function to properly format date for input type="date"
     const formatDateForInput = (dateString) => {
@@ -32,6 +50,10 @@ export default function UserProfile() {
     };
 
     useEffect(() => {
+        // Get user ID from token
+        const userIdFromToken = getUserIdFromToken();
+        setUserId(userIdFromToken);
+
         // load profile when component mounts
         (async () => {
             try {
@@ -105,106 +127,163 @@ export default function UserProfile() {
                     <div className="text-red-600 bg-red-100 p-3 rounded">{error}</div>
                 )}
 
-                {/* Profile Form */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Họ */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Họ
-                            </label>
-                            <input
-                                type="text"
-                                value={formData.lastName}
-                                onChange={e =>
-                                    handleInputChange("lastName", e.target.value)
-                                }
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
-
-                        {/* Tên */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Tên
-                            </label>
-                            <input
-                                type="text"
-                                value={formData.firstName}
-                                onChange={e =>
-                                    handleInputChange("firstName", e.target.value)
-                                }
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
-
-                        {/* Email */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Email
-                            </label>
-                            <input
-                                type="email"
-                                value={formData.email}
-                                onChange={e => handleInputChange("email", e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
-
-                        {/* Số điện thoại */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Số điện thoại
-                            </label>
-                            <input
-                                type="tel"
-                                value={formData.phoneNumber}
-                                onChange={e =>
-                                    handleInputChange("phoneNumber", e.target.value)
-                                }
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
-
-                        {/* Giới tính */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Giới tính
-                            </label>
-                            <select
-                                value={formData.sex}
-                                onChange={e => handleInputChange("sex", e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                {/* Tab Navigation */}
+                <div className="bg-white rounded-lg shadow-sm">
+                    <div className="border-b border-gray-200">
+                        <nav className="flex">
+                            <button
+                                onClick={() => setActiveTab("profile")}
+                                className={`px-6 py-3 text-sm font-medium border-b-2 ${
+                                    activeTab === "profile"
+                                        ? "border-blue-500 text-blue-600"
+                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                }`}
                             >
-                                <option value="Male">Nam</option>
-                                <option value="Female">Nữ</option>
-                                <option value="Other">Khác</option>
-                            </select>
-                        </div>
-
-                        {/* Ngày sinh */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Ngày sinh
-                            </label>
-                            <input
-                                type="date"
-                                value={formData.dob}
-                                onChange={e => handleInputChange("dob", e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
+                                Thông tin cá nhân
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("address")}
+                                className={`px-6 py-3 text-sm font-medium border-b-2 ${
+                                    activeTab === "address"
+                                        ? "border-blue-500 text-blue-600"
+                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                }`}
+                            >
+                                Địa chỉ giao hàng
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("orders")}
+                                className={`px-6 py-3 text-sm font-medium border-b-2 ${
+                                    activeTab === "orders"
+                                        ? "border-blue-500 text-blue-600"
+                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                }`}
+                            >
+                                Lịch sử đơn hàng
+                            </button>
+                        </nav>
                     </div>
 
-                    {/* Save Button */}
-                    <div className="flex justify-end mt-8">
-                        <button
-                            onClick={handleSaveProfile}
-                            disabled={saving}
-                            className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white px-8 py-3 rounded-lg text-lg transition-colors"
-                        >
-                            {saving ? "Đang lưu..." : "Lưu"}
-                        </button>
+                    {/* Tab Content */}
+                    <div className="p-6">
+                        {activeTab === "profile" && (
+                            <div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Họ */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Họ
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.lastName}
+                                            onChange={e =>
+                                                handleInputChange("lastName", e.target.value)
+                                            }
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+
+                                    {/* Tên */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Tên
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.firstName}
+                                            onChange={e =>
+                                                handleInputChange("firstName", e.target.value)
+                                            }
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+
+                                    {/* Email */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Email
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={formData.email}
+                                            onChange={e => handleInputChange("email", e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+
+                                    {/* Số điện thoại */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Số điện thoại
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            value={formData.phoneNumber}
+                                            onChange={e =>
+                                                handleInputChange("phoneNumber", e.target.value)
+                                            }
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+
+                                    {/* Giới tính */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Giới tính
+                                        </label>
+                                        <select
+                                            value={formData.sex}
+                                            onChange={e => handleInputChange("sex", e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            <option value="Male">Nam</option>
+                                            <option value="Female">Nữ</option>
+                                            <option value="Other">Khác</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Ngày sinh */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Ngày sinh
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={formData.dob}
+                                            onChange={e => handleInputChange("dob", e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Nút lưu */}
+                                <div className="mt-8 flex justify-end">
+                                    <button
+                                        onClick={handleSaveProfile}
+                                        disabled={saving}
+                                        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                    >
+                                        {saving ? "Đang lưu..." : "Lưu thay đổi"}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === "address" && (
+                            <AddressManagement />
+                        )}
+
+                        {activeTab === "orders" && userId && (
+                            <OrderHistory userId={userId} />
+                        )}
+
+                        {activeTab === "orders" && !userId && (
+                            <div className="text-center py-12">
+                                <div className="text-gray-400 text-lg mb-2">Không thể tải lịch sử đơn hàng</div>
+                                <p className="text-gray-500">Vui lòng đăng nhập lại để xem lịch sử đơn hàng</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

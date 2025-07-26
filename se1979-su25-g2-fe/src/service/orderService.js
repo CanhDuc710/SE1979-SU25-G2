@@ -27,6 +27,36 @@ export const checkVNPayReturn = async (params) => {
     return res.data;
 };
 
+// User order history functions
+export const getUserOrderHistory = async (userId, { page = 0, size = 10, keyword } = {}) => {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('size', size.toString());
+
+    if (keyword && keyword.trim()) {
+        params.append('keyword', keyword.trim());
+    }
+
+    const res = await axios.get(`${API_BASE_URL}/orders/user/${userId}?${params}`, {
+        headers: createAuthHeaders()
+    });
+    return res.data;
+};
+
+export const getUserOrderDetail = async (userId, orderId) => {
+    const res = await axios.get(`${API_BASE_URL}/orders/user/${userId}/order/${orderId}`, {
+        headers: createAuthHeaders()
+    });
+    return res.data;
+};
+
+export const cancelUserOrder = async (userId, orderId) => {
+    const res = await axios.put(`${API_BASE_URL}/orders/user/${userId}/order/${orderId}/cancel`, {}, {
+        headers: createAuthHeaders()
+    });
+    return res.data;
+};
+
 export const getAllOrders = async ({
     page = 0,
     size = 8,
@@ -73,4 +103,3 @@ export const deleteOrder = async (orderId) => {
     await axios.delete(`${API_BASE_URL}/admin/orders/${orderId}`,
         { headers: createAuthHeaders() });
 };
-
