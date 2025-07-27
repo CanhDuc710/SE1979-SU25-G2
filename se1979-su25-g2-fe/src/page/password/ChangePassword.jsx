@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigate } from 'react-router-dom';
 import { changePasswordSchema } from '../../validation/authSchema.js';
-import {changePassword} from "../../service/authService.js";
+import { changePassword } from '../../service/authService.js';
 
 export default function ChangePassword() {
     const navigate = useNavigate();
@@ -40,7 +40,7 @@ export default function ChangePassword() {
     };
 
     return (
-        <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow">
+        <div>
             <h2 className="text-2xl font-semibold mb-4">Đổi mật khẩu</h2>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>

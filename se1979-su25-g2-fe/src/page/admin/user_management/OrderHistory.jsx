@@ -69,7 +69,6 @@ export default function OrderHistory({ userId }) {
                             <th className="px-4 py-2">Ngày đặt</th>
                             <th className="px-4 py-2">Giá tiền</th>
                             <th className="px-4 py-2">Trạng thái</th>
-                            <th className="px-4 py-2">Hành động</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -155,11 +154,7 @@ export default function OrderHistory({ userId }) {
                                             <td className="px-4 py-2 align-top">
                                                 {statusLabels[o.status]}
                                             </td>
-                                            <td className="px-4 py-2 align-top">
-                                                <button className="px-2 py-1 bg-blue-100 rounded">
-                                                    <FaEye/>
-                                                </button>
-                                            </td>
+
                                         </tr>
                                     </React.Fragment>
                                 );
